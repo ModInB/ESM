@@ -108,7 +108,7 @@ ESM_Modeling <- function(resp,
               modeling.id = modeling.id,
               biva.path = newwd
               )
-  save(obj,file=paste0("ESM.Modeling_",modeling.id,".out"))
+  save(obj,file=paste0("../ESM.Modeling_",modeling.id,".out"))
   cat("\n##################### Done #####################")
   
   return(obj)

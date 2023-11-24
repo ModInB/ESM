@@ -25,10 +25,10 @@ my.ESM <- ESM_Modeling(resp = sp_occ[,1],
                        cv.rep = 2,
                        cv.ratio = 0.7,
                        cv.split.table = NULL,
-                       weighting.score = "AUC",
                        which.biva = NULL,
                        modeling.id = as.character(format(Sys.time(), "%s")),
                        pathToSaveObject = getwd())
+my.ESM$biva.evaluations
 
 ### Ensemble models
 my.ESM_EF <- ecospat.ESM.EnsembleModeling(my.ESM,weighting.score=c("SomersD"),threshold=0)
