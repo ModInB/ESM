@@ -44,9 +44,6 @@ ESM_Models.options <- function(GLM = NULL
         opt@GLM$family <- binomial(link = "logit")
       }
     }
-    if (!is.null(GLM$control)) {
-      opt@GLM$control <- GLM$control
-    }
   }
   
 }
@@ -61,8 +58,7 @@ setClass("ESM.models.options",
                               interaction.level = 0,
                               myFormula = NULL,
                               test = 'none',
-                              family = binomial(link = 'logit'),
-                              control = glm.control(maxit = 50))
+                              family = binomial(link = 'logit'))
                    # GBM = list(distribution = 'bernoulli',
                    #            n.trees = 2500,
                    #            interaction.depth = 7,

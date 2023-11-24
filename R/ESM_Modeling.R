@@ -11,7 +11,6 @@ ESM_Modeling <- function(resp,
                           cv.rep = 10,
                           cv.ratio = 0.7,
                           cv.split.table = NULL,
-                          weighting.score = "AUC",
                           which.biva = NULL,
                           modeling.id = as.character(format(Sys.time(), "%s")),
                           pathToSaveObject = getwd()){
@@ -42,10 +41,6 @@ ESM_Modeling <- function(resp,
     if(!inherits(models.options,"ESM.models.options")){
       stop("models.options should be an object from ESM_Models.options")
     }
-  }
-  if (!weighting.score %in% c("AUC", "TSS", "Boyce", "Kappa", 
-                              "SomersD")) {
-    stop("weighting score not supported! Choose one of the following: AUC, TSS, Boyce, Kappa or SomersD")
   }
   if(anyNA(resp)){
     
@@ -88,22 +83,35 @@ ESM_Modeling <- function(resp,
   combinations <- combinations[,which.biva]
   
   cat("\n################### Start Modelling ###################")
-  for(i in 1:ncol(combinations)){ ## Thus can be then used for paralel job
-    cat(c("\nCominations", as.character(combinations[,i])))
-    test <- .doModeling(resp = resp,
-                        env.var = env.var[,as.character(combinations[,i])],
-                        models = models,
-                        models.options = models.options,
-                        cv.split.table = cv.split.table,
-                        prevalence = prevalence)
-  }
   
-  cat("\n################### Finished! ###################")
+  biva.mods <- apply(combinations, 2, .bivaModeling,resp = resp,
+                     env.var = env.var, models = models,
+                     models.options = models.options,
+                     cv.split.table = cv.split.table,prevalence = prevalence,
+                     simplify = FALSE)
+  names(biva.mods) = paste(combinations[1,],combinations[2,])
+  cat("\n##################### Done #####################")
   
   cat("\n############### Start evaluations ###############")
   
   ## Evaluation
+  biva.eval <- lapply(biva.mods,.bivaEvaluation,
+                      resp=resp,
+                      cv.split.table=cv.split.table)
+  obj <- list(resp = resp,
+              xy = xy,
+              env.var = env.var,
+              sp.name= sp.name,
+              cv.split.table = cv.split.table,
+              biva.predictions = biva.mods,
+              biva.evaluations = biva.eval,
+              modeling.id = modeling.id,
+              biva.path = newwd
+              )
+  save(obj,file=paste0("ESM.Modeling_",modeling.id,".out"))
+  cat("\n##################### Done #####################")
   
+  return(obj)
 }
 
 
@@ -132,16 +140,36 @@ ESM_Modeling <- function(resp,
   colnames(calib.Lines) = c(paste0("_RUN",1:cv.rep),"_Full")
   return(calib.Lines)
 }
-.doModeling <- function(resp,
+
+.bivaModeling <- function(x,
+                          resp,
+                          env.var,
+                          models,
+                          models.options,
+                          cv.split.table,
+                          prevalence){
+  
+  cat(c("\nCombinations", as.character(x)))
+  envi <- env.var[,as.character(x)]
+  cv.split.table <- rbind.data.frame(colnames(cv.split.table),cv.split.table)
+  d <- apply(cv.split.table,2,.doModeling,resp = resp,
+             env.var = envi, models = models,
+             models.options = models.options,
+             prevalence = prevalence)
+  return(d)
+}
+
+.doModeling <- function(x,
+                        resp,
                         env.var,
                         models,
                         models.options,
-                        cv.split.table,
-                        prevalence){
-  
-  for(i in 1:ncol(cv.split.table)){
-    data <- cbind.data.frame(resp = resp[cv.split.table[,i]],
-                             env.var[cv.split.table[,i],])
+                        prevalence,
+                        combi){
+    nameRun <- x[1]
+    x <- as.logical(x[-1])
+    data <- cbind.data.frame(resp = resp[x],
+                             env.var[x,])
     if(!is.null(prevalence)){
       ratio.Pres.Abs <- table(data$resp)/nrow(data)
       ratio.Pres.Abs <- prevalence/ratio.Pres.Abs
@@ -159,26 +187,26 @@ ESM_Modeling <- function(resp,
         if(models.options@GLM$test == "none"){
           if(is.null(models.options@GLM$myFormula)){
             formula <- as.formula(paste0("resp~", 
-                              paste0(colnames(env.var),"+I(",colnames(env.var),"^2)",collapse = "+")))
+                                         paste0(colnames(env.var),"+I(",colnames(env.var),"^2)",collapse = "+")))
             mod <- glm(formula = formula,
                        family = models.options@GLM$family,
                        weights = weights,
                        data = data)
-            save(mod,file=paste("ESM",colnames(cv.split.table)[i],
-                           colnames(env.var)[1],
-                           colnames(env.var)[2],
-                           models[j],"models.out",
-                           sep="_"))
+            
+            save(mod,file=paste("ESM",nameRun,
+                                colnames(env.var)[1],
+                                colnames(env.var)[2],
+                                models[j],"model.out",
+                                sep="_"))
           } 
           
         }else if(models.options@GLM$test == "AIC"){
           step()
         }
-        
+        pred <- predict(mod,newdata = env.var,type = "response")
       }
       
       
     }
-  }
-  
+    return(pred)
 }
