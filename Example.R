@@ -5,21 +5,33 @@ inv <- ecospat.testNiche.inv
 
 # species occurrences
 xy <- inv[,1:2]
-sp_occ <- inv[11]
+resp <- inv[,11]
 
 # env data
-current <- inv[3:8]
+env <- inv[,3:5]
 
 ### Formating the data with the BIOMOD_FormatingData() function from the package biomod2
-sp <- 1
-
+sp.name = "test"
+models = c("GLM",
+           "GBM")
+models.options = ESM_Models.options(GLM=list(test="none",
+                                             type="quadratic"))
+prevalence = 0.5
+cv.method = "split-sampling"
+cv.rep = 2
+cv.ratio = 0.7
+cv.split.table = NULL
+which.biva = NULL
+modeling.id = as.character(format(Sys.time(), "%s"))
+pathToSaveObject = getwd()
+save.obj=T
 ### Calibration of simple bivariate models
-my.ESM <- ESM_Modeling(resp = sp_occ[,1],
+my.ESM <- ESM_Modeling(resp = resp,
                        xy=xy,
-                       env=current,
-                       sp.name = "test",
-                       models = "GLM",
-                       models.options = NULL,
+                       env=env,
+                       sp.name = sp.name,
+                       models = models,
+                       models.options = models.options,
                        prevalence = 0.5,
                        cv.method = "split-sampling", #can be split, block, custom
                        cv.rep = 2,
@@ -27,11 +39,18 @@ my.ESM <- ESM_Modeling(resp = sp_occ[,1],
                        cv.split.table = NULL,
                        which.biva = NULL,
                        modeling.id = as.character(format(Sys.time(), "%s")),
-                       pathToSaveObject = getwd())
+                       pathToSaveObject = getwd(),
+                       save.obj = TRUE)
 my.ESM$biva.evaluations
 
 ### Ensemble models
-my.ESM_EF <- ecospat.ESM.EnsembleModeling(my.ESM,weighting.score=c("SomersD"),threshold=0)
+my.ESM_EF <- ESM_EnsembleModeling(my.ESM,
+                                  weighting.score=c("SomersD"),
+                                  threshold=0,
+                                  save.obj = TRUE)
+my.ESM_EF$evaluations
+
+
 
 ### thresholds to produce binary maps
 my.ESM_thresholds <- ecospat.ESM.threshold(my.ESM_EF)

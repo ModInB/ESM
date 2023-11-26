@@ -1,5 +1,5 @@
 ## Modeling
-
+## save.obj if FALSE, it only save the full models
 ESM_Modeling <- function(resp,
                           xy,
                           env,
@@ -13,7 +13,8 @@ ESM_Modeling <- function(resp,
                           cv.split.table = NULL,
                           which.biva = NULL,
                           modeling.id = as.character(format(Sys.time(), "%s")),
-                          pathToSaveObject = getwd()){
+                          pathToSaveObject = getwd(),
+                          save.obj = TRUE){
   
   
   if(length(resp) != nrow(xy)){
@@ -36,11 +37,7 @@ ESM_Modeling <- function(resp,
     stop("env should be either a SpatRaster or a data.frame")
   }
   if(is.null(models.options)){
-    models.options = new("ESM.models.options")
-  }else{
-    if(!inherits(models.options,"ESM.models.options")){
-      stop("models.options should be an object from ESM_Models.options")
-    }
+    models.options = ESM_Models.options()
   }
   if(anyNA(resp)){
     
@@ -74,41 +71,55 @@ ESM_Modeling <- function(resp,
   
 
   if(is.null(cv.split.table)){
-    cv.split.table <- .CreatingDataSplitTableV2(resp = resp,
-                                                cv.rep = cv.rep,
-                                                cv.method = cv.method,
-                                                cv.ratio = cv.ratio)
+    cv.split.table <- ESM.CreatingDataSplitTable(resp = resp, 
+                                                 cv.rep = cv.rep,
+                                                 cv.method = cv.method,
+                                                 cv.ratio = cv.ratio)
   }
   
   combinations <- combinations[,which.biva]
   
   cat("\n################### Start Modelling ###################")
-  
+  ## Model each bivariate model
   biva.mods <- apply(combinations, 2, .bivaModeling,resp = resp,
                      env.var = env.var, models = models,
                      models.options = models.options,
-                     cv.split.table = cv.split.table,prevalence = prevalence,
-                     simplify = FALSE)
-  names(biva.mods) = paste(combinations[1,],combinations[2,])
+                     cv.split.table = cv.split.table,
+                     prevalence = prevalence, save.obj = save.obj,
+                     simplify = FALSE) 
+  if(length(models)==1){
+    for(i in 1:length(biva.mods)){
+      colnames(biva.mods[[i]]) = paste0(colnames(cv.split.table),".",
+                                        colnames(biva.mods[[i]]))
+    }
+    
+  }
+  names(biva.mods) = paste0(combinations[1,],".",combinations[2,])
   cat("\n##################### Done #####################")
   
   cat("\n############### Start evaluations ###############")
   
   ## Evaluation
   biva.eval <- lapply(biva.mods,.bivaEvaluation,
-                      resp=resp,
+                      resp=resp, models=models,
                       cv.split.table=cv.split.table)
+  
+  
   obj <- list(resp = resp,
               xy = xy,
               env.var = env.var,
               sp.name= sp.name,
               cv.split.table = cv.split.table,
+              models = models,
               biva.predictions = biva.mods,
               biva.evaluations = biva.eval,
               modeling.id = modeling.id,
               biva.path = newwd
               )
-  save(obj,file=paste0("../ESM.Modeling_",modeling.id,".out"))
+  
+  if(save.obj){
+    save(obj,file=paste0("../ESM.Modeling_",modeling.id,".out"))
+  }
   cat("\n##################### Done #####################")
   
   return(obj)
@@ -116,10 +127,11 @@ ESM_Modeling <- function(resp,
 
 
 #Function to generate the argument DataSplitTable in the function ecospat.ESM.Modeling                                                                        
-.CreatingDataSplitTableV2 <- function(resp,
-                                      cv.rep,
-                                      cv.method,
-                                      cv.ratio){
+ESM.CreatingDataSplitTable <- function(resp,
+                                       cv.method,
+                                       cv.rep = NULL,
+                                       cv.ratio = NULL,
+                                       cv.n.blocks = NULL){
   
   calib.Lines <- matrix(FALSE, nrow = length(resp), ncol = cv.rep)
   
@@ -133,11 +145,13 @@ ESM_Modeling <- function(resp,
       calib.Lines[sample(abs,size = round(length(abs)*cv.ratio)),i] = TRUE
     }
     
+    calib.Lines <- cbind(calib.Lines,TRUE)
+    colnames(calib.Lines) = c(paste0("RUN",1:cv.rep),"Full")
+    
   }else{ ##Create blocks
-    TODO 
+    stop("Not Yet available") 
   }
-  calib.Lines <- cbind(calib.Lines,TRUE)
-  colnames(calib.Lines) = c(paste0("_RUN",1:cv.rep),"_Full")
+  
   return(calib.Lines)
 }
 
@@ -147,16 +161,18 @@ ESM_Modeling <- function(resp,
                           models,
                           models.options,
                           cv.split.table,
-                          prevalence){
+                          prevalence,
+                          save.obj = TRUE){
   
-  cat(c("\nCombinations", as.character(x)))
+  cat(c("\n\nCombinations", as.character(x)))
   envi <- env.var[,as.character(x)]
   cv.split.table <- rbind.data.frame(colnames(cv.split.table),cv.split.table)
+  ## Model each run
   d <- apply(cv.split.table,2,.doModeling,resp = resp,
              env.var = envi, models = models,
              models.options = models.options,
-             prevalence = prevalence)
-  return(d)
+             prevalence = prevalence, save.obj = save.obj)
+  return(do.call(cbind,d))
 }
 
 .doModeling <- function(x,
@@ -165,48 +181,163 @@ ESM_Modeling <- function(resp,
                         models,
                         models.options,
                         prevalence,
-                        combi){
-    nameRun <- x[1]
-    x <- as.logical(x[-1])
-    data <- cbind.data.frame(resp = resp[x],
-                             env.var[x,])
-    if(!is.null(prevalence)){
-      ratio.Pres.Abs <- table(data$resp)/nrow(data)
-      ratio.Pres.Abs <- prevalence/ratio.Pres.Abs
-      ratio.Pres.Abs <- round(ratio.Pres.Abs/min(ratio.Pres.Abs)) #so that the min weight is 1
-      weights <- data$resp
-      weights[data$resp==1] = ratio.Pres.Abs["1"]
-      weights[data$resp==0] = ratio.Pres.Abs["0"]
-    }else{
-      weights <- rep(1,nrow(data))
-    } 
+                        save.obj = TRUE){
+    
+  nameRun <- x[1]
+  x <- as.logical(x[-1])
+  data <- cbind.data.frame(resp = resp[x],
+                           env.var[x,])
+  if(!is.null(prevalence)){
+    ratio.Pres.Abs <- table(data$resp)/nrow(data)
+    ratio.Pres.Abs <- prevalence/ratio.Pres.Abs
+    ratio.Pres.Abs <- round(ratio.Pres.Abs/min(ratio.Pres.Abs)) #so that the min weight is 1
+    w <- data$resp
+    w[data$resp==1] = ratio.Pres.Abs["1"]
+    w[data$resp==0] = ratio.Pres.Abs["0"]
+  }else{
+    w <- rep(1,nrow(data))
+  } 
+  data$w = w
     for(j in 1: length(models)){
       
       
       if(models[j] == "GLM"){
-        if(models.options@GLM$test == "none"){
-          if(is.null(models.options@GLM$myFormula)){
-            formula <- as.formula(paste0("resp~", 
-                                         paste0(colnames(env.var),"+I(",colnames(env.var),"^2)",collapse = "+")))
-            mod <- glm(formula = formula,
-                       family = models.options@GLM$family,
-                       weights = weights,
-                       data = data)
+        cat(paste("\nGLM", nameRun))
+        
+        if(is.null(models.options$GLM$myFormula)){
+          if(models.options$GLM$test == "none"){
             
+            formula <- .makeGLMFormula(env.var,
+                                       models.options$GLM)
+            mod <- glm(formula = formula,
+                       family = models.options$GLM$family,
+                       weights = w,
+                       data = data)
+            if(save.obj){
+              save(mod,file=paste("ESM",nameRun,
+                                  colnames(env.var)[1],
+                                  colnames(env.var)[2],
+                                  models[j],"model.out",
+                                  sep="_"))
+            }else if(nameRun == "Full"){
+              save(mod,file=paste("ESM",nameRun,
+                                  colnames(env.var)[1],
+                                  colnames(env.var)[2],
+                                  models[j],"model.out",
+                                  sep="_"))
+            }
+            
+          }else if(models.options$GLM$test == "AIC"){
+            formula <- .makeGLMFormula(env.var,
+                                       models.options$GLM)
+            mod.full<- glm(formula = formula,
+                           family = models.options$GLM$family,
+                           weights = w,
+                           data = data)
+            mod <- step(mod.full,
+                        scope = "resp~1",
+                        direction = "both",
+                        trace=F)
+            cat(paste0("\n\tBest Formula:",deparse(mod$formula)))
+            if(save.obj){
+              save(mod,file=paste("ESM",nameRun,
+                                  colnames(env.var)[1],
+                                  colnames(env.var)[2],
+                                  models[j],"model.out",
+                                  sep="_"))
+            }else if(nameRun == "Full"){
+              save(mod,file=paste("ESM",nameRun,
+                                  colnames(env.var)[1],
+                                  colnames(env.var)[2],
+                                  models[j],"model.out",
+                                  sep="_"))
+            }
+          } 
+          
+        }else{
+          mod <- glm(formula = models.options$GLM$myFormula,
+                     family = models.options$GLM$family,
+                     weights = w,
+                     data = data)
+          if(save.obj){
             save(mod,file=paste("ESM",nameRun,
                                 colnames(env.var)[1],
                                 colnames(env.var)[2],
                                 models[j],"model.out",
                                 sep="_"))
-          } 
-          
-        }else if(models.options@GLM$test == "AIC"){
-          step()
+          }else if(nameRun == "Full"){
+            save(mod,file=paste("ESM",nameRun,
+                                colnames(env.var)[1],
+                                colnames(env.var)[2],
+                                models[j],"model.out",
+                                sep="_"))
+          }
         }
-        pred <- predict(mod,newdata = env.var,type = "response")
+        pred <- as.data.frame(predict(mod,newdata = env.var,type = "response"))
+        colnames(pred) = "GLM" 
       }
       
+      if(models[j]=="GBM"){
+        cat(paste("\nGBM", nameRun,"\n"))
+        
+        formula <- .makeGLMFormula(env.var,
+                                   model.option=list(type="linear"))
+        mod <- gbm::gbm(formula = formula,
+                        distribution = models.options$GBM$distribution,
+                        data = data,
+                        weights = w,
+                        n.trees = models.options$GBM$n.trees,
+                        interaction.depth = models.options$GBM$interaction.depth,
+                        n.minobsinnode = models.options$GBM$n.minobsinnode,
+                        shrinkage = models.options$GBM$shrinkage,
+                        bag.fraction = models.options$GBM$bag.fraction,
+                        train.fraction = models.options$GBM$train.fraction,
+                        cv.folds = models.options$GBM$cv.folds,
+                        keep.data = models.options$GBM$keep.data,
+                        verbose = models.options$GBM$verbose,
+                        n.cores = models.options$GBM$n.cores)
+        pred <- as.data.frame(gbm::predict.gbm(mod,newdata = env.var,type = "response"))
+        colnames(pred) = "GBM" 
+        
+        if(save.obj){
+          save(mod,file=paste("ESM",nameRun,
+                              colnames(env.var)[1],
+                              colnames(env.var)[2],
+                              models[j],"model.out",
+                              sep="_"))
+        }else if(nameRun == "Full"){
+          save(mod,file=paste("ESM",nameRun,
+                              colnames(env.var)[1],
+                              colnames(env.var)[2],
+                              models[j],"model.out",
+                              sep="_"))
+        }
+      }
       
+      if(j == 1){
+        predFin <- pred
+        
+      }else{
+        predFin <- cbind.data.frame(predFin,pred)
+      }
     }
-    return(pred)
+    return(predFin)
+}
+
+.makeGLMFormula <- function(env.var = env.var,model.option){
+  
+  formula <- paste0("resp~", paste0(colnames(env.var),collapse = "+"))
+  
+  if(model.option$type == "quadratic" | model.option$type == "polynomial"){
+    IsNum <- apply(env.var,2,is.numeric)
+    Topaste <- paste0("I(",colnames(env.var)[IsNum],"^2)",collapse="+")
+    formula <- paste(formula,Topaste,sep = "+")
+    if(model.option$type == "polynomial"){
+      Topaste <- paste0("I(",colnames(env.var)[IsNum],"^3)",collapse="+")
+      formula <- paste(formula,Topaste,sep = "+")
+    }
+  }
+  
+  return(as.formula(formula))
+  
 }

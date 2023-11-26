@@ -1,5 +1,6 @@
 .evaluationScores <- function (Pred, resp) 
 {
+
   pred.esmPres <- Pred[resp == 1]
   pred.esmAbs <- Pred[resp == 0]
   auc.test <- dismo::evaluate(p = pred.esmPres, a = pred.esmAbs)@auc
@@ -11,16 +12,36 @@
                             1),
                Boyce = boyce.test, 
                MaxTSS = tss.test))
+  
 }
-.bivaEvaluation <- function(biva,resp,cv.split.table){
+.bivaEvaluation <- function(biva,
+                            resp,
+                            models,
+                            cv.split.table){
   evalBiva <- NULL
-  for(j in 1:(ncol(cv.split.table)-1)){
-    evalBiva <- rbind(evalBiva,
-                      .evaluationScores(Pred = biva[!(cv.split.table[,j]),j],
-                      resp = resp[!(cv.split.table[,j])]))
+  nameBiva <- colnames(biva)
+  for(i in 1: length(models)){
+    eval <- NULL
+    for(j in 1:(ncol(cv.split.table)-1)){
+      
+        ToDo <- grep(paste0(colnames(cv.split.table)[j],
+                            ".",models[i]), 
+                     nameBiva, value = TRUE)
+        eval <- rbind(eval,
+                          .evaluationScores(Pred = biva[!(cv.split.table[,j]),ToDo],
+                                            resp = resp[!(cv.split.table[,j])]))
+        rownames(eval)[nrow(eval)] = ToDo
+    }
+    full = apply(eval,2,mean)
+    eval <- rbind(eval,full)
+    ToDo <- grep(paste0(colnames(cv.split.table)[j+1],
+                        ".",models[i]), 
+                 nameBiva, value = TRUE)
+    rownames(eval)[nrow(eval)] = ToDo
+    evalBiva <- rbind(evalBiva,eval)
+    
   }
-  evalBiva <- t(evalBiva)
-  evalBiva <- cbind(evalBiva,apply(evalBiva,1,mean))
-  colnames(evalBiva) = colnames(cv.split.table)
   return(evalBiva)
 }
+  
+  
