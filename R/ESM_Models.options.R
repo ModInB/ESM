@@ -1,4 +1,4 @@
-ESM_Models.options <- function(GLM = NULL,
+ESM_Models.Options <- function(GLM = NULL,
                                # GAM = NULL,
                                GBM = NULL
                                ){

@@ -8,6 +8,7 @@ ESM_Projection <- function(ESM.Mod,
   models <- ESM.Mod$model.info$models
   which.biva <- ESM.Mod$model.info$which.biva
   env.var <- ESM.Mod$data$env.var
+  
   #### check new.env
   if(is.matrix(new.env)){
     new.env  <- as.data.frame(new.env)
@@ -31,7 +32,7 @@ ESM_Projection <- function(ESM.Mod,
     if(sum(colnames(new.env) %in% used.env) != length(used.env) ){
       stop("new.env need to have the same variable names as used in ESM_Modeling")
     }
-    
+    proj.type = "data.frame"
     proj <- apply(combinations, 2, .IndividualProj,
                   new.env = new.env,models = models,
                   name.env = name.env)
@@ -39,6 +40,7 @@ ESM_Projection <- function(ESM.Mod,
     if(sum(names(new.env) %in% used.env) != length(used.env) ){
       stop("new.env need to have the same variable names as used in ESM_Modeling")
     }
+    proj.type = "SpatRaster"
     
     proj <- apply(combinations, 2, .IndividualProj,
                   new.env = new.env,models = models,
@@ -46,7 +48,9 @@ ESM_Projection <- function(ESM.Mod,
   }
   
   obj = list(projection.path=proj,
-             model.info = ESM.Mod$model.info)
+             model.info = ESM.Mod$model.info,
+             name.env = name.env,
+             proj.type=proj.type)
   if(save.obj){
     save(obj,file=paste0("../ESM.Projection.",ESM.Mod$model.info$modeling.id,".out"))
   }
@@ -74,7 +78,6 @@ ESM_Projection <- function(ESM.Mod,
         
         if(models[j]=="GLM"){
           pred <- round(1000 * terra::predict(new.env, mod, type = "response"))
-          
         }else if(models[j]=="GBM"){
           pred <- invisible(round(1000 *terra::predict(new.env,mod, type = "response"))) ##invisible not working
           pred <- terra::mask(pred,subset(new.env,1)) ## was putting values where both variables had na

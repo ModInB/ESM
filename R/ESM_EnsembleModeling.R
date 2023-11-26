@@ -1,4 +1,4 @@
-ESM_EnsembleModeling <- function(ESM.Mod,
+ESM_Ensemble.Modeling <- function(ESM.Mod,
                                  weighting.score,
                                  threshold = NULL,
                                  save.obj = TRUE){

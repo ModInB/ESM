@@ -37,7 +37,7 @@ ESM_Modeling <- function(resp,
     stop("env should be either a SpatRaster or a data.frame")
   }
   if(is.null(models.options)){
-    models.options = ESM_Models.options()
+    models.options = ESM_Models.Options()
   }
   if(anyNA(resp)){
     
@@ -58,8 +58,8 @@ ESM_Modeling <- function(resp,
   # Create a folder to store objects
   iniwd <- getwd()
   on.exit(setwd(iniwd))
-  dir.create(paste0(pathToSaveObject,"/ESM.BIOMOD.output_", sp.name,"/",modeling.id),recursive = T)
-  newwd <- paste0("./ESM.BIOMOD.output_", sp.name,"/",modeling.id)
+  dir.create(paste0(pathToSaveObject,"/ESM.output_", sp.name,"/",modeling.id),recursive = T)
+  newwd <- paste0("./ESM.output_", sp.name,"/",modeling.id)
   setwd(newwd)
   
   # Generate all the possible combination variables

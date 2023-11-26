@@ -10,14 +10,14 @@ resp <- inv[,11]
 
 # env data
 env <- inv[,3:5]
-env <- terra::rast(system.file("extdata","ecospat.testEnv.tif",package="ecospat"))
-xy <- ecospat.testData[,2:3]
-resp <- ecospat.testData$Veronica_alpina
+# env <- terra::rast(system.file("extdata","ecospat.testEnv.tif",package="ecospat"))
+# xy <- ecospat.testData[,2:3]
+# resp <- ecospat.testData$Veronica_alpina
 
 ### Formating the data with the BIOMOD_FormatingData() function from the package biomod2
 sp.name = "V.a"
 models = c("GLM","GBM")
-models.options = ESM_Models.options(GLM=list(test="none",
+models.options = ESM_Models.Options(GLM=list(test="none",
                                              type="quadratic"))
 prevalence = 0.5
 cv.method = "split-sampling"
@@ -47,8 +47,8 @@ my.ESM <- ESM_Modeling(resp = resp,
 my.ESM$biva.evaluations
 
 ### Ensemble models
-my.ESM_EF <- ESM_EnsembleModeling(my.ESM,
-                                  weighting.score=c("SomersD"),
+my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
+                                  weighting.score=c("MaxTSS"),
                                   threshold=0,
                                   save.obj = TRUE)
 my.ESM_EF$evaluations
@@ -58,6 +58,13 @@ my.ESM_EF$evaluations
 proj <- ESM_Projection(ESM.Mod = my.ESM,
                        new.env = env,
                        name.env = "current")
+Ens.proj <- ESM_Ensemble.Projection(ESM.proj = proj,
+                                    ESM.ensembleMod = my.ESM_EF,
+                                    save.obj = TRUE) #if TRUE the maps or the data.frame will be saved
+
+####################################################################################
+
+
 
 ### thresholds to produce binary maps
 my.ESM_thresholds <- ecospat.ESM.threshold(my.ESM_EF)
