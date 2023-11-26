@@ -68,7 +68,7 @@ ESM_Modeling <- function(resp,
   if (is.null(which.biva)) {
     which.biva <- 1:ncol(combinations)
   }
-  
+  combinations <- combinations[,which.biva]
 
   if(is.null(cv.split.table)){
     cv.split.table <- ESM.CreatingDataSplitTable(resp = resp, 
@@ -77,7 +77,6 @@ ESM_Modeling <- function(resp,
                                                  cv.ratio = cv.ratio)
   }
   
-  combinations <- combinations[,which.biva]
   
   cat("\n################### Start Modelling ###################")
   ## Model each bivariate model
@@ -105,20 +104,22 @@ ESM_Modeling <- function(resp,
                       cv.split.table=cv.split.table)
   
   
-  obj <- list(resp = resp,
-              xy = xy,
-              env.var = env.var,
-              sp.name= sp.name,
+  obj <- list(data = list(resp = resp,
+                          xy = xy,
+                          env.var = env.var,
+                          sp.name= sp.name),
+              model.info = list(models = models,
+                                models.options = models.options,
+                                which.biva = which.biva,
+                                modeling.id = modeling.id,
+                                biva.path = newwd),
               cv.split.table = cv.split.table,
-              models = models,
               biva.predictions = biva.mods,
-              biva.evaluations = biva.eval,
-              modeling.id = modeling.id,
-              biva.path = newwd
+              biva.evaluations = biva.eval
               )
   
   if(save.obj){
-    save(obj,file=paste0("../ESM.Modeling_",modeling.id,".out"))
+    save(obj,file=paste0("../ESM.Modeling.",modeling.id,".out"))
   }
   cat("\n##################### Done #####################")
   
@@ -293,7 +294,7 @@ ESM.CreatingDataSplitTable <- function(resp,
                         bag.fraction = models.options$GBM$bag.fraction,
                         train.fraction = models.options$GBM$train.fraction,
                         cv.folds = models.options$GBM$cv.folds,
-                        keep.data = models.options$GBM$keep.data,
+                        keep.data = TRUE,
                         verbose = models.options$GBM$verbose,
                         n.cores = models.options$GBM$n.cores)
         pred <- as.data.frame(gbm::predict.gbm(mod,newdata = env.var,type = "response"))

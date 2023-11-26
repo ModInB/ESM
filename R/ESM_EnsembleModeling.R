@@ -15,16 +15,17 @@ ESM_EnsembleModeling <- function(ESM.Mod,
   }
   iniwd <- getwd()
   on.exit(setwd(iniwd))
-  newwd <- ESM.Mod$biva.path
+  newwd <- ESM.Mod$model.info$biva.path
   setwd(newwd)
   
   ### First generate the first level of aggregation (on algo)
-  models <- ESM.Mod$models
+  models <- ESM.Mod$model.info$models
   biva.eval <- ESM.Mod$biva.evaluations
   biva.pred <- ESM.Mod$biva.predictions
-  run.names <- colnames(ESM.Mod$cv.split.table)
-  resp <- ESM.Mod$resp
   cv.split.table <-ESM.Mod$cv.split.table
+  run.names <- colnames(cv.split.table)
+  resp <- ESM.Mod$data$resp
+  
   
   for(i in 1:length(models)){
     ##Get the weights of the full model (which is = to mean across the cv)
@@ -72,21 +73,19 @@ ESM_EnsembleModeling <- function(ESM.Mod,
   }else{
     EF <- pred.EF
     EF.eval <- EF.algo.eval
+    weights.EF <- weights.algo
   }
   
-  obj <- list(resp = resp,
-              sp.name = my.ESM$sp.name,
+  obj <- list(data=ESM.Mod$data,
+              model.info = ESM.Mod$model.info,
               cv.split.table = cv.split.table,
-              models = models,
               evaluations = EF.eval,
-              pred.EF.algo = pred.EF,
-              weights.algo = weights.algo,
-              EF = EF,
-              weights.EF = weights.EF,
-              modeling.id = modeling.id,
-              biva.path = newwd)
+              EF.algo = list(pred.EF.algo = pred.EF,
+                             weights.algo = weights.algo),
+              EF = list(pred.EF = EF,
+                        weights.EF = weights.EF))
   if(save.obj){
-    save(obj,file= paste0("../ESM.EnsembleModeling.",modeling.id,".out"))
+    save(obj,file= paste0("../ESM.EnsembleModeling.",ESM.Mod$model.info$modeling.id,".out"))
   }
   return(obj)
 }

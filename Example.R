@@ -1,4 +1,5 @@
 library(ecospat)
+library(terra)
 # Loading test data
 data(ecospat.testNiche.inv)
 inv <- ecospat.testNiche.inv
@@ -9,11 +10,13 @@ resp <- inv[,11]
 
 # env data
 env <- inv[,3:5]
+env <- terra::rast(system.file("extdata","ecospat.testEnv.tif",package="ecospat"))
+xy <- ecospat.testData[,2:3]
+resp <- ecospat.testData$Veronica_alpina
 
 ### Formating the data with the BIOMOD_FormatingData() function from the package biomod2
-sp.name = "test"
-models = c("GLM",
-           "GBM")
+sp.name = "V.a"
+models = c("GLM","GBM")
 models.options = ESM_Models.options(GLM=list(test="none",
                                              type="quadratic"))
 prevalence = 0.5
@@ -50,7 +53,11 @@ my.ESM_EF <- ESM_EnsembleModeling(my.ESM,
                                   save.obj = TRUE)
 my.ESM_EF$evaluations
 
+### Predictions
 
+proj <- ESM_Projection(ESM.Mod = my.ESM,
+                       new.env = env,
+                       name.env = "current")
 
 ### thresholds to produce binary maps
 my.ESM_thresholds <- ecospat.ESM.threshold(my.ESM_EF)

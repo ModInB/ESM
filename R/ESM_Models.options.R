@@ -15,7 +15,6 @@ ESM_Models.options <- function(GLM = NULL,
                          bag.fraction = 0.5,
                          train.fraction = 1,
                          cv.folds = 3,
-                         keep.data = FALSE,
                          verbose = FALSE,
                          n.cores = 1
                           ))
@@ -83,9 +82,6 @@ ESM_Models.options <- function(GLM = NULL,
     }
     if (!is.null(GBM$cv.folds)) {
       opt$GBM$cv.folds <- GBM$cv.folds
-    }
-    if (!is.null(GBM$keep.data)) {
-      opt$GBM$keep.data <- GBM$keep.data
     }
     if (!is.null(GBM$verbose)) {
       opt$GBM$verbose <- GBM$verbose
