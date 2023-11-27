@@ -21,11 +21,10 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
   ### First generate the first level of aggregation (on algo)
   models <- ESM.Mod$model.info$models
   biva.eval <- ESM.Mod$biva.evaluations
-  biva.pred <- ESM.Mod$biva.predictions
+  biva.pred <- do.call(cbind,ESM.Mod$biva.predictions)
   cv.split.table <-ESM.Mod$cv.split.table
   run.names <- colnames(cv.split.table)
   resp <- ESM.Mod$data$resp
-  test <- do.call(cbind,biva.pred)
   
   for(i in 1:length(models)){
     ##Get the weights of the full model (which is = to mean across the cv)
@@ -39,9 +38,10 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
     }else{
       weights.algo <- rbind(weights.algo,w)
     }
+
     ## Then make the ensemble
     pred.EF.algo <- sapply(run.names,.bivaToEnsemble,model = models[i],
-                           w = w,biva.pred = biva.pred) #not super fast
+                           w = w,biva.pred = biva.pred) 
     pred.EF.algo <- do.call(cbind.data.frame,pred.EF.algo)
     if(i==1){
       pred.EF <- pred.EF.algo
@@ -92,11 +92,10 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
 
 .bivaToEnsemble <- function(x,model,w,biva.pred){
   
-    pred.algo <- as.data.frame(lapply(biva.pred,FUN = function(y,model,x){
-      y[,paste0(x,".",model)]
-    },model = model,x=x))
+    pred.algo <- biva.pred[,grep(paste0(x,".",model),colnames(biva.pred),fixed = T)]
     pred.EF.run <- as.data.frame(apply(pred.algo,1,weighted.mean,
-                                       w=w[colnames(pred.algo)],na.rm=T))
+                                       w=w[sub(paste0(".",x,".",model), "",colnames(pred.algo),fixed = T)],na.rm=T))
+    ## For the w, I make sure that it is in the same order as pred.algo
     colnames(pred.EF.run) = model
     return(pred.EF.run)
 }

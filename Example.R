@@ -55,7 +55,7 @@ xy <- ecospat.testData[,2:3]
 resp <- ecospat.testData$Veronica_alpina
 
 ### Formating the data with the BIOMOD_FormatingData() function from the package biomod2
-sp.name = "V.a"
+sp.name = "ab"
 models = c("GLM","GBM")
 models.options = ESM_Models.Options(GLM=list(test="none",
                                              type="quadratic"))
