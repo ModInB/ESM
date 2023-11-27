@@ -25,7 +25,7 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
   cv.split.table <-ESM.Mod$cv.split.table
   run.names <- colnames(cv.split.table)
   resp <- ESM.Mod$data$resp
-  
+  test <- do.call(cbind,biva.pred)
   
   for(i in 1:length(models)){
     ##Get the weights of the full model (which is = to mean across the cv)
@@ -33,7 +33,7 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
       x[paste0("Full.",model),ws]
     },model = models[i],ws=weighting.score))
     row.names(w) = models[i]
-    w[w<threshold] = 0
+    w[w<threshold | is.na(w)] = 0
     if(i == 1){
       weights.algo <- w
     }else{
@@ -41,7 +41,7 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
     }
     ## Then make the ensemble
     pred.EF.algo <- sapply(run.names,.bivaToEnsemble,model = models[i],
-                           w = w,biva.pred = biva.pred)
+                           w = w,biva.pred = biva.pred) #not super fast
     pred.EF.algo <- do.call(cbind.data.frame,pred.EF.algo)
     if(i==1){
       pred.EF <- pred.EF.algo
@@ -60,7 +60,7 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
   ## Make the full ensemble
   if(length(models)>1){
     weights.EF <- EF.algo.eval[grep("Full",row.names(EF.algo.eval)),weighting.score]
-    weights.EF[weights.EF<threshold] = 0
+    weights.EF[weights.EF<threshold | is.na(weights.EF)] = 0
     names(weights.EF) = sub("Full.","",names(weights.EF),fixed = TRUE)
     EF <- sapply(run.names,.EFToEnsemble,
                            w = weights.EF,pred.EF = pred.EF)
@@ -101,7 +101,7 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
     return(pred.EF.run)
 }
 .EFToEnsemble <- function(x,pred.EF,w){
-  pred.EF.algo <- pred.EF[,grep(x,colnames(pred.EF))]
+  pred.EF.algo <- pred.EF[,grep(paste0(x,"."),colnames(pred.EF),fixed = T)]
   EF <- apply(pred.EF.algo,1,weighted.mean,w=w)
   return(EF)
 }

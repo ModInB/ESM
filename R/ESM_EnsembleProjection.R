@@ -79,7 +79,7 @@ ESM_Ensemble.Projection <- function(ESM.proj,
     }else{
       EF <- EF.toMerge
     }
-    EF <- terra::round(EF)
+    EF <- round(EF)
     if(save.obj){
       writeRaster(EF,paste0("ESM_Ensemble_",name.env,".tif"),gdal=c("COMPRESS=DEFLATE","PREDICTOR=2"))
       

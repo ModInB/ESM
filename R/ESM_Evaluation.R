@@ -27,12 +27,16 @@
         ToDo <- grep(paste0(colnames(cv.split.table)[j],
                             ".",models[i]), 
                      nameBiva, value = TRUE)
+        
+        if(anyNA(biva[!(cv.split.table[,j]),ToDo])){
+          next()
+        }
         eval <- rbind(eval,
                           .evaluationScores(Pred = biva[!(cv.split.table[,j]),ToDo],
                                             resp = resp[!(cv.split.table[,j])]))
         rownames(eval)[nrow(eval)] = ToDo
     }
-    full = apply(eval,2,mean)
+    full = apply(eval,2,mean,na.rm=T)
     eval <- rbind(eval,full)
     ToDo <- grep(paste0(colnames(cv.split.table)[j+1],
                         ".",models[i]), 

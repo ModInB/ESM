@@ -19,6 +19,8 @@ ESM_Models.Options <- function(GLM = NULL,
                          n.cores = 1
                           ))
   
+  ### Code from biomod2
+  
   fam_GLM = c("binomial", "gaussian", "Gamma", "inverse.gaussian", 
                         "poisson", "quasi", "quasibinomial", "quasipoisson")
   if (!is.null(GLM)) {
