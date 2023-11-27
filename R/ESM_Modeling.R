@@ -1,6 +1,6 @@
 ## Modeling
 ## save.obj if FALSE, it only save the full models
-ESM_Modeling <- function(resp,
+ESM_Modeling <- function( resp,
                           xy,
                           env,
                           sp.name,
@@ -46,8 +46,8 @@ ESM_Modeling <- function(resp,
   #########################################
   ## Check model names 
   
-  if(any(!(models  %in% c("GLM","GBM")))){
-    stop("models should be = to GLM and/or GBM")
+  if(any(!(models  %in% c("GLM","GBM","MAXNET")))){
+    stop("models should be = to GLM, GBM, and/or MAXNET")
   }
   
   #######################################
@@ -327,6 +327,7 @@ ESM.CreatingDataSplitTable <- function(resp,
     }else{
       w <- rep(1,nrow(data))
     } 
+    data.maxnet <- data
     data$w = w
     for(j in 1: length(models)){
       err <- FALSE
@@ -486,6 +487,36 @@ ESM.CreatingDataSplitTable <- function(resp,
         }
       }
       
+      if(models[j] == "MAXNET"){
+        cat(paste("\nMAXNET", nameRun,"\n"))
+        tryCatch(expr={mod <- maxnet::maxnet(p = data.maxnet$resp,data = data.maxnet[,-1])}, error=function(e){
+          cat(paste("\n model",models[j],nameRun,"failed"))
+          err <<-TRUE
+        })
+        
+        if(err){
+          pred <- as.data.frame(rep(NA,nrow(env.var)))
+          colnames(pred) = "MAXNET" 
+        }else{
+          pred <- as.data.frame(predict(mod,newdata = env.var,type = "cloglog",clamp=F))
+          colnames(pred) = "MAXNET" 
+        }
+        
+        if(save.obj & !(err)){
+          save(mod,file=paste("ESM",nameRun,
+                              colnames(env.var)[1],
+                              colnames(env.var)[2],
+                              models[j],"model.out",
+                              sep="_"))
+        }else if(nameRun == "Full"& !(err)){
+          save(mod,file=paste("ESM",nameRun,
+                              colnames(env.var)[1],
+                              colnames(env.var)[2],
+                              models[j],"model.out",
+                              sep="_"))
+        }
+      }
+      
       if(j == 1){
         predFin <- pred
         
@@ -529,6 +560,7 @@ ESM.CreatingDataSplitTable <- function(resp,
   }else{
     w <- rep(1,nrow(data))
   } 
+  data.maxnet <- data
   data$w = w
     for(j in 1: length(models)){
       err <- FALSE
@@ -687,7 +719,35 @@ ESM.CreatingDataSplitTable <- function(resp,
                               sep="_"))
         }
       }
-      
+      if(models[j] == "MAXNET"){
+        cat(paste("\nMAXNET", nameRun,"\n"))
+        tryCatch(expr={mod <- maxnet::maxnet(p = data.maxnet$resp,data = data.maxnet[,-1])}, error=function(e){
+          cat(paste("\n model",models[j],nameRun,"failed"))
+          err <<-TRUE
+        })
+        
+        if(err){
+          pred <- as.data.frame(rep(NA,nrow(env.var)))
+          colnames(pred) = "MAXNET" 
+        }else{
+          pred <- as.data.frame(predict(mod,newdata = env.var,type = "cloglog",clamp=F))
+          colnames(pred) = "MAXNET" 
+        }
+        
+        if(save.obj & !(err)){
+          save(mod,file=paste("ESM",nameRun,
+                              colnames(env.var)[1],
+                              colnames(env.var)[2],
+                              models[j],"model.out",
+                              sep="_"))
+        }else if(nameRun == "Full"& !(err)){
+          save(mod,file=paste("ESM",nameRun,
+                              colnames(env.var)[1],
+                              colnames(env.var)[2],
+                              models[j],"model.out",
+                              sep="_"))
+        }
+      }
       if(j == 1){
         predFin <- pred
         

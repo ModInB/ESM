@@ -87,10 +87,12 @@ ESM_Projection <- function(ESM.Mod,
       mod <- get(load(mod))
       if(is.data.frame(new.env)){
         if(models[j]=="GLM"){
-          pred <- round(1000 * predict.glm(mod, new.env = new.env, type = "response"))
+          pred <- round(1000 * predict.glm(mod, newdata = new.env, type = "response"))
           
         }else if(models[j]=="GBM"){
-          pred <- invisible(round(1000 *gbm::predict.gbm(mod,new.env = new.env, type = "response")))
+          pred <- invisible(round(1000 *gbm::predict.gbm(mod,newdata = new.env, type = "response")))
+        }else{
+          pred <- invisible(round(1000 * predict(mod, newdata= new.env, type = "cloglog",clamp=FALSE))) ##invisible not working
         }
         done <- c(done,paste0(name.env,"/ESM_",x[1],"_",x[2],"_",models[j],".txt"))
         write.table(pred,paste0("../",name.env,"/ESM_",x[1],"_",x[2],"_",models[j],".txt"),sep="\t")
@@ -104,6 +106,8 @@ ESM_Projection <- function(ESM.Mod,
         }else if(models[j]=="GBM"){
           pred <- invisible(round(1000 * terra::predict(new.env,mod, fun = gbm::predict.gbm, type = "response"))) ##invisible not working
           pred <- terra::mask(pred,subset(new.env,1)) ## was putting values where both variables had na
+        }else{
+          pred <- invisible(round(1000 * terra::predict(new.env,mod, type = "cloglog",clamp=FALSE,na.rm=T))) ##invisible not working
         }
         done <- c(done,paste0(name.env,"/ESM_",x[1],"_",x[2],"_",models[j],".tif"))
         terra::writeRaster(pred,paste0("../",name.env,"/ESM_",x[1],"_",x[2],"_",models[j],".tif"),
