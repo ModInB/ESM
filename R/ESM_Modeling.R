@@ -153,7 +153,7 @@ ESM.CreatingDataSplitTable <- function(resp,
     stop("Not Yet available") 
   }
   
-  return(calib.Lines)
+  return(calib.Lines) 
 }
 
 .bivaModeling <- function(x,
