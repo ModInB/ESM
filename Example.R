@@ -1,5 +1,6 @@
 library(ecospat)
 library(terra)
+library(maxnet) ## Otherwise the predict function will not work
 
 source("R/ESM_Modeling.R")
 source("R/ESM_Models.options.R")
@@ -8,38 +9,6 @@ source("R/ESM_Projection.R")
 source("R/ESM_Evaluation.R")
 source("R/ESM_EnsembleProjection.R")
 
-
-test <- get(load("C:/Users/fcollart/Downloads/Code_and_data/BiomodData_Collembola_Entom_schoe.RData"))
-resp <-test@data.species
-env <- test@data.env.var
-xy <- test@coord
-sp.name <- "TestError"
-models = c("GLM","GBM")
-models.options = ESM_Models.Options(GLM=list(test="AIC",
-                                             type="quadratic"))
-
-### Calibration of simple bivariate models
-my.ESM <- ESM_Modeling(resp = resp,
-                       xy=xy,
-                       env=env,
-                       sp.name = sp.name,
-                       models = models,
-                       models.options = models.options,
-                       prevalence = 0.5,
-                       cv.method = "split-sampling", #can be split, block, custom
-                       cv.rep = 2,
-                       cv.ratio = 0.7,
-                       cv.split.table = NULL,
-                       which.biva = 34:38,
-                       modeling.id = as.character(format(Sys.time(), "%s")),
-                       pathToSaveObject = getwd(),
-                       save.obj = TRUE)
-
-my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
-                                   weighting.score=c("MaxTSS"),
-                                   threshold=0,
-                                   save.obj = TRUE)
-my.ESM_EF$evaluations
 # Loading test data
 data(ecospat.testNiche.inv)
 inv <- ecospat.testNiche.inv
@@ -96,7 +65,7 @@ my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
 my.ESM_EF$evaluations
 
 ### Evaluation of the ensemble models based on the pooling procedure 
-eval <- ESM.Pooling.Evaluation(ESM.Mod = my.ESM,
+eval <- ESM_Pooling.Evaluation(ESM.Mod = my.ESM,
                                ESM.ensembleMod = my.ESM_EF,
                                EachSmallModels = TRUE)
 
@@ -118,12 +87,12 @@ Ens.proj <- ESM_Ensemble.Projection(ESM.proj = proj,
                                     save.obj = TRUE) #if TRUE the maps or the data.frame will be saved
 
 ### thresholds to produce binary maps
-my.ESM_thresholds <- ESM.threshold(my.ESM_EF)
+my.ESM_thresholds <- ESM_threshold(my.ESM_EF)
 
 ## get the variable contributions of ESMs
-ESM.Variable.Contributions(my.ESM,my.ESM_EF) 
+ESM_Variable.Contributions(my.ESM,my.ESM_EF) 
 
 ## get the response plots of ESMs
-my.ESM_responsePlot<- ESM.response.Plot(my.ESM,
+my.ESM_responsePlot<- ESM_Response.Plot(my.ESM,
                                         my.ESM_EF,
                                         fixed.var.metric = 'mean')

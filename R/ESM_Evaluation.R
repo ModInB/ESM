@@ -1,61 +1,22 @@
-.evaluationScores <- function (Pred, resp) 
-{
+#############################################################
+## Melting pot of function and hidden function to evaluate
+## models and/or check model outputs
+###########################################################
 
-  pred.esmPres <- Pred[resp == 1]
-  pred.esmAbs <- Pred[resp == 0]
-  auc.test <- PresenceAbsence::auc(DATA=cbind(ID=1:length(Pred),
-                                              resp=resp,
-                                              Pred), 
-                                   st.dev = FALSE,which.model = 1, 
-                                   na.rm = TRUE)
-  boyce.test <- ecospat::ecospat.boyce(c(pred.esmPres, pred.esmAbs), 
-                              pred.esmPres, PEplot = F)$cor
-  tss.test <- ecospat::ecospat.max.tss(Pred = Pred, Sp.occ = resp)[[2]]
-  return(cbind(AUC = auc.test, 
-               SomersD = (2 * auc.test - 
-                            1),
-               Boyce = boyce.test, 
-               MaxTSS = tss.test))
-  
-}
-.bivaEvaluation <- function(biva,
-                            resp,
-                            models,
-                            cv.split.table){
-  evalBiva <- NULL
-  nameBiva <- colnames(biva)
-  for(i in 1: length(models)){
-    eval <- NULL
-    for(j in 1:(ncol(cv.split.table)-1)){
-      
-        ToDo <- grep(paste0(colnames(cv.split.table)[j],
-                            ".",models[i]), 
-                     nameBiva, value = TRUE)
-        
-        if(anyNA(biva[!(cv.split.table[,j]),ToDo])){
-          next()
-        }
-        eval <- rbind(eval,
-                          .evaluationScores(Pred = biva[!(cv.split.table[,j]),ToDo],
-                                            resp = resp[!(cv.split.table[,j])]))
-        rownames(eval)[nrow(eval)] = ToDo
-    }
-    full = apply(eval,2,mean,na.rm=T)
-    eval <- rbind(eval,full)
-    ToDo <- grep(paste0(colnames(cv.split.table)[j+1],
-                        ".",models[i]), 
-                 nameBiva, value = TRUE)
-    rownames(eval)[nrow(eval)] = ToDo
-    evalBiva <- rbind(evalBiva,eval)
-  }
-  return(evalBiva)
-}
-  
-ESM.Pooling.Evaluation <- function (ESM.Mod, 
+## The "user-friendly" functions that were slightly modified for ecospat package to works with the new version
+## check in the help section of the ecospat package
+
+#############
+## ESM.Pooling.Evaluation
+## Perform the pooling evaluation
+###############
+
+
+ESM_Pooling.Evaluation <- function (ESM.Mod, 
                                     ESM.ensembleMod, 
                                     EachSmallModels = FALSE) 
 {
- 
+  
   if (!is.logical(EachSmallModels)) {
     stop("EachSmallModels should be logical")
   }
@@ -66,7 +27,7 @@ ESM.Pooling.Evaluation <- function (ESM.Mod,
   nReplicate <- ncol(ESM.Mod$cv.split.table)-1
   fit <- ESM.ensembleMod$EF.algo$pred.EF.algo
   calib <- ESM.Mod$cv.split.table[, 1:nReplicate]
-
+  
   PredFin <- NULL
   evalFin <- NULL
   for(d in 1:length(modelling.techniques)) {
@@ -128,21 +89,13 @@ ESM.Pooling.Evaluation <- function (ESM.Mod,
   }
   return(output)
 }
-.ecospat.pooling<-function (calib, models.prediction) 
-{
-  Pred <- NULL
-  for (k in 1:nrow(calib)) {
-    if (sum(!calib[k, ]) != 0) {
-      valStock <- cbind(models.prediction[k, 1], mean(as.numeric(models.prediction[k, 
-                                                                                   (which(!calib[k, ]) + 1)]), na.rm = T))
-      colnames(valStock) = c("resp", "meanESM")
-      Pred <- rbind(Pred, valStock)
-    }
-  }
-  return(Pred)
-}
 
-ESM.threshold <- function (ESM.ensembleMod) 
+#############
+## ESM.threshold
+## Evaluate the fit of the ensemble models and compute thresholds
+###############
+
+ESM_threshold <- function (ESM.ensembleMod) 
 {
   models = ESM.ensembleMod$model.info$models 
   resp <-  ESM.ensembleMod$data$resp
@@ -165,7 +118,7 @@ ESM.threshold <- function (ESM.ensembleMod)
                   resp.var = resp, 
                   Full.models[, i])
     AUC <- PresenceAbsence::auc(DATA, st.dev = FALSE,which.model = 1, na.rm = TRUE)
-
+    
     TSS <- ecospat.max.tss(Pred = Full.models[, i],Sp.occ = resp)
     TSS.th <- TSS$max.threshold
     TSS <- TSS$max.TSS
@@ -187,12 +140,12 @@ ESM.threshold <- function (ESM.ensembleMod)
     neg.F <- which(boyce$F.ratio <= 1)
     if (max(neg.F) < min(pos.F)) {
       Boyce.th.max <- EVAL1$Boyce.th.min <- mean(boyce$HS[c(max(neg.F), 
-                                                                  min(pos.F))])
+                                                            min(pos.F))])
     }else {
       Boyce.th.max <- mean(boyce$HS[c(max(neg.F), 
-                                            max(neg.F) + 1)])
+                                      max(neg.F) + 1)])
       Boyce.th.min <- mean(boyce$HS[c(min(pos.F), 
-                                            min(pos.F) - 1)])
+                                      min(pos.F) - 1)])
     }
     
     EVAL1 <- cbind.data.frame(model = colnames(Full.models)[i], Boyce.th.min, Boyce.th.max,
@@ -203,7 +156,14 @@ ESM.threshold <- function (ESM.ensembleMod)
   }
   return(EVAL)
 }
-ESM.Variable.Contributions <- function (ESM.Mod, 
+
+
+#############
+## ESM.Variable.Contributions
+## Compute the contributions of each predictor
+###############
+
+ESM_Variable.Contributions <- function (ESM.Mod, 
                                         ESM.ensembleMod){
   
   var <- colnames(ESM.Mod$data$env.var)
@@ -231,8 +191,12 @@ ESM.Variable.Contributions <- function (ESM.Mod,
   return(contrib)
 }
 
+#############
+## ESM_Response.Plot
+## Generates the species response curve for each predictor
+###############
 
-ESM.response.Plot <- function (ESM.Mod, 
+ESM_Response.Plot <- function (ESM.Mod, 
                                ESM.ensembleMod, 
                                fixed.var.metric = "median"){
   
@@ -301,8 +265,82 @@ ESM.response.Plot <- function (ESM.Mod,
       }
     }
   }
-
+  
   unlink(paste0("ESM.output_", ESM.Mod$data$sp.name,"/data.fixed"), recursive = TRUE)
-
+  
   return(proj.fixed.list = proj.fixed.list)
 }
+
+########################################################################
+## The dark side of the moon: the hidden functions
+
+## Compute diverse metrics
+.evaluationScores <- function (Pred, resp) 
+{
+
+  pred.esmPres <- Pred[resp == 1]
+  pred.esmAbs <- Pred[resp == 0]
+  auc.test <- PresenceAbsence::auc(DATA=cbind(ID=1:length(Pred),
+                                              resp=resp,
+                                              Pred), 
+                                   st.dev = FALSE,which.model = 1, 
+                                   na.rm = TRUE)
+  boyce.test <- ecospat::ecospat.boyce(c(pred.esmPres, pred.esmAbs), 
+                              pred.esmPres, PEplot = F)$cor
+  tss.test <- ecospat::ecospat.max.tss(Pred = Pred, Sp.occ = resp)[[2]]
+  return(cbind(AUC = auc.test, 
+               SomersD = (2 * auc.test - 
+                            1),
+               Boyce = boyce.test, 
+               MaxTSS = tss.test))
+  
+}
+## Allow to evaluate each runs of a bivariate model 
+.bivaEvaluation <- function(biva,
+                            resp,
+                            models,
+                            cv.split.table){
+  evalBiva <- NULL
+  nameBiva <- colnames(biva)
+  for(i in 1: length(models)){
+    eval <- NULL
+    for(j in 1:(ncol(cv.split.table)-1)){
+      
+        ToDo <- grep(paste0(colnames(cv.split.table)[j],
+                            ".",models[i]), 
+                     nameBiva, value = TRUE)
+        
+        if(anyNA(biva[!(cv.split.table[,j]),ToDo])){
+          next()
+        }
+        eval <- rbind(eval,
+                          .evaluationScores(Pred = biva[!(cv.split.table[,j]),ToDo],
+                                            resp = resp[!(cv.split.table[,j])]))
+        rownames(eval)[nrow(eval)] = ToDo
+    }
+    full = apply(eval,2,mean,na.rm=T)
+    eval <- rbind(eval,full)
+    ToDo <- grep(paste0(colnames(cv.split.table)[j+1],
+                        ".",models[i]), 
+                 nameBiva, value = TRUE)
+    rownames(eval)[nrow(eval)] = ToDo
+    evalBiva <- rbind(evalBiva,eval)
+  }
+  return(evalBiva)
+}
+## Perform the pooling 
+.ecospat.pooling<-function (calib, models.prediction) 
+{
+  Pred <- NULL
+  for (k in 1:nrow(calib)) {
+    if (sum(!calib[k, ]) != 0) {
+      valStock <- cbind(models.prediction[k, 1], mean(as.numeric(models.prediction[k, 
+                                                                                   (which(!calib[k, ]) + 1)]), na.rm = T))
+      colnames(valStock) = c("resp", "meanESM")
+      Pred <- rbind(Pred, valStock)
+    }
+  }
+  return(Pred)
+}
+
+
