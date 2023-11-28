@@ -1,5 +1,77 @@
-## Modeling
-## save.obj if FALSE, it only save the full models
+#################################################################################################################################################
+## ESM_Modeling: 
+##  Description:
+##    Model species distribution based on the method Ensemble of Small Models (ESM)
+##    Evaluate also each bivariate models.
+##
+##  Arguments:
+## @resp: nucmeric of 0-1. 0 the species si absent and 1 when present
+## @xy: matrix or data.frame containing the X and Y coordinate of the species 
+## @env: matrix, data.frame or SpatRaster of the species predictors.
+## @models: character of the wanted algorithm methods. Can be c("GLM","GBM","MAXNET) 
+##          or a subset of these 3 techniques.
+## @models.options: NULL or the output from ESM.Modeling.Options()
+## @prevalence: either NULL or a 0-1 numeric used to build 'weighted response weights'. 
+##              The default is 0.5 (weighting presences equally to the absences). 
+##              If NULL each observation (presence or absence) has the same weight 
+##              (independent of the number of presences and absences). 
+##              Note that it is not applicable for MAXNET
+## @cv.method: character. Either "split-sampling", "block" or "custom". 
+##             "block" correspond to a k-fold cross-validations but where 
+##              the presences (and absences) are equally split into the k blocks
+## @cv.rep: numeric. Number of replicates used for the split-sampling 
+##          (only applicable when cv.method="split-sampling")
+## @cv,ratio: 0-1 numeric.ratio of the dataset used to trained the model  
+##            (only applicable when cv.method="split-sampling")
+## @cv.n.blocks: numeric. Number of wanted blocks when cv.method = "block (k-fold cross-validation)
+## @cv.split.table: a matrix or a data.frame filled with TRUE/FALSE 
+##                  to specify which part of data must be used for models 
+##                  calibration (TRUE) and for models validation (FALSE). 
+##                  Each column corresponds to a 'RUN' and should be named "RUNX" 
+##                  where X correspond to the number of the run. The last column 
+##                  should be filled with only TRUE and named "Full" to make a 
+##                  full model used for the future projection. (only applicable
+##                  when cv.method="custom")
+## @which.biva: numeric. which bivariate combinations should be used for modeling? 
+##              Default: NULL (thus all the combinations are made).
+## @paralell: logical. Allows or not parallel job using the functions makeCluster
+## @n.cores: numeric. Number of cores used to make the models.
+## @modeling.id: character. the ID (=name) of modeling procedure. A random number by default.
+## @pathToSaveObject: a chracter of a full path to store the objects. Default is taking the value from getwd()
+## @save.obj: logical. Allows or not to save each run and the final output. 
+##            If FALSE, only the full models will be saved to make the projections possible
+##
+##  Details:
+##          The basic idea of ensemble of small models (ESMs) is to model a species distribution 
+##          based on small, simple models, for example all possible bivariate models (i.e. models 
+##          that contain only two predictors at a time out of a larger set of predictors), and then 
+##          combine all possible bivariate models into an ensemble (Lomba et al. 2010; Breiner et al. 2015).
+##
+##          The ESM set of functions could be used to build ESMs using simple bivariate models which are averaged 
+##          using weights based on model performances. They provide full functionality of the approach described 
+##          in Breiner et al. (2015).
+##
+##          The argument which.biva allows to split model runs, e.g. if which.biva is 1:3, only the three 
+##          first bivariate variable combinations will be modeled. This allows to run different biva splits
+##          on different computers. However, it is better not to use this option if all models are run on a single computer.
+## Values: 
+##        a list containing: 
+##                          data: a list with the object resp, xy, env.var and sp.name. env.var is = to the data suuplied in the argument env. 
+##                                If env, was a SpatRaster, it corrsponds to the extracted values of these rasters for the species coordinates.
+##                          model.info: contains the models used, their options, the combination of bivariate models (which.biva), the
+##                                      modeling ID, the path to the folder where are the stored the models (biva.path), and the failed models
+##                          cv.split.table: a table used to train and test models (see explanation of the argument cv.split.table)
+##                          biva.predictions: a list containing the predictions of all the runs for each bivariate models
+##                          biva.evaluations: a list containing the evaluation of each bivariate model runs. The evaluation of 
+##                          the full model correspond to the mean of all the runs. Note that if one of the run has a maxTSS = -Inf,
+##                          the full will have a maxTSS = -Inf (thus if you used MaxTSS as a weighting score, this bivariate model
+##                          will be removed for the ensemble).
+##  Authors:
+##          Flavien Collart based on the previous code written by Frank Breiner and Mirko Di Febbraro with the contributions of 
+##          Olivier Broennimann and Flavien Collart
+#################################################################################################################################################
+
+
 ESM_Modeling <- function( resp,
                           xy,
                           env,
@@ -228,6 +300,10 @@ ESM_Modeling <- function( resp,
   return(obj)
 }
 
+##################################################################################################
+
+##
+## Functions used inside ESM_Modeling
 
 #Function to generate the argument DataSplitTable in the function ecospat.ESM.Modeling                                                                        
 ESM.CreatingDataSplitTable <- function(resp,
@@ -279,6 +355,11 @@ ESM.CreatingDataSplitTable <- function(resp,
   
   return(calib.Lines) 
 }
+
+### Functions to generate the bivariate models. .doModeling and .makeGLMFormula have to be inside .bivaModeling to avoid issues for parallel job
+## .bivaModeling allow to run the functions .doModeling to model each run of a bivariate models
+## .doModeling generates the bivariate models
+## .makeGLMFormula allows to generate the formula for GLM to allow linear, quadratic or polynomial terms (and for GBM)
 
 .bivaModeling <- function(x,
                           resp,
@@ -537,6 +618,9 @@ ESM.CreatingDataSplitTable <- function(resp,
              prevalence = prevalence, save.obj = save.obj)
   return(do.call(cbind,d))
 }
+
+
+##################################################################################################
 
 .doModeling <- function(x,
                         resp,
