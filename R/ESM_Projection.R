@@ -18,6 +18,9 @@
 ##                                      modeling ID, the path to the folder where are the stored the models (biva.path), and the failed models
 ##                          name.env: the value given to the argument name.env
 ##                          proj.type: a character equal to data.frame or SpatRaster depending on the class of new.env
+##
+##        Maps or data.frame are stored in the folder named by name.env. Values are multiplied by 1000 and rounded. Note that the maps 
+##        are in .tif and compressed with the option COMPRESS=DEFLATE and PREDICTOR=2
 ##  Authors:
 ##          Flavien Collart based on the previous code written by Frank Breiner with the contributions of 
 ##          Olivier Broennimann and Flavien Collart
