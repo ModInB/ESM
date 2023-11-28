@@ -1,3 +1,28 @@
+#################################################################################################################################################
+## ESM_Projection: 
+##  Description:
+##    Projects each bivariate model on new.env
+##
+##  Arguments:
+## @ESM.Mod: The outputs resulted from ESM_Modeling()
+## @new.env: a data.frame, a matrix or a SpatRaster containg the environment where the models should be projected. 
+##           Note that the colnames or the names of the predictors should be exactly the same as the one used in ESM_Modeling()
+## @name.env: a character which will be used to generate a folder to save the individual projections.
+## @paralell: logical. Allows or not parallel job using the functions makeCluster
+## @n.cores: numeric. Number of cores used to make the models.
+##
+## Values: 
+##        a list containing: 
+##                          projection.path: a vector of the path to each projection.
+##                          model.info: contains the models used, their options, the combination of bivariate models (which.biva), the
+##                                      modeling ID, the path to the folder where are the stored the models (biva.path), and the failed models
+##                          name.env: the value given to the argument name.env
+##                          proj.type: a character equal to data.frame or SpatRaster depending on the class of new.env
+##  Authors:
+##          Flavien Collart based on the previous code written by Frank Breiner with the contributions of 
+##          Olivier Broennimann and Flavien Collart
+#################################################################################################################################################
+
 ESM_Projection <- function(ESM.Mod,
                            new.env,
                            name.env,
@@ -54,7 +79,7 @@ ESM_Projection <- function(ESM.Mod,
     }
     proj.type = "SpatRaster"
     if(parallel){
-      new.env <- terra::wrap(new.env)
+      new.env <- terra::wrap(new.env) ## To allow a correct parallelisation
       cl <- parallel::makeCluster(n.cores)
       proj <- parallel::parApply(cl,combinations, 2, .IndividualProj,
                                  new.env = new.env,models = models,
@@ -77,6 +102,8 @@ ESM_Projection <- function(ESM.Mod,
   }
   return(obj)
 }
+
+## Function projecting a model onto a new environment.
 .IndividualProj <- function(x,new.env,models,name.env,parallel){
   cat(paste("\n Projections of bivariate model:",x[1],x[2]))
   done <- c()
