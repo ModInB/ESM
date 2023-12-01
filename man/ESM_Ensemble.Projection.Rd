@@ -16,10 +16,10 @@ ESM_Ensemble.Projection(ESM.proj,
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{ESM.proj}{
-The object returned by ESM_Projection()
+The object returned by \code{ESM_Projection()}
 }
   \item{ESM.ensembleMod}{
-The object returned by ESM_Ensemble.Modeling()
+The object returned by \code{ESM_Ensemble.Modeling()}
 }
   \item{chosen.models}{
  a \code{character} allowing to only make the ensemble maps on a selection of modeling techniques. \emph{Default}: "all".

@@ -18,13 +18,11 @@ ESM_Models.Options(GLM = NULL,
 \item{type}: \code{character}. Either "linear", "quadratic" or "polynomial". \emph{Default}: "quadratic".
 \item{myFormula}: \code{formula}. Custom formula. The response variable should be called resp. Example: as.formula("resp~predictor") \emph{Default}: \code{NULL}.
 \item{test}: \code{character}. Either "AIC" or "none". Perform or not a step AIC selection for the formula. \emph{Default}: "none".
-\item{family}: \code{character}. defining the error distribution and link function to be used in the model, must be a family name, a family function or the result of a call to a family function. \emph{Default}: "binomial(link='logit')"
 }
 }
   \item{GBM}{
 \code{list}. with the objects (see \link[gbm]{gbm}):
 \itemize{
-\item{distribution}: \code{character}. Name of the distribution used. \emph{Default}: "bernouilli".
 \item{n.trees}: \code{integer}. Number of trees to fit. \emph{Default}: 1000.
 \item{interaction.depth}: \code{integer}. The maximum depth of each tree \code{numeric}. Number of trees to fit. \emph{Default}: 4.
 \item{n.minobsinnode}: \code{integer}. The minimum number of observations in the terminal nodes of the trees. \emph{Default}: 5.
@@ -33,12 +31,12 @@ ESM_Models.Options(GLM = NULL,
 \item{train.fraction}: \code{numeric}. The first fraction of observations to fit the model. \emph{Default}: 1.
 \item{cv.folds}: \code{integer}. Number of cross-validations to perform. \emph{Default}: 3.
 \item{verbose}: \code{logical}. print or not the progress. \emph{Default}: FALSE.
-\item{n.cores}: \code{logical}. Number of CPU cores to use. \emph{Default}: 1.
+\item{n.cores}: \code{logical}. Number of CPU cores to use. \emph{Default}: \code{NULL}.
 }
 }
 }
 \details{
-Note that no argument checking is performed when using this function. Please refer to the manual of glm and gbm.
+For the arguments of each modeling technique, please refer to the manual of \code{\link[stats]{glm}} and \code{\link[gbm]{gbm}}.
 }
 \value{
 a \code{list} of parameters for ESM
