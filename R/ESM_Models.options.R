@@ -1,7 +1,6 @@
 
 #' @export
 ESM_Models.Options <- function(GLM = NULL,
-                               # GAM = NULL,
                                GBM = NULL
                                ){
   ## Default options
@@ -18,83 +17,81 @@ ESM_Models.Options <- function(GLM = NULL,
                          train.fraction = 1,
                          cv.folds = 3,
                          verbose = FALSE,
-                         n.cores = 1
+                         n.cores = NULL
                           ))
   
-  ### Code from biomod2
-  
-  fam_GLM = c("binomial", "gaussian", "Gamma", "inverse.gaussian", 
-                        "poisson", "quasi", "quasibinomial", "quasipoisson")
+  ### Adapted Code from biomod2
   if (!is.null(GLM)) {
     if (!is.null(GLM$type)) {
+      if(!(any(GLM$type %in% c("linear","quadratic","polynomial")))){
+        stop("GLM$type should be either 'linear', 'quadratic' or 'polynomial'")
+      }
       opt$GLM$type <- GLM$type
     }
     if (!is.null(GLM$myFormula)) {
       opt$GLM$myFormula <- GLM$myFormula
     }
     if (!is.null(GLM$test)) {
+      if(!(any(GLM$test %in% c("none","AIC")))){
+        stop("GLM$type should be either 'none' or 'AIC'")
+      }
       opt$GLM$test <- GLM$test
-    }
-    if (!is.null(GLM$family)) {
-      fam.test <- TRUE
-      if (inherits(GLM$family, "family")) {
-        opt$GLM$family <- GLM$family
-      }
-      else if (is.character(GLM$family)) {
-        if (!unlist(strsplit(GLM$family, "[/(]"))[1] %in% 
-            fam_GLM) {
-          fam.test <- FALSE
-        }
-        if (grepl(")", GLM$family)) {
-          opt$GLM$family <- eval(parse(text = GLM$family))
-        }
-        else {
-          opt$GLM$family <- eval(parse(text = paste0(GLM$family, 
-                                                     "()")))
-        }
-      }
-      else {
-        fam.test <- FALSE
-      }
-      if (!fam.test) {
-        cat("\n!!! invalid GLM$family given -> binomial(link = 'logit') was automatically set up !!!")
-        opt$GLM$family <- binomial(link = "logit")
-      }
     }
   }
   if (!is.null(GBM)) {
-    if (!is.null(GBM$distribution)) {
-      opt$GBM$distribution <- GBM$distribution
-    }
     if (!is.null(GBM$n.trees)) {
+      if(!is.integer(GBM$n.trees)){
+        stop("GBM$n.trees should be an integer")
+      }
       opt$GBM$n.trees <- GBM$n.trees
     }
     if (!is.null(GBM$interaction.depth)) {
+      if(!is.integer(GBM$interaction.depth)){
+        stop("GBM$interaction.depth should be an integer")
+      }
       opt$GBM$interaction.depth <- GBM$interaction.depth
     }
     if (!is.null(GBM$n.minobsinnode)) {
+      if(!is.integer(GBM$n.minobsinnode)){
+        stop("GBM$n.minobsinnode should be an integer")
+      }
       opt$GBM$n.minobsinnode <- GBM$n.minobsinnode
     }
     if (!is.null(GBM$shrinkage)) {
+      if(!is.numeric(GBM$shrinkage)){
+        stop("GBM$shrinkage should be a numeric")
+      }
       opt$GBM$shrinkage <- GBM$shrinkage
     }
     if (!is.null(GBM$bag.fraction)) {
+      if(!is.numeric(GBM$bag.fraction | GBM$bag.fraction>1 | GBM$bag.fraction<0)){
+        stop("GBM$bag.fraction should be a numeric and comprised between 0 and 1")
+      }
       opt$GBM$bag.fraction <- GBM$bag.fraction
     }
     if (!is.null(GBM$train.fraction)) {
+      if(!is.numeric(GBM$train.fraction | GBM$train.fraction>1 | GBM$train.fraction<0)){
+        stop("GBM$train.fraction should be a numeric and comprised between 0 and 1")
+      }
       opt$GBM$train.fraction <- GBM$train.fraction
     }
     if (!is.null(GBM$cv.folds)) {
+      if(!is.integer(GBM$cv.folds)){
+        stop("GBM$cv.folds should be an integer")
+      }
       opt$GBM$cv.folds <- GBM$cv.folds
     }
     if (!is.null(GBM$verbose)) {
+      if(!is.logical(GBM$verbose)){
+        stop("GBM$v should be logical")
+      }
       opt$GBM$verbose <- GBM$verbose
     }
     if (!is.null(GBM$n.cores)) {
+      if(!is.integer(GBM$n.cores)){
+        stop("GBM$n.cores should be an integer")
+      }
       opt$GBM$n.cores <- GBM$n.cores
-    }
-    else {
-      opt$GBM$n.cores <- 1
     }
   }
   
