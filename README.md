@@ -1,5 +1,11 @@
 [![Github Version](https://img.shields.io/badge/dev%20version-0.1-orange.svg)](https://github.com/FlavienCollart/ESMTest)
-[![Last Commit](https://img.shields.io/badge/Last%20Commit-December.svg?color=%23000000)](https://github.com/FlavienCollart/ESMTest/commits/main)
+[![Last Commit](https://img.shields.io/badge/Last%20Commit-December-8E3145.sv)](https://github.com/FlavienCollart/ESMTest/commits/main)
+
+<!-- [![Download](http://cranlogs.r-pkg.org/badges/grand-total/biomod2?color=yellow)](https://cran.r-project.org/package=segclust2d) -->
+<!-- 
+badge for github version :
+badger::badge_github_version("FlavienCollart/ESMTest", "orange") 
+-->
 
 <div align="center">
 <b>------------------------------------------------------------<br/>
