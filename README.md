@@ -17,7 +17,7 @@ badger::badge_github_version("FlavienCollart/ESMTest", "blue")
 
 ### <i class="fas fa-tools"></i> Installation
 
-<br/>
+<b><br/>
 
 - **Development version** [![v](https://img.shields.io/badge/dev%20version-0.1-orange.svg)](https://github.com/FlavienCollart/ESMTest) from [FlavienCollart](https://github.com/FlavienCollart/ESMTest) :
 
