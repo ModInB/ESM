@@ -26,8 +26,15 @@ library(devtools)
 devtools::install_github("FlavienCollart/ESMTest", dependencies = TRUE)
 ```
 
-### <i class="fas fa-tools"></i> Information
+### Information
 
 <br/>
 
 New version of the functions in the ecospat package to remove dependencies with biomod2.
+
+### References
+  - Breiner F.T., A. Guisan, A. Bergamini and M.P. Nobis. 2015. Overcoming limitations of modelling rare species by using ensembles of small models. \emph{Methods in Ecology and Evolution}, \bold{6},1210-1218.
+  - Breiner F.T., Nobis M.P., Bergamini A., Guisan A. 2018. Optimizing ensembles of small models for predicting the distribution of species with few occurrences. \emph{Methods in Ecology and Evolution}. doi:10.1111/2041-210X.12957
+  - Collart, F., & Guisan, A. (2023). Small to train, small to test: Dealing with low sample size in model evaluation. \emph{Ecological Informatics}. \bold{75}, 102106. doi:10.1016/j.ecoinf.2023.102106
+  - Lomba, A., L. Pellissier, C.F. Randin, J. Vicente, F. Moreira, J. Honrado and A. Guisan. 2010. Overcoming the rare species modelling paradox: A novel hierarchical framework applied to an Iberian endemic plant. 
+\emph{Biological Conservation}, \bold{143},2647-2657
