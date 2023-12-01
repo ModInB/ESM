@@ -1,5 +1,5 @@
 [![Github Version](https://img.shields.io/badge/devel-0.1-red.svg)](https://github.com/FlavienCollart/ESMTest)
-[![Last Commit](https://img.shields.io/github/last-commit/biomodhub/biomod2.svg)](https://github.com/FlavienCollart/ESMTest/commits/master)
+[![Last Commit](https://img.shields.io/github/last-commit/FlavienCollart/ESMTest.svg)](https://github.com/FlavienCollart/ESMTest/commits/master)
 
 <!-- [![Download](http://cranlogs.r-pkg.org/badges/grand-total/biomod2?color=yellow)](https://cran.r-project.org/package=segclust2d) -->
 <!-- 
