@@ -16,6 +16,7 @@
 ##  Authors:
 ##          Flavien Collart based on the previous code written by Frank Breiner with the contributions of 
 ##          Flavien Collart
+#' @export
 #################################################################################################################################################
 
 
