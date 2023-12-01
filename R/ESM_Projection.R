@@ -58,7 +58,9 @@ ESM_Projection <- function(ESM.Mod,
   }
   combinations <- combinations[,which.biva]
   used.env <- unique(c(combinations[1,],combinations[2,]))
-
+  if("MAXNET" %in% models){
+    require(maxnet)
+  }
   if(is.data.frame(new.env)){
     if(sum(colnames(new.env) %in% used.env) != length(used.env) ){
       stop("new.env need to have the same variable names as used in ESM_Modeling")
