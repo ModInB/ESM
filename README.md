@@ -39,5 +39,7 @@ library(devtools)
 devtools::install_github("biomodhub/biomod2", dependencies = TRUE)
 ```
 ### <i class="fas fa-tools"></i> Information
+
 <br\>
+
 New version of the functions in the ecospat package to remove dependencies with biomod2.
