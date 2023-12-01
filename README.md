@@ -17,7 +17,7 @@ badger::badge_github_version("FlavienCollart/ESMTest", "blue")
 
 ### <i class="fas fa-tools"></i> Installation
 
-<b><br/>
+<br/>
 
 - **Development version** [![v](https://img.shields.io/badge/dev%20version-0.1-orange.svg)](https://github.com/FlavienCollart/ESMTest) from [FlavienCollart](https://github.com/FlavienCollart/ESMTest) :
 
@@ -25,9 +25,9 @@ badger::badge_github_version("FlavienCollart/ESMTest", "blue")
 library(devtools)
 devtools::install_github("FlavienCollart/ESMTest", dependencies = TRUE)
 ```
-<b>
+
 ### <i class="fas fa-tools"></i> Information
 
-<br\>
+<br/>
 
 New version of the functions in the ecospat package to remove dependencies with biomod2.
