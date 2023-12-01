@@ -16,7 +16,7 @@ ESM_Ensemble.Modeling(ESM.Mod,
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{ESM.Mod}{
-The object returned by ESM_Modeling()
+The object returned by \code{ESM_Modeling()}
 }
   \item{weighting.score}{
 \code{character}. An evaluation score used to weight single models to build ensembles:"AUC","MaxTSS","Boyce" or,"SomersD".

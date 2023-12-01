@@ -116,7 +116,7 @@ Flavien Collart \email{flaviencollart@hotmail.com} based on the previous code wr
 
 \seealso{
 \code{\link[ESM]{ESM_Projection}}, \code{\link[ESM]{ESM_Ensemble.Modeling}},   \code{\link[ESM]{ESM_Ensemble.Projection}}, \code{\link[ESM]{ESM_Pooling.Evaluation}},
-\code{\link[ESM]{ESM_threshold}},\code{\link[ESM]{ESM_Variable.Contributions}}, \code{\link[ESM]{ESM_Response.Plot}}
+\code{\link[ESM]{ESM_Threshold}},\code{\link[ESM]{ESM_Variable.Contributions}}, \code{\link[ESM]{ESM_Response.Plot}}
 }
 
 \examples{

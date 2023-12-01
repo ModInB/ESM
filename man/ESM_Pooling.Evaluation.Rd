@@ -44,11 +44,6 @@ Collart, F., Hedenas, L., Broennimann, O., Guisan, A. and Vanderpoorten, A. 2021
 \author{
 Flavien Collart \email{flaviencollart@hotmail.com} with contributions of Olivier Broennimann \email{olivier.broennimann@unil.ch}
 }
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
 \code{\link[ESM]{ESM_Ensemble.Modeling}}, \code{\link[ESM]{ESM_Modeling}}
