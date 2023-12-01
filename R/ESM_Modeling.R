@@ -357,10 +357,9 @@ ESM.CreatingDataSplitTable <- function(resp,
   return(calib.Lines) 
 }
 
-### Functions to generate the bivariate models. .doModeling and .makeGLMFormula have to be inside .bivaModeling to avoid issues for parallel job
+
 ## .bivaModeling allow to run the functions .doModeling to model each run of a bivariate models
-## .doModeling generates the bivariate models
-## .makeGLMFormula allows to generate the formula for GLM to allow linear, quadratic or polynomial terms (and for GBM)
+
 
 .bivaModeling <- function(x,
                           resp,
@@ -384,6 +383,7 @@ ESM.CreatingDataSplitTable <- function(resp,
 
 
 ##################################################################################################
+## .doModeling generates the bivariate models
 
 .doModeling <- function(x,
                         resp,
@@ -604,7 +604,7 @@ ESM.CreatingDataSplitTable <- function(resp,
     }
     return(predFin)
 }
-
+## .makeGLMFormula allows to generate the formula for GLM to allow linear, quadratic or polynomial terms (and for GBM)
 .makeGLMFormula <- function(env.var = env.var,model.option){
   
   formula <- paste0("resp~", paste0(colnames(env.var),collapse = "+"))
