@@ -25,12 +25,13 @@ badger::badge_github_version("FlavienCollart/ESMTest", "orange")
 library(devtools)
 devtools::install_github("FlavienCollart/ESMTest", dependencies = TRUE)
 ```
-<br/>
+<br/><br/>
 ### Information
 <br/>
 
 New version of the functions in the ecospat package to remove dependencies with biomod2.
 <br/>
+
 ### References
 <br/>
   - Breiner F.T., A. Guisan, A. Bergamini and M.P. Nobis. 2015. Overcoming limitations of modelling rare species by using ensembles of small models. Methods in Ecology and Evolution, 6,1210-1218.<br/>
