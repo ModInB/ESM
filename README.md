@@ -23,7 +23,7 @@ badger::badge_github_version("FlavienCollart/ESMTest", "blue")
 
 ```R
 library(devtools)
-devtools::install_github("biomodhub/biomod2", dependencies = TRUE)
+devtools::install_github("FlavienCollart/ESMTest", dependencies = TRUE)
 ```
 ### <i class="fas fa-tools"></i> Information
 
