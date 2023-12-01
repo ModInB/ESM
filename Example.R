@@ -1,14 +1,5 @@
 library(ecospat)
 library(terra)
-library(maxnet) ## Otherwise the predict function will not work
-
-source("R/ESM_Modeling.R")
-source("R/ESM_Models.options.R")
-source("R/ESM_EnsembleModeling.R")
-source("R/ESM_Projection.R")
-source("R/ESM_Evaluation.R")
-source("R/ESM_EnsembleProjection.R")
-
 # Loading test data
 data(ecospat.testNiche.inv)
 inv <- ecospat.testNiche.inv
@@ -87,7 +78,7 @@ Ens.proj <- ESM_Ensemble.Projection(ESM.proj = proj,
                                     save.obj = TRUE) #if TRUE the maps or the data.frame will be saved
 
 ### thresholds to produce binary maps
-my.ESM_thresholds <- ESM_threshold(my.ESM_EF)
+my.ESM_thresholds <- ESM_Threshold(my.ESM_EF)
 
 ## get the variable contributions of ESMs
 ESM_Variable.Contributions(my.ESM,my.ESM_EF) 

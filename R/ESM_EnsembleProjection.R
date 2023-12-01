@@ -59,6 +59,7 @@ ESM_Ensemble.Projection <- function(ESM.proj,
       to.select <- grep(paste0(".",models[j]),names.proj,fixed = TRUE)
       algo.proj <- mods[,to.select]
       w <- weights.algo[models[j],sub(paste0(".",models[j]),"",names.proj[to.select],fixed = TRUE)] ##Here make sure of that the order is the same between weights and projections
+      w[is.na(w)] = 0
       algo.proj <- algo.proj[,w>0]
       w <- w[w>0]
       ## Make the ensemble for each algo
@@ -92,9 +93,10 @@ ESM_Ensemble.Projection <- function(ESM.proj,
       
       ## Projections and weights selection
       to.select <- grep(paste0(".",models[j]),names.proj,fixed = TRUE)
-      algo.proj <- subset(mods,to.select)
+      algo.proj <- terra::subset(mods,to.select)
       w <- weights.algo[models[j],sub(paste0(".",models[j]),"",names.proj[to.select],fixed = TRUE)]##Here make sure of that the order is the same between weights and projections
-      algo.proj <- subset(algo.proj,w>0) ## Remove the projections where the weights are equal or lower than 0
+      w[is.na(w)] = 0
+      algo.proj <- terra::subset(algo.proj,w>0) ## Remove the projections where the weights are equal or lower than 0
       w <- w[w>0] ## Remove the unwanted weights
       
       ## Make the ensemble for each algo

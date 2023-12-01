@@ -178,7 +178,7 @@ Ens.proj <- ESM_Ensemble.Projection(ESM.proj = proj,
                                     save.obj = TRUE)
 
 ### thresholds to produce binary maps
-my.ESM_thresholds <- ESM_threshold(my.ESM_EF)
+my.ESM_thresholds <- ESM_Threshold(my.ESM_EF)
 
 
 ### Binary Projection based on max TSS of calibrated ESMs into new space                                                
