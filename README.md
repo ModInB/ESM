@@ -9,7 +9,7 @@ badger::badge_github_version("FlavienCollart/ESMTest", "blue")
 
 <div align="center">
 <b>------------------------------------------------------------<br/>
-Ensemble of Small Models
+Ensemble of Small Models<br/>
 ------------------------------------------------------------<br/>
 </b>
 </div>
