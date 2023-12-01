@@ -1,4 +1,4 @@
-[![Github Version](https://img.shields.io/badge/dev%20version-0.1-red.svg)](https://github.com/FlavienCollart/ESMTest)
+[![Github Version](https://img.shields.io/badge/dev%20version-0.1-orange.svg)](https://github.com/FlavienCollart/ESMTest)
 [![Last Commit](https://img.shields.io/github/last-commit/FlavienCollart/ESMTest.svg)](https://github.com/FlavienCollart/ESMTest/commits/main)
 
 <!-- [![Download](http://cranlogs.r-pkg.org/badges/grand-total/biomod2?color=yellow)](https://cran.r-project.org/package=segclust2d) -->
@@ -19,7 +19,7 @@ badger::badge_github_version("FlavienCollart/ESMTest", "blue")
 
 <br/>
 
-- **Development version** [![v](https://img.shields.io/badge/devel%20version-4.2--5-blue.svg)](https://github.com/FlavienCollart/ESMTest) from [biomodhub](https://github.com/FlavienCollart/ESMTest) :
+- **Development version** [![v](https://img.shields.io/badge/dev%20version-0.1-orange.svg)](https://github.com/FlavienCollart/ESMTest) from [FlavienCollart](https://github.com/FlavienCollart/ESMTest) :
 
 ```R
 library(devtools)
