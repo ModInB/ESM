@@ -25,6 +25,7 @@ badger::badge_github_version("FlavienCollart/ESMTest", "blue")
 library(devtools)
 devtools::install_github("FlavienCollart/ESMTest", dependencies = TRUE)
 ```
+<b>
 ### <i class="fas fa-tools"></i> Information
 
 <br\>
