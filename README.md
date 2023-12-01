@@ -1,4 +1,4 @@
-[![Github Version](https://img.shields.io/badge/devel%20version-4.2--5-blue.svg)](https://github.com/FlavienCollart/ESMTest)
+[![Github Version](https://img.shields.io/badge/devel-0.1-red.svg)](https://github.com/FlavienCollart/ESMTest)
 [![Last Commit](https://img.shields.io/github/last-commit/biomodhub/biomod2.svg)](https://github.com/FlavienCollart/ESMTest/commits/master)
 
 <!-- [![Download](http://cranlogs.r-pkg.org/badges/grand-total/biomod2?color=yellow)](https://cran.r-project.org/package=segclust2d) -->
@@ -6,19 +6,6 @@
 badge for github version :
 badger::badge_github_version("FlavienCollart/ESMTest", "blue") 
 -->
-
-<style>
-.zoom p {
-width:800px;
-margin-left: auto;
-margin-right: auto;
-}
-.zoom p:hover {
-width:1500px;
-position: relative;
-z-index: 10;
-}
-</style>
 
 <div align="center">
 <b>------------------------------------------------------------<br/>
