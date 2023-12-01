@@ -1,5 +1,6 @@
 #################################################################################################################################################
-## ESM_Ensemble.Modeling: 
+## ESM_Ensemble.Modeling
+#' @export
 ##  Description:
 ##    Ensemble all the bivariate models together for each modeling techniques and then
 ##    make an ensemble between techniques based on a weighted mean. The ensembles are

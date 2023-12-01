@@ -9,6 +9,7 @@
 #############
 ## ESM.Pooling.Evaluation
 ## Perform the pooling evaluation
+#' @export
 ###############
 
 
@@ -91,11 +92,12 @@ ESM_Pooling.Evaluation <- function (ESM.Mod,
 }
 
 #############
-## ESM.threshold
+## ESM_Threshold
 ## Evaluate the fit of the ensemble models and compute thresholds
+#' @export
 ###############
 
-ESM_threshold <- function (ESM.ensembleMod) 
+ESM_Threshold <- function (ESM.ensembleMod) 
 {
   models = ESM.ensembleMod$model.info$models 
   resp <-  ESM.ensembleMod$data$resp
@@ -161,6 +163,7 @@ ESM_threshold <- function (ESM.ensembleMod)
 #############
 ## ESM.Variable.Contributions
 ## Compute the contributions of each predictor
+#' @export
 ###############
 
 ESM_Variable.Contributions <- function (ESM.Mod, 
@@ -194,6 +197,7 @@ ESM_Variable.Contributions <- function (ESM.Mod,
 #############
 ## ESM_Response.Plot
 ## Generates the species response curve for each predictor
+#' @export
 ###############
 
 ESM_Response.Plot <- function (ESM.Mod, 

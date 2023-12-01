@@ -1,0 +1,11 @@
+Package: ESM
+Version: 0.1
+Date: 2023-11-30
+Title: Ensemble of Small Models
+Authors@R: c(person("Flavien", "Collart", role = c("cre","aut","ctb"), email = "flaviencollart@hotmail.com"))
+Author: Flavien Collart [cre, aut, ctb]
+Maintainer: Flavien Collart <flaviencollart@hotmail.com>
+Encoding: UTF-8
+Depends: R (>= 4.0.0)
+Imports: gbm (>= 2.1.1), terra (>= 1.2-5), PresenceAbsence (>= 1.1.9), parallel, maxnet (>= 0.1.4), ecospat (>= 4.0.0), matrixStats (>= 0.53.1)
+RoxygenNote: 7.2.3

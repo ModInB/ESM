@@ -1,3 +1,5 @@
+
+#' @export
 ESM_Models.Options <- function(GLM = NULL,
                                # GAM = NULL,
                                GBM = NULL
