@@ -19,7 +19,7 @@ badger::badge_github_version("FlavienCollart/ESMTest", "orange")
 
 <br/>
 
-- **Development version** [![v](https://img.shields.io/badge/dev%20version-0.1-orange.svg)](https://github.com/FlavienCollart/ESMTest) from [FlavienCollart](https://github.com/FlavienCollart/ESMTest) :
+- **Development version** [![v](https://img.shields.io/badge/dev%20version-0.1-53AA93.svg)](https://github.com/FlavienCollart/ESMTest) from [FlavienCollart](https://github.com/FlavienCollart/ESMTest) :
 
 ```R
 library(devtools)
