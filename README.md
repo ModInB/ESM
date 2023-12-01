@@ -1,5 +1,5 @@
 [![Github Version](https://img.shields.io/badge/dev%20version-0.1-orange.svg)](https://github.com/FlavienCollart/ESMTest)
-[![Last Commit](https://img.shields.io/badge/Last%20Commit-December-color=%23000000.svg)](https://github.com/FlavienCollart/ESMTest/commits/main)
+[![Last Commit](https://img.shields.io/badge/Last%20Commit-December.svg?color=%23000000)](https://github.com/FlavienCollart/ESMTest/commits/main)
 
 <div align="center">
 <b>------------------------------------------------------------<br/>
