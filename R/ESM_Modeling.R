@@ -342,11 +342,11 @@ ESM.CreatingDataSplitTable <- function(resp,
     }
     for(i in 0:(cv.n.blocks-1)){
       if(i < (cv.n.blocks-1)){
-        calib.Lines[pres.Random[(i*size.blockPres+1):(size.blockPres*(i+1))],i] = TRUE
-        calib.Lines[abs.Random[(i*size.blockAbs+1):(size.blockAbs*(i+1))],i] = TRUE
+        calib.Lines[pres.Random[(i*size.blockPres+1):(size.blockPres*(i+1))],(i+1)] = TRUE
+        calib.Lines[abs.Random[(i*size.blockAbs+1):(size.blockAbs*(i+1))],(i+1)] = TRUE
       }else{
-        calib.Lines[pres.Random[(i*size.blockPres+1):length(pres.Random)],i] = TRUE
-        calib.Lines[abs.Random[(i*size.blockAbs+1):length(abs.Random)],i] = TRUE
+        calib.Lines[pres.Random[(i*size.blockPres+1):length(pres.Random)],(i+1)] = TRUE
+        calib.Lines[abs.Random[(i*size.blockAbs+1):length(abs.Random)],(i+1)] = TRUE
       }
       
     }
