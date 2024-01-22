@@ -221,9 +221,10 @@ ESM_Response.Plot <- function (ESM.Mod,
                                                         min.data[i])/999)
     proj.fixed <- ESM_Projection(ESM.Mod,
                                  new.env = data.fixed,
-                                 name.env = "data.fixed")
+                                 name.env = paste0("data.fixed",i))
     proj.fixed.list[[i]] <- ESM_Ensemble.Projection(ESM.proj = proj.fixed,
-                                                    ESM.ensembleMod = ESM.ensembleMod)
+                                                    ESM.ensembleMod = ESM.ensembleMod,
+                                                    save.obj = FALSE)
     proj.fixed.list[[i]] <- cbind(data.fixed[, i], proj.fixed.list[[i]])
   }
   names(proj.fixed.list) <- colnames(data)
@@ -270,7 +271,7 @@ ESM_Response.Plot <- function (ESM.Mod,
     }
   }
   
-  unlink(paste0("ESM.output_", ESM.Mod$data$sp.name,"/data.fixed"), recursive = TRUE)
+  unlink(paste0("ESM.output_", ESM.Mod$data$sp.name,"/data.fixed",1:ncol(data)), recursive = TRUE)
   
   return(proj.fixed.list = proj.fixed.list)
 }
@@ -321,6 +322,9 @@ ESM_Response.Plot <- function (ESM.Mod,
                           .evaluationScores(Pred = biva[!(cv.split.table[,j]),ToDo],
                                             resp = resp[!(cv.split.table[,j])]))
         rownames(eval)[nrow(eval)] = ToDo
+    }
+    if(nrow(eval)<=1){
+      next
     }
     full = apply(eval,2,mean,na.rm=T)
     eval <- rbind(eval,full)

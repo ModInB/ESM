@@ -269,11 +269,16 @@ ESM_Modeling <- function( resp,
   failed.mod <- do.call(cbind, biva.mods)
   mod.pred.NAs <- apply(failed.mod, 2, anyNA)
   failed.mod <- colnames(failed.mod)[mod.pred.NAs]
+  failed.mod.FULL <- failed.mod[grep(".Full.",failed.mod,fixed = T)]
+  failed.mod.FULL <- sub(".Full.*","",failed.mod.FULL)
+  biva.mods2 <- biva.mods[which(!(names(biva.mods) %in%failed.mod.FULL))]
   
   cat("\n############### Start evaluations ###############")
   
+  which.biva <- which.biva[!(names(biva.mods) %in%failed.mod.FULL)] # removed the failed ones
+  
   ## Evaluation
-  biva.eval <- lapply(biva.mods,.bivaEvaluation,
+  biva.eval <- lapply(biva.mods2,.bivaEvaluation,
                       resp=resp, models=models,
                       cv.split.table=cv.split.table)
   
@@ -342,11 +347,11 @@ ESM.CreatingDataSplitTable <- function(resp,
     }
     for(i in 0:(cv.n.blocks-1)){
       if(i < (cv.n.blocks-1)){
-        calib.Lines[pres.Random[(i*size.blockPres+1):(size.blockPres*(i+1))],i] = TRUE
-        calib.Lines[abs.Random[(i*size.blockAbs+1):(size.blockAbs*(i+1))],i] = TRUE
+        calib.Lines[pres.Random[(i*size.blockPres+1):(size.blockPres*(i+1))],(i+1)] = TRUE
+        calib.Lines[abs.Random[(i*size.blockAbs+1):(size.blockAbs*(i+1))],(i+1)] = TRUE
       }else{
-        calib.Lines[pres.Random[(i*size.blockPres+1):length(pres.Random)],i] = TRUE
-        calib.Lines[abs.Random[(i*size.blockAbs+1):length(abs.Random)],i] = TRUE
+        calib.Lines[pres.Random[(i*size.blockPres+1):length(pres.Random)],(i+1)] = TRUE
+        calib.Lines[abs.Random[(i*size.blockAbs+1):length(abs.Random)],(i+1)] = TRUE
       }
       
     }
@@ -357,10 +362,9 @@ ESM.CreatingDataSplitTable <- function(resp,
   return(calib.Lines) 
 }
 
-### Functions to generate the bivariate models. .doModeling and .makeGLMFormula have to be inside .bivaModeling to avoid issues for parallel job
+
 ## .bivaModeling allow to run the functions .doModeling to model each run of a bivariate models
-## .doModeling generates the bivariate models
-## .makeGLMFormula allows to generate the formula for GLM to allow linear, quadratic or polynomial terms (and for GBM)
+
 
 .bivaModeling <- function(x,
                           resp,
@@ -384,6 +388,7 @@ ESM.CreatingDataSplitTable <- function(resp,
 
 
 ##################################################################################################
+## .doModeling generates the bivariate models
 
 .doModeling <- function(x,
                         resp,
@@ -604,7 +609,7 @@ ESM.CreatingDataSplitTable <- function(resp,
     }
     return(predFin)
 }
-
+## .makeGLMFormula allows to generate the formula for GLM to allow linear, quadratic or polynomial terms (and for GBM)
 .makeGLMFormula <- function(env.var = env.var,model.option){
   
   formula <- paste0("resp~", paste0(colnames(env.var),collapse = "+"))

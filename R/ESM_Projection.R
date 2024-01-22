@@ -31,7 +31,8 @@ ESM_Projection <- function(ESM.Mod,
                            new.env,
                            name.env,
                            parallel = FALSE,
-                           n.cores = 1){
+                           n.cores = 1,
+                           save.obj = T){
   iniwd <- getwd()
   on.exit(setwd(iniwd))
   setwd(ESM.Mod$model.info$biva.path)
@@ -111,10 +112,10 @@ ESM_Projection <- function(ESM.Mod,
 
 ## Function projecting a model onto a new environment.
 .IndividualProj <- function(x,new.env,models,name.env,parallel){
-  cat(paste("\n Projections of bivariate model:",x[1],x[2]))
+  if(!is.data.frame(new.env)){
+    cat(paste("\n Projections of bivariate model:",x[1],x[2]))}
   done <- c()
   for(j in 1:length(models)){
-    cat(paste0("\n\t",models[j]))
     mod <- paste("ESM_Full",x[1],x[2],models[j],"model.out",sep="_")
     if(file.exists(mod)){
       mod <- get(load(mod))
@@ -131,6 +132,8 @@ ESM_Projection <- function(ESM.Mod,
         write.table(pred,paste0("../",name.env,"/ESM_",x[1],"_",x[2],"_",models[j],".txt"),sep="\t")
         
       }else{
+        cat(paste0("\n\t",models[j]))
+        
         if(parallel){
           new.env <- terra::unwrap(new.env)
         }
