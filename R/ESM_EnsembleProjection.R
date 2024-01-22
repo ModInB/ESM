@@ -52,7 +52,7 @@ ESM_Ensemble.Projection <- function(ESM.proj,
     names.proj <- sub(".txt","",names.proj,fixed = TRUE)
     names.proj <- gsub("_",".",names.proj,fixed = TRUE)
     colnames(mods) = names.proj
-    
+    colnames(weights.algo) = gsub("_",".",colnames(weights.algo),fixed = TRUE)
     for(j in 1: length(models)){
       
       ## Projections and weights selection
@@ -88,7 +88,7 @@ ESM_Ensemble.Projection <- function(ESM.proj,
     names.proj <- sub(paste0(name.env,"/ESM_"),"",as.character(projections),fixed = TRUE)
     names.proj <- sub(".tif","",names.proj,fixed = TRUE)
     names.proj <- gsub("_",".",names.proj,fixed = TRUE) ## To make the selections
-
+    colnames(weights.algo) = gsub("_",".",colnames(weights.algo),fixed = TRUE)
     for(j in 1: length(models)){
       
       ## Projections and weights selection
