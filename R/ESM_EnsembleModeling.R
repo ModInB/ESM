@@ -65,6 +65,8 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
   models <- ESM.Mod$model.info$models
   biva.eval <- ESM.Mod$biva.evaluations
   biva.pred <- do.call(cbind,ESM.Mod$biva.predictions)
+  failed.mod <- ESM.Mod$model.info$failed.mod
+  biva.pred <- biva.pred[,which(!(colnames(biva.pred) %in%failed.mod))] ## Remove Failed Models 
   cv.split.table <-ESM.Mod$cv.split.table
   run.names <- colnames(cv.split.table)
   resp <- ESM.Mod$data$resp

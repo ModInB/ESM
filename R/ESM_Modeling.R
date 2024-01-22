@@ -269,11 +269,16 @@ ESM_Modeling <- function( resp,
   failed.mod <- do.call(cbind, biva.mods)
   mod.pred.NAs <- apply(failed.mod, 2, anyNA)
   failed.mod <- colnames(failed.mod)[mod.pred.NAs]
+  failed.mod.FULL <- failed.mod[grep(".Full.",failed.mod,fixed = T)]
+  failed.mod.FULL <- sub(".Full.*","",failed.mod.FULL)
+  biva.mods2 <- biva.mods[which(!(names(biva.mods) %in%failed.mod.FULL))]
   
   cat("\n############### Start evaluations ###############")
   
+  which.biva <- which.biva[!(names(biva.mods) %in%failed.mod.FULL)] # removed the failed ones
+  
   ## Evaluation
-  biva.eval <- lapply(biva.mods,.bivaEvaluation,
+  biva.eval <- lapply(biva.mods2,.bivaEvaluation,
                       resp=resp, models=models,
                       cv.split.table=cv.split.table)
   

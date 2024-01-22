@@ -31,6 +31,9 @@ a \code{character} which will be used to generate a folder to save the individua
   \item{n.cores}{
 \code{integer}. Number of CPU cores used to make the models.
 }
+\item{save.obj}{
+  \code{logical}. Allows or not the final output.
+}
 }
 \value{
    a \code{list} containing: 

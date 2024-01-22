@@ -31,7 +31,8 @@ ESM_Projection <- function(ESM.Mod,
                            new.env,
                            name.env,
                            parallel = FALSE,
-                           n.cores = 1){
+                           n.cores = 1,
+                           save.obj = T){
   iniwd <- getwd()
   on.exit(setwd(iniwd))
   setwd(ESM.Mod$model.info$biva.path)
