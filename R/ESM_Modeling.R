@@ -615,7 +615,7 @@ ESM.CreatingDataSplitTable <- function(resp,
   formula <- paste0("resp~", paste0(colnames(env.var),collapse = "+"))
   
   if(model.option$type == "quadratic" | model.option$type == "polynomial"){
-    IsNum <- apply(env.var,2,is.numeric)
+    IsNum <- sapply(env.var,2,is.numeric)
     Topaste <- paste0("I(",colnames(env.var)[IsNum],"^2)",collapse="+")
     formula <- paste(formula,Topaste,sep = "+")
     if(model.option$type == "polynomial"){

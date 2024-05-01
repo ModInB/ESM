@@ -138,10 +138,9 @@ ESM_Projection <- function(ESM.Mod,
           new.env <- terra::unwrap(new.env)
         }
         if(models[j]=="GLM"){
-          pred <- round(1000 * terra::predict(new.env, mod, type = "response"))
+          pred <- round(1000 * terra::predict(new.env, mod, type = "response",na.rm=T))
         }else if(models[j]=="GBM"){
-          pred <- invisible(round(1000 * terra::predict(new.env,mod, fun = gbm::predict.gbm, type = "response"))) ##invisible not working
-          pred <- terra::mask(pred,subset(new.env,1)) ## was putting values where both variables had na
+          pred <- invisible(round(1000 * terra::predict(new.env,mod, fun = gbm::predict.gbm, type = "response",na.rm=T))) ##need to test again
         }else{
           pred <- invisible(round(1000 * terra::predict(new.env,mod, type = "cloglog",clamp=FALSE,na.rm=T))) ##invisible not working
         }
