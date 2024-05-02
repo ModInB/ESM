@@ -337,10 +337,12 @@ ESM_Response.Plot <- function (ESM.Mod,
                    nameBiva, value = TRUE)
       
       if(anyNA(biva[!(cv.split.table[,ncol(cv.split.table)]),ToDo])){
-        next()
+        full = NA
+      }else{
+        full =  .evaluationScores(Pred = biva[!(cv.split.table[,ncol(cv.split.table)]),ToDo],
+                                  resp = resp[!(cv.split.table[,ncol(cv.split.table)])])
       }
-      full =  .evaluationScores(Pred = biva[!(cv.split.table[,ncol(cv.split.table)]),ToDo],
-                        resp = resp[!(cv.split.table[,ncol(cv.split.table)])])
+      
     }
     
     eval <- rbind(eval,full)

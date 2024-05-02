@@ -17,7 +17,7 @@ resp <- ecospat.testData$Veronica_alpina
 
 ### Formating the data with the BIOMOD_FormatingData() function from the package biomod2
 sp.name = "bc"
-models = c("MAXNET","GLM")
+models = c("ANN","GLM")
 models.options = ESM_Models.Options(GLM=list(test="none",
                                              type="quadratic"))
 prevalence = 0.5
@@ -42,18 +42,18 @@ my.ESM <- ESM_Modeling(resp = resp,
                        cv.ratio = 0.7,
                        cv.split.table = NULL,
                        which.biva = NULL,
-                       parallel = T,
+                       parallel = F,
                        n.cores = 5,
                        modeling.id = as.character(format(Sys.time(), "%s")),
                        pathToSaveObject = getwd(),
-                       save.models = F,
-                       save.obj = F)
+                       save.models = T,
+                       save.obj = T)
 my.ESM$biva.evaluations
 my.ESM$biva.calibration
 
 ### Ensemble models
 my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
-                                  weighting.score=c("MaxTSS"),
+                                  weighting.score=c("SomersD"),
                                   threshold=0,
                                   save.obj = F)
 my.ESM_EF$evaluations
@@ -61,7 +61,7 @@ my.ESM_EF$evaluations
 ### Evaluation of the ensemble models based on the pooling procedure 
 eval <- ESM_Pooling.Evaluation(ESM.Mod = my.ESM,
                                ESM.ensembleMod = my.ESM_EF,
-                               EachSmallModels = F)
+                               EachSmallModels = T)
 
 eval$ESM.evaluations
 eval$ESM.evaluations.bivariate.models
@@ -71,7 +71,7 @@ eval$ESM.evaluations.bivariate.models
 proj <- ESM_Projection(ESM.Mod = my.ESM,
                        new.env = env,
                        name.env = "current",
-                       parallel = T,
+                       parallel = F,
                        n.cores = 5,
                        save.obj = F)
 

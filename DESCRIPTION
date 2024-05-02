@@ -16,5 +16,5 @@ Author: Flavien Collart [cre, aut, ctb],
 Maintainer: Flavien Collart <flaviencollart@hotmail.com>
 Encoding: UTF-8
 Depends: R (>= 4.0.0)
-Imports: gbm (>= 2.1.1), terra (>= 1.2-5), PresenceAbsence (>= 1.1.9), parallel, maxnet (>= 0.1.4), ecospat (>= 4.0.0), matrixStats (>= 0.53.1)
+Imports: gbm (>= 2.1.1), terra (>= 1.2-5), PresenceAbsence (>= 1.1.9), parallel, maxnet (>= 0.1.4), ecospat (>= 4.0.0), matrixStats (>= 0.53.1), nnet (>= 7.3-19)
 RoxygenNote: 7.2.3

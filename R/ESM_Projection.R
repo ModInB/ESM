@@ -59,9 +59,7 @@ ESM_Projection <- function(ESM.Mod,
   }
   combinations <- combinations[,which.biva]
   used.env <- unique(c(combinations[1,],combinations[2,]))
-  if("MAXNET" %in% models){
-    require(maxnet)
-  }
+
   if(is.data.frame(new.env)){
     if(sum(colnames(new.env) %in% used.env) != length(used.env) ){
       stop("new.env need to have the same variable names as used in ESM_Modeling")
@@ -125,8 +123,12 @@ ESM_Projection <- function(ESM.Mod,
           
         }else if(models[j]=="GBM"){
           pred <- invisible(round(1000 *gbm::predict.gbm(mod,newdata = new.env, type = "response")))
+        }else if(models[j]=="MAXNET"){
+          require(maxnet)
+          pred <- invisible(round(1000 * predict(mod, newdata = new.env, type = "cloglog",clamp=FALSE))) ##invisible not working
         }else{
-          pred <- invisible(round(1000 * predict(mod, newdata= new.env, type = "cloglog",clamp=FALSE))) ##invisible not working
+          require(nnet)
+          pred <- invisible(round(1000 * predict(mod, newdata = new.env, type = "raw")))
         }
         done <- c(done,paste0(name.env,"/ESM_",x[1],"_",x[2],"_",models[j],".txt"))
         write.table(pred,paste0("../",name.env,"/ESM_",x[1],"_",x[2],"_",models[j],".txt"),sep="\t")
@@ -141,9 +143,12 @@ ESM_Projection <- function(ESM.Mod,
           pred <- round(1000 * terra::predict(new.env, mod, type = "response",na.rm=T))
         }else if(models[j]=="GBM"){
           pred <- invisible(round(1000 * terra::predict(new.env,mod, fun = gbm::predict.gbm, type = "response",na.rm=T))) ##need to test again
-        }else{
+        }else if(models[j]=="MAXNET"){
           require(maxnet)
           pred <- invisible(round(1000 * terra::predict(new.env,mod, fun = predict, type = "cloglog",clamp=FALSE,na.rm=T))) ##invisible not working
+        }else{
+          require(nnet)
+          pred <- invisible(round(1000 * terra::predict(new.env,mod, fun = predict, type = "raw",na.rm=T))) ##invisible not working
         }
         done <- c(done,paste0(name.env,"/ESM_",x[1],"_",x[2],"_",models[j],".tif"))
         terra::writeRaster(pred,paste0("../",name.env,"/ESM_",x[1],"_",x[2],"_",models[j],".tif"),

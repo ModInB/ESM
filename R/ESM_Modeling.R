@@ -120,8 +120,8 @@ ESM_Modeling <- function( resp,
   #########################################
   ## Check model names 
   
-  if(any(!(models  %in% c("GLM","GBM","MAXNET")))){
-    stop("models should be = to GLM, GBM, and/or MAXNET")
+  if(any(!(models  %in% c("GLM","GBM","MAXNET","ANN")))){
+    stop("models should be = to ANN, GLM, GBM, and/or MAXNET")
   }
   
   #######################################
@@ -267,24 +267,26 @@ ESM_Modeling <- function( resp,
   
   
   cat("\n##################### Done #####################")
-  
+  #### Not correct here for the filtering 
+  # Need to remove those with NA's + not changing across points 
+  ## ANN cool to test that
   failed.mod <- do.call(cbind, biva.mods)
   mod.pred.NAs <- apply(failed.mod, 2, anyNA)
   failed.mod <- colnames(failed.mod)[mod.pred.NAs]
   failed.mod.FULL <- failed.mod[grep(".Full.",failed.mod,fixed = T)]
   failed.mod.FULL <- sub(".Full.*","",failed.mod.FULL)
-  biva.mods2 <- biva.mods[which(!(names(biva.mods) %in%failed.mod.FULL))]
+  biva.mods2 <- biva.mods[which(!(names(biva.mods) %in% failed.mod.FULL))]
   which.biva <- which.biva[!(names(biva.mods) %in% failed.mod.FULL)] # removed the failed ones
   cat("\n############### Start evaluations ###############")
   
   
   ## Evaluation
-  biva.eval <- lapply(biva.mods2,.bivaEvaluation,
+  biva.eval <- lapply(biva.mods,.bivaEvaluation,
                       resp=resp, models=models,
                       cv.split.table=cv.split.table,
                       validation = TRUE)
   
-  biva.calib <- lapply(biva.mods2,.bivaEvaluation,
+  biva.calib <- lapply(biva.mods,.bivaEvaluation,
                        resp=resp, models=models,
                        cv.split.table=!(cv.split.table),
                        validation = FALSE)
@@ -424,6 +426,8 @@ ESM_Modeling <- function( resp,
   } 
   data.maxnet <- data
   data$w = w
+  data.ann <- data
+  data.ann$resp <- as.factor(data.ann$resp)
     for(j in 1: length(models)){
       err <- FALSE
       
@@ -581,6 +585,7 @@ ESM_Modeling <- function( resp,
                               sep="_"))
         }
       }
+      
       if(models[j] == "MAXNET"){
         cat(paste("\nMAXNET", nameRun,"\n"))
         tryCatch(expr={mod <- maxnet::maxnet(p = data.maxnet$resp,data = data.maxnet[,-1])}, error=function(e){
@@ -610,6 +615,48 @@ ESM_Modeling <- function( resp,
                               sep="_"))
         }
       }
+      
+      if(models[j] == "ANN"){
+        cat(paste("\nANN", nameRun,"\n"))
+        formula <- .makeGLMFormula(env.var,
+                                   model.option=list(type="linear"))
+        
+        tryCatch(expr={mod <- nnet::nnet(formula,data = data.ann,
+                                         size = 8,
+                                         decay = 0.001,
+                                         rang = 0.1,
+                                         maxit = 200, 
+                                         trace= FALSE)}, 
+                 error=function(e){
+              cat(paste("\n model",models[j],nameRun,"failed"))
+              err <<-TRUE
+        })
+        
+        if(err){
+          pred <- as.data.frame(rep(NA,nrow(env.var)))
+          colnames(pred) = "ANN" 
+        }else{
+          pred <- predict(mod,newdata = env.var,type="raw")
+          colnames(pred) = "ANN" 
+        
+        }
+        
+        if(save.obj & !(err)){
+          save(mod,file=paste("ESM",nameRun,
+                              colnames(env.var)[1],
+                              colnames(env.var)[2],
+                              models[j],"model.out",
+                              sep="_"))
+        }else if(nameRun == "Full"& !(err)){
+          save(mod,file=paste("ESM",nameRun,
+                              colnames(env.var)[1],
+                              colnames(env.var)[2],
+                              models[j],"model.out",
+                              sep="_"))
+        }
+        
+      }
+      
       if(j == 1){
         predFin <- pred
         
