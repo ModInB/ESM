@@ -326,7 +326,9 @@ ESM_Response.Plot <- function (ESM.Mod,
     if(nrow(eval)<=1){
       next
     }
-    full = apply(eval,2,mean,na.rm=T)
+    eval2 <- eval
+    eval2[eval2 == (-Inf)] <- 0
+    full = apply(eval2,2,mean,na.rm=T)
     eval <- rbind(eval,full)
     ToDo <- grep(paste0(colnames(cv.split.table)[j+1],
                         ".",models[i]), 

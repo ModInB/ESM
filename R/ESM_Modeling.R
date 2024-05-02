@@ -184,7 +184,7 @@ ESM_Modeling <- function( resp,
   }
   
   if(is.null(cv.split.table)){
-    cv.split.table <- ESM.CreatingDataSplitTable(resp = resp, 
+    cv.split.table <- .ESM.CreatingDataSplitTable(resp = resp, 
                                                  cv.rep = cv.rep,
                                                  cv.method = cv.method,
                                                  cv.ratio = cv.ratio,
@@ -311,8 +311,10 @@ ESM_Modeling <- function( resp,
 ##
 ## Functions used inside ESM_Modeling
 
+######
+
 #Function to generate the argument DataSplitTable in the function ecospat.ESM.Modeling                                                                        
-ESM.CreatingDataSplitTable <- function(resp,
+.ESM.CreatingDataSplitTable <- function(resp,
                                        cv.method,
                                        cv.rep = NULL,
                                        cv.ratio = NULL,
@@ -615,7 +617,7 @@ ESM.CreatingDataSplitTable <- function(resp,
   formula <- paste0("resp~", paste0(colnames(env.var),collapse = "+"))
   
   if(model.option$type == "quadratic" | model.option$type == "polynomial"){
-    IsNum <- sapply(env.var,2,is.numeric)
+    IsNum <- sapply(env.var,is.numeric)
     Topaste <- paste0("I(",colnames(env.var)[IsNum],"^2)",collapse="+")
     formula <- paste(formula,Topaste,sep = "+")
     if(model.option$type == "polynomial"){

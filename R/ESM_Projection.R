@@ -142,7 +142,8 @@ ESM_Projection <- function(ESM.Mod,
         }else if(models[j]=="GBM"){
           pred <- invisible(round(1000 * terra::predict(new.env,mod, fun = gbm::predict.gbm, type = "response",na.rm=T))) ##need to test again
         }else{
-          pred <- invisible(round(1000 * terra::predict(new.env,mod, type = "cloglog",clamp=FALSE,na.rm=T))) ##invisible not working
+          require(maxnet)
+          pred <- invisible(round(1000 * terra::predict(new.env,mod, fun = predict, type = "cloglog",clamp=FALSE,na.rm=T))) ##invisible not working
         }
         done <- c(done,paste0(name.env,"/ESM_",x[1],"_",x[2],"_",models[j],".tif"))
         terra::writeRaster(pred,paste0("../",name.env,"/ESM_",x[1],"_",x[2],"_",models[j],".tif"),

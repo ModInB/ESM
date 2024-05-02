@@ -1,5 +1,6 @@
 library(ecospat)
 library(terra)
+library(ESM)
 # Loading test data
 data(ecospat.testNiche.inv)
 inv <- ecospat.testNiche.inv
@@ -68,7 +69,7 @@ eval$ESM.evaluations.bivariate.models
 proj <- ESM_Projection(ESM.Mod = my.ESM,
                        new.env = env,
                        name.env = "current",
-                       parallel = F,
+                       parallel = T,
                        n.cores = 5)
 
 
