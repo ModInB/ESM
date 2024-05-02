@@ -48,6 +48,7 @@ my.ESM <- ESM_Modeling(resp = resp,
                        pathToSaveObject = getwd(),
                        save.obj = TRUE)
 my.ESM$biva.evaluations
+my.ESM$biva.calibration
 
 ### Ensemble models
 my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,

@@ -95,10 +95,11 @@ The argument which.biva allows to split model runs, e.g. if which.biva is 1:3, o
   \itemize{
    a \code{list} containing: 
    \item{data}: a \code{list} with the object resp, xy, env.var and sp.name. env.var is = to the data supplied in the argument env. If env, was a SpatRaster, it corrsponds to the extracted values of these rasters for the species coordinates.
-   \item{model.info}: a \code{list} of the models used, their options, the combination of bivariate models (which.biva), the modeling ID, the path to the folder where are the stored the models (biva.path), and the failed models
-  \item{cv.split.table}: a \code{matrix} used to train and test models. See explanation of the argument cv.split.table
-  \item{biva.predictions}: a \code{list} of the predictions of all the runs for each bivariate models
-  \item{biva.evaluations}: a \code{list} of the evaluation of each bivariate model runs. The evaluation of the full model correspond to the mean of all the runs. Note that if one of the run has a maxTSS = -Inf, the full will have a maxTSS = -Inf (thus if you used MaxTSS as a weighting score, this bivariate model will be removed for the ensemble).
+   \item{model.info}: a \code{list} of the models used, their options, the combination of bivariate models (which.biva), the modeling ID, the path to the folder where are the stored the models (biva.path), and the failed models.
+  \item{cv.split.table}: a \code{matrix} used to train and test models. See explanation of the argument cv.split.table.
+  \item{biva.predictions}: a \code{list} of the predictions of all the runs for each bivariate models.
+  \item{biva.evaluations}: a \code{list} of the evaluation of each bivariate model runs. The evaluation of the full model correspond to the mean of all the runs. Note that if one of the run has a Boyce = NA, we will consider this has a 0 when averaging.
+    \item{biva.calibration}: a \code{list} of the calibration power of each bivariate model runs including the full model.
   }
 }
 \references{

@@ -304,7 +304,8 @@ ESM_Response.Plot <- function (ESM.Mod,
 .bivaEvaluation <- function(biva,
                             resp,
                             models,
-                            cv.split.table){
+                            cv.split.table, 
+                            validation = TRUE){
   evalBiva <- NULL
   nameBiva <- colnames(biva)
   for(i in 1: length(models)){
@@ -326,9 +327,22 @@ ESM_Response.Plot <- function (ESM.Mod,
     if(nrow(eval)<=1){
       next
     }
-    eval2 <- eval
-    eval2[eval2 == (-Inf)] <- 0
-    full = apply(eval2,2,mean,na.rm=T)
+    if(validation){
+      eval2 <- eval
+      eval2[is.na(eval2[,"Boyce"]),"Boyce"] <- 0
+      full = apply(eval2,2,mean,na.rm=T)
+    }else{
+      ToDo <- grep(paste0(colnames(cv.split.table)[ncol(cv.split.table)],
+                          ".",models[i]), 
+                   nameBiva, value = TRUE)
+      
+      if(anyNA(biva[!(cv.split.table[,ncol(cv.split.table)]),ToDo])){
+        next()
+      }
+      full =  .evaluationScores(Pred = biva[!(cv.split.table[,ncol(cv.split.table)]),ToDo],
+                        resp = resp[!(cv.split.table[,ncol(cv.split.table)])])
+    }
+    
     eval <- rbind(eval,full)
     ToDo <- grep(paste0(colnames(cv.split.table)[j+1],
                         ".",models[i]), 

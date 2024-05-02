@@ -264,6 +264,7 @@ ESM_Modeling <- function( resp,
   
   names(biva.mods) = paste0(combinations[1,],".",combinations[2,])
   
+  
   cat("\n##################### Done #####################")
   
   failed.mod <- do.call(cbind, biva.mods)
@@ -272,16 +273,21 @@ ESM_Modeling <- function( resp,
   failed.mod.FULL <- failed.mod[grep(".Full.",failed.mod,fixed = T)]
   failed.mod.FULL <- sub(".Full.*","",failed.mod.FULL)
   biva.mods2 <- biva.mods[which(!(names(biva.mods) %in%failed.mod.FULL))]
-  
+  which.biva <- which.biva[!(names(biva.mods) %in% failed.mod.FULL)] # removed the failed ones
   cat("\n############### Start evaluations ###############")
   
-  which.biva <- which.biva[!(names(biva.mods) %in%failed.mod.FULL)] # removed the failed ones
   
   ## Evaluation
   biva.eval <- lapply(biva.mods2,.bivaEvaluation,
                       resp=resp, models=models,
-                      cv.split.table=cv.split.table)
+                      cv.split.table=cv.split.table,
+                      validation = TRUE)
   
+  biva.calib <- lapply(biva.mods2,.bivaEvaluation,
+                       resp=resp, models=models,
+                       cv.split.table=!(cv.split.table),
+                       validation = FALSE)
+
   
   obj <- list(data = list(resp = resp,
                           xy = xy,
@@ -295,6 +301,7 @@ ESM_Modeling <- function( resp,
                                 biva.path = newwd),
               cv.split.table = cv.split.table,
               biva.predictions = biva.mods,
+              biva.calibration = biva.calib,
               biva.evaluations = biva.eval
               )
   
