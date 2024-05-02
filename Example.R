@@ -16,7 +16,7 @@ xy <- ecospat.testData[,2:3]
 resp <- ecospat.testData$Veronica_alpina
 
 ### Formating the data with the BIOMOD_FormatingData() function from the package biomod2
-sp.name = "ab"
+sp.name = "bc"
 models = c("MAXNET","GLM")
 models.options = ESM_Models.Options(GLM=list(test="none",
                                              type="quadratic"))
@@ -46,7 +46,8 @@ my.ESM <- ESM_Modeling(resp = resp,
                        n.cores = 5,
                        modeling.id = as.character(format(Sys.time(), "%s")),
                        pathToSaveObject = getwd(),
-                       save.obj = TRUE)
+                       save.models = F,
+                       save.obj = F)
 my.ESM$biva.evaluations
 my.ESM$biva.calibration
 
@@ -54,13 +55,13 @@ my.ESM$biva.calibration
 my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
                                   weighting.score=c("MaxTSS"),
                                   threshold=0,
-                                  save.obj = TRUE)
+                                  save.obj = F)
 my.ESM_EF$evaluations
 
 ### Evaluation of the ensemble models based on the pooling procedure 
 eval <- ESM_Pooling.Evaluation(ESM.Mod = my.ESM,
                                ESM.ensembleMod = my.ESM_EF,
-                               EachSmallModels = TRUE)
+                               EachSmallModels = F)
 
 eval$ESM.evaluations
 eval$ESM.evaluations.bivariate.models
@@ -71,13 +72,14 @@ proj <- ESM_Projection(ESM.Mod = my.ESM,
                        new.env = env,
                        name.env = "current",
                        parallel = T,
-                       n.cores = 5)
+                       n.cores = 5,
+                       save.obj = F)
 
 
 
 Ens.proj <- ESM_Ensemble.Projection(ESM.proj = proj,
                                     ESM.ensembleMod = my.ESM_EF,
-                                    save.obj = TRUE) #if TRUE the maps or the data.frame will be saved
+                                    save.obj = T) #if TRUE the maps or the data.frame will be saved
 
 ### thresholds to produce binary maps
 my.ESM_thresholds <- ESM_Threshold(my.ESM_EF)

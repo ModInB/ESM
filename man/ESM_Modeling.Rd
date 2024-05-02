@@ -80,8 +80,11 @@ ESM_Modeling(resp,
   \item{pathToSaveObject}{
   a \code{character} of a full path to store the objects. \emph{Default}: Takes the value from getwd().
 }
+  \item{save.models}{
+  \code{logical}. Allows or not to save all the bivariate models. If \code{FALSE}, only the full models will be saved to make the projections possible.
+}
   \item{save.obj}{
-  \code{logical}. Allows or not to save each run and the final output. If \code{FALSE}, only the full models will be saved to make the projections possible
+  \code{logical}. Allows or not to save the final output.
 }
 }
 \details{

@@ -90,6 +90,7 @@ ESM_Modeling <- function( resp,
                           n.cores = 1,
                           modeling.id = as.character(format(Sys.time(), "%s")),
                           pathToSaveObject = getwd(),
+                          save.models = TRUE,
                           save.obj = TRUE){
   
   ## Check resp, XY, sp.name and prevalence
@@ -243,14 +244,14 @@ ESM_Modeling <- function( resp,
                        env.var = env.var, models = models,
                        models.options = models.options,
                        cv.split.table = cv.split.table,
-                       prevalence = prevalence, save.obj = save.obj)
+                       prevalence = prevalence, save.obj = save.models)
     parallel::stopCluster(cl)
   }else{
     biva.mods <- apply(combinations, 2, .bivaModeling,resp = resp,
                        env.var = env.var, models = models,
                        models.options = models.options,
                        cv.split.table = cv.split.table,
-                       prevalence = prevalence, save.obj = save.obj,
+                       prevalence = prevalence, save.obj = save.models,
                        simplify = FALSE)
   }
   

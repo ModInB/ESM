@@ -147,7 +147,7 @@ ESM_Projection <- function(ESM.Mod,
         }
         done <- c(done,paste0(name.env,"/ESM_",x[1],"_",x[2],"_",models[j],".tif"))
         terra::writeRaster(pred,paste0("../",name.env,"/ESM_",x[1],"_",x[2],"_",models[j],".tif"),
-                           gdal=c("COMPRESS=DEFLATE","PREDICTOR=2"),overwrite=T)
+                           gdal=c("COMPRESS=DEFLATE","PREDICTOR=2"),datatype="INT2U",overwrite=T)
       }
       
     }else{
