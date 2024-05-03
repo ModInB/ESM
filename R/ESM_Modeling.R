@@ -267,26 +267,23 @@ ESM_Modeling <- function( resp,
   
   
   cat("\n##################### Done #####################")
-  #### Not correct here for the filtering 
-  # Need to remove those with NA's + not changing across points 
-  ## ANN cool to test that
-  failed.mod <- do.call(cbind, biva.mods)
-  mod.pred.NAs <- apply(failed.mod, 2, anyNA)
-  failed.mod <- colnames(failed.mod)[mod.pred.NAs]
-  failed.mod.FULL <- failed.mod[grep(".Full.",failed.mod,fixed = T)]
-  failed.mod.FULL <- sub(".Full.*","",failed.mod.FULL)
-  biva.mods2 <- biva.mods[which(!(names(biva.mods) %in% failed.mod.FULL))]
-  which.biva <- which.biva[!(names(biva.mods) %in% failed.mod.FULL)] # removed the failed ones
+
+  failed.mods <- lapply(biva.mods,.checkFailedMods)
+  biva.mods.filt <- lapply(1:length(biva.mods), .PutNAsFailed, 
+                           biva.mods,failed.mods)
+  names(biva.mods.filt) = names(biva.mods)
+  lapply(1:length(biva.mods), .PrintFailedMods, 
+         biva.mods,failed.mods)
   cat("\n############### Start evaluations ###############")
   
   
   ## Evaluation
-  biva.eval <- lapply(biva.mods,.bivaEvaluation,
+  biva.eval <- lapply(biva.mods.filt,.bivaEvaluation,
                       resp=resp, models=models,
                       cv.split.table=cv.split.table,
-                      validation = TRUE)
+                      validation = TRUE) #If the full Model failed Next
   
-  biva.calib <- lapply(biva.mods,.bivaEvaluation,
+  biva.calib <- lapply(biva.mods.filt,.bivaEvaluation,
                        resp=resp, models=models,
                        cv.split.table=!(cv.split.table),
                        validation = FALSE)
@@ -299,11 +296,11 @@ ESM_Modeling <- function( resp,
               model.info = list(models = models,
                                 models.options = models.options,
                                 which.biva = which.biva,
-                                failed.mod = failed.mod,
+                                failed.mod = failed.mods,
                                 modeling.id = modeling.id,
                                 biva.path = newwd),
               cv.split.table = cv.split.table,
-              biva.predictions = biva.mods,
+              biva.predictions = biva.mods.filt,
               biva.calibration = biva.calib,
               biva.evaluations = biva.eval
               )
@@ -683,4 +680,24 @@ ESM_Modeling <- function( resp,
   
   return(as.formula(formula))
   
+}
+
+### Check Failed Mods
+.checkFailedMods <- function(biva.mod){
+  IsNa <- apply(biva.mod, 2, anyNA)
+  IsFlat <- apply(biva.mod, 2, sd) == 0
+  
+  Failed <- IsNa | IsFlat
+  return(Failed)
+}
+### Transform Failed models into NAs
+.PutNAsFailed <- function(biva,biva.mods,failed.mods){
+  biva.mods[[biva]][failed.mods[[biva]]] = NA
+  return(biva.mods[[biva]])
+}
+### Print Failed Mods
+.PrintFailedMods <- function(biva,biva.mods,failed.mods){
+  if(sum(failed.mods[[biva]])>0){
+    cat(paste("\nFailed Models for combination",names(biva.mods)[biva],":",colnames(biva.mods[[biva]])[failed.mods[[biva]]] ))
+  }
 }

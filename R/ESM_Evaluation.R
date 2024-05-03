@@ -141,7 +141,7 @@ ESM_Threshold <- function (ESM.ensembleMod)
     pos.F <- which(boyce$F.ratio > 1)
     neg.F <- which(boyce$F.ratio <= 1)
     if (max(neg.F) < min(pos.F)) {
-      Boyce.th.max <- EVAL1$Boyce.th.min <- mean(boyce$HS[c(max(neg.F), 
+      Boyce.th.max <- Boyce.th.min <- mean(boyce$HS[c(max(neg.F), 
                                                             min(pos.F))])
     }else {
       Boyce.th.max <- mean(boyce$HS[c(max(neg.F), 
@@ -310,6 +310,7 @@ ESM_Response.Plot <- function (ESM.Mod,
   nameBiva <- colnames(biva)
   for(i in 1: length(models)){
     eval <- NULL
+    
     for(j in 1:(ncol(cv.split.table)-1)){
       
         ToDo <- grep(paste0(colnames(cv.split.table)[j],
@@ -317,20 +318,31 @@ ESM_Response.Plot <- function (ESM.Mod,
                      nameBiva, value = TRUE)
         
         if(anyNA(biva[!(cv.split.table[,j]),ToDo])){
-          next()
-        }
-        eval <- rbind(eval,
-                          .evaluationScores(Pred = biva[!(cv.split.table[,j]),ToDo],
-                                            resp = resp[!(cv.split.table[,j])]))
+          if(j ==1){
+            eval <- NA
+          }else{
+            scores <- NA
+            eval <- rbind(eval,scores)
+          }
+          
+        }else{
+          scores <- .evaluationScores(Pred = biva[!(cv.split.table[,j]),ToDo],
+                                      resp = resp[!(cv.split.table[,j])])
+          eval <- rbind(eval,scores)
+          }
+        
         rownames(eval)[nrow(eval)] = ToDo
     }
-    if(nrow(eval)<=1){
-      next
-    }
     if(validation){
-      eval2 <- eval
-      eval2[is.na(eval2[,"Boyce"]),"Boyce"] <- 0
-      full = apply(eval2,2,mean,na.rm=T)
+      if(anyNA(biva[,paste0("Full.",models[i])])){
+        full = NA
+      }else{
+        eval2 <- eval
+        eval2[is.na(eval2[,"Boyce"]),"Boyce"] <- 0
+        full = apply(eval2,2,mean,na.rm=T)
+      }
+      
+      
     }else{
       ToDo <- grep(paste0(colnames(cv.split.table)[ncol(cv.split.table)],
                           ".",models[i]), 

@@ -40,6 +40,8 @@ ESM_Projection <- function(ESM.Mod,
   models <- ESM.Mod$model.info$models
   which.biva <- ESM.Mod$model.info$which.biva
   env.var <- ESM.Mod$data$env.var
+  biva.pred = ESM.Mod$biva.predictions
+  
   
   #### check new.env
   if(is.matrix(new.env)){
@@ -69,13 +71,13 @@ ESM_Projection <- function(ESM.Mod,
       cl <- parallel::makeCluster(n.cores)
       proj <- parallel::parApply(cl,combinations, 2, .IndividualProj,
                                  new.env = new.env,models = models,
-                                 name.env = name.env)
+                                 name.env = name.env, biva.pred = biva.pred)
       parallel::stopCluster(cl)
       
     }else{
       proj <- apply(combinations, 2, .IndividualProj,
                     new.env = new.env,models = models,
-                    name.env = name.env)
+                    name.env = name.env, biva.pred = biva.pred)
     }
    
   }else{
@@ -88,13 +90,15 @@ ESM_Projection <- function(ESM.Mod,
       cl <- parallel::makeCluster(n.cores)
       proj <- parallel::parApply(cl,combinations, 2, .IndividualProj,
                                  new.env = new.env,models = models,
-                                 name.env = name.env,parallel = parallel)
+                                 name.env = name.env,parallel = parallel, 
+                                 biva.pred = biva.pred)
       parallel::stopCluster(cl)
       
     }else{
       proj <- apply(combinations, 2, .IndividualProj,
                     new.env = new.env,models = models,
-                    name.env = name.env,parallel = parallel)
+                    name.env = name.env,parallel = parallel, 
+                    biva.pred = biva.pred)
     }
   }
   
@@ -109,11 +113,16 @@ ESM_Projection <- function(ESM.Mod,
 }
 
 ## Function projecting a model onto a new environment.
-.IndividualProj <- function(x,new.env,models,name.env,parallel){
+.IndividualProj <- function(x,new.env,models,name.env,parallel, biva.pred){
   if(!is.data.frame(new.env)){
     cat(paste("\n Projections of bivariate model:",x[1],x[2]))}
   done <- c()
   for(j in 1:length(models)){
+    ToSkip <- anyNA(biva.pred[[paste(x[1],x[2], sep=".")]][,paste0("Full.",models[j])])
+    if(ToSkip){
+      cat(paste("\nThe Full model",x[1],x[2],models[j]),"failed and thus won't be projected")
+      next
+    }
     mod <- paste("ESM_Full",x[1],x[2],models[j],"model.out",sep="_")
     if(file.exists(mod)){
       mod <- get(load(mod))

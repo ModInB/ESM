@@ -40,7 +40,7 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
                                  save.obj = TRUE){
   
   ## Check some arguments
-  if (!weighting.score %in% c("AUC", "MaxTSS", "Boyce", 
+  if(!weighting.score %in% c("AUC", "MaxTSS", "Boyce", 
                               "SomersD")) {
     stop("weighting score not supported! Choose one of the following: AUC, MaxTSS, Boyce, or SomersD")
   }
@@ -65,8 +65,7 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
   models <- ESM.Mod$model.info$models
   biva.eval <- ESM.Mod$biva.evaluations
   biva.pred <- do.call(cbind,ESM.Mod$biva.predictions)
-  failed.mod <- ESM.Mod$model.info$failed.mod
-  biva.pred <- biva.pred[,which(!(colnames(biva.pred) %in%failed.mod))] ## Remove Failed Models 
+  failed.mods <- ESM.Mod$model.info$failed.mod
   cv.split.table <-ESM.Mod$cv.split.table
   run.names <- colnames(cv.split.table)
   resp <- ESM.Mod$data$resp

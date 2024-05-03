@@ -42,7 +42,7 @@ ESM_Ensemble.Projection <- function(ESM.proj,
   ##Take the needed objects
   weights.algo <- ESM.ensembleMod$EF.algo$weights.algo
   weights.EF <- ESM.ensembleMod$EF$weights.EF
-  projections <- ESM.proj$projection.path
+  projections <- do.call(c,ESM.proj$projection.path)
   name.env <- ESM.proj$name.env
   
   ## Make the projections

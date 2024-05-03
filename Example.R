@@ -42,7 +42,7 @@ my.ESM <- ESM_Modeling(resp = resp,
                        cv.ratio = 0.7,
                        cv.split.table = NULL,
                        which.biva = NULL,
-                       parallel = F,
+                       parallel = T,
                        n.cores = 5,
                        modeling.id = as.character(format(Sys.time(), "%s")),
                        pathToSaveObject = getwd(),
@@ -71,7 +71,7 @@ eval$ESM.evaluations.bivariate.models
 proj <- ESM_Projection(ESM.Mod = my.ESM,
                        new.env = env,
                        name.env = "current",
-                       parallel = F,
+                       parallel = T,
                        n.cores = 5,
                        save.obj = F)
 
