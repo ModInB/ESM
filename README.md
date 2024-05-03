@@ -21,7 +21,7 @@ devtools::install_github("FlavienCollart/ESMTest", dependencies = TRUE)
 
 ### Information
 
-New version of the functions in the ecospat package to remove dependencies with biomod2.
+New version for the functions in the ecospat package to reduce storage needs (beta version).
 
 
 ### References
