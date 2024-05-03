@@ -1,8 +1,8 @@
 
 #' @export
 ESM_Models.Options <- function(GLM = NULL,
-                               GBM = NULL
-                               ){
+                               GBM = NULL,
+                               ANN = NULL){
   ## Default options
   opt <- list(GLM = list(type = 'quadratic',
                          myFormula = NULL,
@@ -18,7 +18,11 @@ ESM_Models.Options <- function(GLM = NULL,
                          cv.folds = 3,
                          verbose = FALSE,
                          n.cores = NULL
-                          ))
+                          ),
+              ANN = list(size = 8,
+                         decay = 0.001,
+                         rang = 0.1,
+                         maxit = 200))
   
   ### Adapted Code from biomod2
   if (!is.null(GLM)) {
@@ -94,9 +98,33 @@ ESM_Models.Options <- function(GLM = NULL,
       opt$GBM$n.cores <- GBM$n.cores
     }
   }
-  
+  if (!is.null(ANN)){
+    if(!is.null(ANN$size)){
+      if(!is.integer(ANN$size)){
+        stop("ANN$size should be an integer")
+      }
+      opt$ANN$size = ANN$size
+    }
+    if(!is.null(ANN$decay)){
+      if(!is.numeric(ANN$decay)){
+        stop("ANN$decay should be a numeric")
+      }
+      opt$ANN$decay = ANN$decay 
+    }
+    if(!is.null(ANN$rang)){
+      if(!is.numeric(ANN$rang)){
+        stop("ANN$rang should be a numeric")
+      }
+      opt$ANN$rang = ANN$rang 
+    }
+    if(!is.null(ANN$maxit)){
+      if(!is.integer(ANN$maxit)){
+        stop("ANN$maxit should be a numeric")
+      }
+      opt$ANN$maxit = ANN$maxit 
+    }
+  }
   ####
-  
   
   return(opt)
   

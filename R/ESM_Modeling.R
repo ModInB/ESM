@@ -619,10 +619,10 @@ ESM_Modeling <- function( resp,
                                    model.option=list(type="linear"))
         
         tryCatch(expr={mod <- nnet::nnet(formula,data = data.ann,
-                                         size = 8,
-                                         decay = 0.001,
-                                         rang = 0.1,
-                                         maxit = 200, 
+                                         size = models.options$ANN$size,
+                                         decay = models.options$ANN$decay,
+                                         rang = models.options$ANN$rang,
+                                         maxit = models.options$ANN$maxit, 
                                          trace= FALSE)}, 
                  error=function(e){
               cat(paste("\n model",models[j],nameRun,"failed"))
