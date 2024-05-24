@@ -1,5 +1,51 @@
-
+#' @name ESM_Models.Options
+#' @author Flavien Collart from the code of biomod2::BIOMOD_ModelingOptions
+#' @title Model parameters for ESMs
+#' @description Generate a list of model parameters
+#' @param ANN a \code{list}. with the objects:
+#' \itemize{
+#' \item{size} an \code{integer}. The numer of units in the hidden layers. \emph{Default}: 8.
+#' \item{decay} a \code{numeric}. The weight decay. \emph{Default}: 0.001.
+#' \item{rang} a \code{numeric}. Initial random weights. \emph{Default}: 0.1.
+#' \item{maxit} an \code{integer}.The maximal number of iterations. \emph{Default}: 200.
+#' }
+#' 
+#' @param CTA a \code{list}. with the objects:
+#' \itemize{
+#' \item{na.action} The default action to remove observations with NA in the response variable. \emph{Default}: \code{\link[rpart]{na.rpart}}
+#' \item{method} a \code{character}. Only "class" is available
+#' \item{x} a \code{logical}. Keep a copy of the x matrix. \emph{Default}: FALSE.
+#' \item{y} a \code{logical}. Keep a copy of the y matrix. \emph{Default}: TRUE.
+#' \item{model} a \code{logical}. Keep a copy of the model frame. \emph{Default}: FALSE.
+#' \item{control} a \code{list}. a list of options obtained with \code{\link[rpart]{rpart.control}}. \emph{Default}: $xval = 5, minbucket = 5, minsplit = 5, cp = 0, maxdepth =25. for the other parameters see \code{\link[rpart]{rpart.control}} 
+#' }
+#' 
+#' @param GLM a \code{list}. with the objects:
+#' \itemize{
+#' \item{type}: \code{character}. Either "linear", "quadratic" or "polynomial". \emph{Default}: "quadratic".
+#' \item{myFormula}: \code{formula}. Custom formula. The response variable should be called resp. Example: as.formula("resp~predictor") \emph{Default}: \code{NULL}.
+#' \item{test}: \code{character}. Either "AIC" or "none". Perform or not a step AIC selection for the formula. \emph{Default}: "none".
+#' }
+#' 
+#' @param GBM a \code{list}. with the objects:
+#' \itemize{
+#' \item{n.trees}: \code{integer}. Number of trees to fit. \emph{Default}: 1000.
+#' \item{interaction.depth}: \code{integer}. The maximum depth of each tree \code{numeric}. Number of trees to fit. \emph{Default}: 4.
+#' \item{n.minobsinnode}: \code{integer}. The minimum number of observations in the terminal nodes of the trees. \emph{Default}: 5.
+#' \item{shrinkage}: \code{numeric}. The learning rate   \emph{Default}: 0.005.
+#' \item{bag.fraction}: \code{numeric}. The fraction of the training set observations randomly selected to propose the next tree in the expansion. \emph{Default}: 0.5.
+#' \item{train.fraction}: \code{numeric}. The first fraction of observations to fit the model. \emph{Default}: 1.
+#' \item{cv.folds}: \code{integer}. Number of cross-validations to perform. \emph{Default}: 3.
+#' \item{verbose}: \code{logical}. print or not the progress. \emph{Default}: FALSE.
+#' \item{n.cores}: \code{logical}. Number of CPU cores to use. \emph{Default}: \code{NULL}.
+#' }
+#' 
+#' @details For the arguments of each modeling technique, please refer to the manual of \code{\link[nnet]{nnet}}, \code{\link[rpart]{rpart}}, \code{\link[stats]{glm}}, and \code{\link[gbm]{gbm}}.
+#' @return a \code{list} of parameters for ESM.
+#' @examples 
+#' models.options = ESM_Models.Options(GLM=list(test="AIC",type="polynomial"))
 #' @export
+
 ESM_Models.Options <- function(ANN = NULL,
                                CTA = NULL,
                                GLM = NULL,

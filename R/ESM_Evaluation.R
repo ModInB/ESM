@@ -276,6 +276,8 @@ ESM_Response.Plot <- function (ESM.Mod,
   return(proj.fixed.list = proj.fixed.list)
 }
 
+
+
 ########################################################################
 ## The dark side of the moon: the hidden functions
 
