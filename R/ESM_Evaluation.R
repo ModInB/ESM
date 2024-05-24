@@ -4,14 +4,50 @@
 ###########################################################
 
 ## The "user-friendly" functions that were slightly modified for ecospat package to works with the new version
-## check in the help section of the ecospat package
 
 #############
 ## ESM.Pooling.Evaluation
 ## Perform the pooling evaluation
+#' @name ESM_Pooling.Evaluation
+#' @title Ensemble of Small Models: Evaluation via the Pooling procedure
+#' @author Flavien Collart \email{flaviencollart@hotmail.com}
+#' @description 
+#' This function evaluates the Ensemble of Small Models by pooling the different runs of the cross validation as in Collart et al (2021) 
+#' and recommended for rare species by Collart & Guisan (2023).
+#' @param ESM.Mod The object returned by \code{\link{ESM_Modeling}}.
+#' @param ESM.ensembleMod The object returned by \code{\link{ESM_Ensemble.Modeling}}.
+#' @param EachSmallModels \code{logical}. Should the individual bivariate models be evaluated by the pooling procedure?
+#' 
+#' @details 
+#' Because a minimum sample size is needed to evaluate models (see Collart & Guisan, 2023), 
+#' this function uses the approach from Collart et al.(2021), which consists to pool the suitability values of 
+#' the hold-out data (evaluation dataset) across replicates. As the same data point (presence or absence or background point) 
+#' is presumably sampled in several replicates, the suitability values for each data point is consequently averaged across 
+#' replicates where they were sampled. This procedure generates a series of independent suitability values with a size approximately 
+#' equal (as some data points may not have been sampled by chance in any of the \emph{n} replicates) to that of the number of data point.
+#' 
+#' @return 
+#' a \code{list} containing:
+#' \itemize{
+#' \item{ESM.evaluations}{a \code{matrix} with the evaluation scores for the ESMs based on the different modelling algorithms and 
+#' based on the consensus across the modelling algorithms (called here "ensemble").}
+#' \item{ESM.fit}{a \code{matrix} of predicted values resulting from the pooling procedure and used to compute the evaluation scores. 
+#' The column \emph{resp} is where the species occurs or not.}
+#' \item{ESM.evaluations.bivariate.models}{a \code{list} containing a matrix of evaluation scores for each bivariate models 
+#' (generated only if EachSmallModels = T).}
+#' \item{ESM.fit.bivariate.models}{a \code{list} containing a matrix of of predicted values resulting from the pooling procedure 
+#' for each bivariate models (generated only if EachSmallModels = T).}
+#' }
+#' 
+#' @references 
+#' Collart, F., & Guisan, A. (2023). Small to train, small to test: Dealing with low sample size in model evaluation. 
+#' \emph{Ecological Informatics}. \bold{75}, 102106. \doi{10.1016/j.ecoinf.2023.102106}.
+#' 
+#' Collart, F., Hedenas, L., Broennimann, O., Guisan, A. and Vanderpoorten, A. 2021. Intraspecific differentiation: 
+#' Implications for niche and distribution modelling. \emph{Journal of Biogeography}. \bold{48}, 415-426. \doi{10.1111/jbi.14009}.
+#' 
+#' @seealso \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Modeling}}
 #' @export
-###############
-
 
 ESM_Pooling.Evaluation <- function (ESM.Mod, 
                                     ESM.ensembleMod, 
@@ -92,8 +128,31 @@ ESM_Pooling.Evaluation <- function (ESM.Mod,
 }
 
 #############
-## ESM_Threshold
-## Evaluate the fit of the ensemble models and compute thresholds
+#' @name ESM_Threshold
+#' @title Thresholds for Ensemble of Small Models
+#' @author Flavien Collart \email{flaviencollart@hotmail.com} based on the scripts of Frank Breiner.
+#' @description 
+#' This function evaluates the full model which is used for projections and provides thresholds to produce binary maps.
+#' @param ESM.ensembleMod The object returned by \code{\link{ESM_Ensemble.Modeling}}.
+#' @details 
+#' This function provides evaluation scores of the full model (no split sampling) and thresholds which can be used to convert suitability 
+#' maps into binary maps. Various thresholds are provided: TSS (where sensitivity and specificity are maximised), MPA 1.0 (where all presences 
+#' are prdicted positive), MPA 0.95 (where 95\% of all presences are predicted positive), MPA 0.90 (where 90\% of all presences are predicted positive), 
+#' Boyce.th.min (the lowest suitability value where the predicted/expected ratio is >1) and Boyce.th.max (the highest suitability value where the 
+#' predicted/expected ratio is =1). 
+#' @return 
+#' A \code{data.frame} with evaluation scores of the fit and thresholds.
+#' @references 
+#' Hirzel, Alexandre H., et al. Evaluating the ability of habitat suitability models to predict species presences. 
+#' \emph{Ecological modelling}, \bold{199.2} (2006): 142-152.
+#' 
+#' Engler, Robin, Antoine Guisan, and Luca Rechsteiner. An improved approach for predicting the distribution of rare and endangered species 
+#' from occurrence and pseudo-absence data. \emph{Journal of applied ecology}, \bold{41.2} (2004): 263-274.
+#' 
+#' Fielding, Alan H., and John F. Bell. A review of methods for the assessment of prediction errors in conservation presence/absence models. 
+#' \emph{Environmental conservation}, \bold{24.1} (1997): 38-49.
+#' 
+#' 
 #' @export
 ###############
 
@@ -161,8 +220,26 @@ ESM_Threshold <- function (ESM.ensembleMod)
 
 
 #############
-## ESM.Variable.Contributions
-## Compute the contributions of each predictor
+#' @name ESM_Variable.Contributions
+#' @title Variable contribution in ESMs
+#' @author Olivier Broennimann \email{Olivier.Broennimann@unil.ch} with contributions of Heidi Mod and Daniel Scherrer 
+#' and the adaptations of Flavien Collart \email{flaviencollart@hotmail.com}
+#' @description 
+#' This function evaluates the full model which is used for projections and provides thresholds to produce binary maps.
+#' 
+#' @param ESM.Mod The object returned by \code{\link{ESM_Modeling}}.
+#' @param ESM.ensembleMod The object returned by \code{\link{ESM_Ensemble.Modeling}}.
+#' 
+#' @details Calculates the ratio between sum of weights of bivariate models where a focal variable was used and sum of weights of bivariate 
+#' models where the focal variable was not used. The ratio is corrected for the number of models with or without the focal variable. 
+#' This ratio gives an indication on the proportional contribution of the variable in the final ensemble model. A value of higher than 1 
+#' indicate that the focal variable has a higher contribution than average.
+#' In the case of multiple methods (e.g., GLM, GAM...), the contributions are counted per method. For ensemble model, the contributions 
+#' are then weighted means (based on the weighting score as chosen in ecospat.ESM.EnsembleModeling of single methods.
+#' 
+#' @return 
+#' a \code{dataframe} with contribution values (i.e. proportional contribution) by variable and model
+#' @seealso \code{\link{ESM_Modeling}}
 #' @export
 ###############
 
@@ -195,8 +272,28 @@ ESM_Variable.Contributions <- function (ESM.Mod,
 }
 
 #############
-## ESM_Response.Plot
-## Generates the species response curve for each predictor
+#' @name ESM_Response.Plot
+#' @title Produce response plots for ESMs
+#' @author Flavien Collart \email{flaviencollart@hotmail.com} from the code of Frank Breiner.
+#' @description 
+#' This function creates response plots (evaluation strips) for Ensembles of Small Models (ESMs).
+#' 
+#' @param ESM.Mod The object returned by \code{\link{ESM_Modeling}}.
+#' @param ESM.ensembleMod The object returned by \code{\link{ESM_Ensemble.Modeling}}.
+#' @param fixed.var.metric Either 'median' (\emph{Default}), 'mean', 'min' or 'max' specifying the statistic used 
+#' to fix as constant the remaining variables when the predicted response is estimated for one of the variables.
+#' 
+#' @details 
+#' This function plots the response curves of a model for each variable, while keeping the remianing variables constant. 
+#' This is an adaptation of the Evaluation Strip method proposed by Elith et al.(2005).
+#' @return 
+#' A plot of the response curves is produced (red line Ensemble, other colour lines are for single algorithms) and a \code{list} with the output is provided.
+#' 
+#' @references 
+#' Elith, J., Ferrier, S., Huettmann, FALSE. & Leathwick, J. R. 2005 The evaluation strip: A new and robust method for plotting predicted 
+#' responses from species distribution models. Ecological Modelling 186, 280-289.
+#' 
+#' @seealso \code{\link{ESM_Modeling}}
 #' @export
 ###############
 

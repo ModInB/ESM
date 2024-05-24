@@ -91,6 +91,8 @@ ESM_Models.Options <- function(ANN = NULL,
               )
   
   ### Adapted Code from biomod2 4.2.4
+  
+  ## ANN ----
   if (!is.null(ANN)){
     if(!is.null(ANN$size)){
       if(!is.integer(ANN$size)){
@@ -117,6 +119,7 @@ ESM_Models.Options <- function(ANN = NULL,
       opt$ANN$maxit = ANN$maxit 
     }
   }
+  ## CTA----
   if (!is.null(CTA)){
     if(!is.null(CTA$na.action)){
       opt$CTA$na.action = CTA$na.actio
@@ -152,6 +155,8 @@ ESM_Models.Options <- function(ANN = NULL,
       opt$CTA$control = CTA$control
     }
   }
+  
+  ## GLM ----
   if (!is.null(GLM)) {
     if (!is.null(GLM$type)) {
       if(!(any(GLM$type %in% c("linear","quadratic","polynomial")))){
@@ -169,6 +174,7 @@ ESM_Models.Options <- function(ANN = NULL,
       opt$GLM$test <- GLM$test
     }
   }
+  ## GBM ----
   if (!is.null(GBM)) {
     if (!is.null(GBM$n.trees)) {
       if(!is.integer(GBM$n.trees)){

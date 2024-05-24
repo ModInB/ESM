@@ -1,31 +1,34 @@
-#################################################################################################################################################
-## ESM_Projection: 
-##  Description:
-##    Projects each bivariate model on new.env
-##
-##  Arguments:
-## @ESM.Mod: The outputs resulted from ESM_Modeling()
-## @new.env: a data.frame, a matrix or a SpatRaster containg the environment where the models should be projected. 
-##           Note that the colnames or the names of the predictors should be exactly the same as the one used in ESM_Modeling()
-## @name.env: a character which will be used to generate a folder to save the individual projections.
-## @paralell: logical. Allows or not parallel job using the functions makeCluster
-## @n.cores: numeric. Number of cores used to make the models.
-##
-## Values: 
-##        a list containing: 
-##                          projection.path: a vector of the path to each projection.
-##                          model.info: contains the models used, their options, the combination of bivariate models (which.biva), the
-##                                      modeling ID, the path to the folder where are the stored the models (biva.path), and the failed models
-##                          name.env: the value given to the argument name.env
-##                          proj.type: a character equal to data.frame or SpatRaster depending on the class of new.env
-##
-##        Maps or data.frame are stored in the folder named by name.env. Values are multiplied by 1000 and rounded. Note that the maps 
-##        are in .tif and compressed with the option COMPRESS=DEFLATE and PREDICTOR=2
-##  Authors:
-##          Flavien Collart based on the previous code written by Frank Breiner with the contributions of 
-##          Olivier Broennimann and Flavien Collart
+
+#' @name ESM_Projection
+#' @author Flavien Collart \email{flaviencollart@hotmail.com} based on the previous code written by Frank Breiner 
+#' and Mirko Di Febbraro with the contributions of Olivier Broennimann and Flavien Collart
+#' @title Ensemble of Small Models: Projections of Bivariate Models
+#' @description Project bivariate models 
+#' @param ESM.Mod The object returned by \code{\link{ESM_Modeling}}.
+#' @param new.env a \code{data.frame}, \code{matrix} or a \code{SpatRaster} of the predictors where the models 
+#' should be projected. Note that the colnames or the names of the predictors should be exactly the same as the one used in \code{\link{ESM_Modeling}}.
+#' @param name.env a \code{character} which will be used to generate a folder to save the individual projections.
+#' @param parallel \code{logical}. Allows or not parallel job using the functions makeCluster.
+#' @param n.cores \code{integer}. Number of CPU cores used to make the models.
+#' @param save.obj \code{logical}. Allows or not the final output.
+#' 
+#' @return  a \code{list} containing: 
+#' \itemize{
+#' \item{projection.path}: a \code{character} the path to each projection.
+#' \item{model.info}: a \code{list} of the models used, their options, the combination of bivariate models (which.biva),
+#' the modeling ID, the path to the folder where are the stored the models (biva.path), and the failed models.
+#' \item{name.env}: a \code{character} the value given to the argument name.env.
+#' \item{proj.type}: a \code{character} which is either "data.frame" or "SpatRaster" depending on the class of new.env
+#' }
+#' @seealso \code{\link{ESM_Modeling}} and  \code{\link{ESM_Ensemble.Projection}}
+#' @references Lomba, A., L. Pellissier, C.F. Randin, J. Vicente, F. Moreira, J. Honrado and A. Guisan. 2010. Overcoming the rare species 
+#' modelling paradox: A novel hierarchical framework applied to an Iberian endemic plant. \emph{Biological Conservation}, \bold{143},2647-2657.
+#' 
+#' Breiner F.T., A. Guisan, A. Bergamini and M.P. Nobis. 2015. Overcoming limitations of modelling rare species by using ensembles of small models. \emph{Methods in Ecology and Evolution}, \bold{6},1210-1218.
+#' 
+#' Breiner F.T., Nobis M.P., Bergamini A., Guisan A. 2018. Optimizing ensembles of small models for predicting the distribution of species with few occurrences. \emph{Methods in Ecology and Evolution}. \doi{10.1111/2041-210X.12957}
+#' 
 #' @export
-#################################################################################################################################################
 
 ESM_Projection <- function(ESM.Mod,
                            new.env,
@@ -43,7 +46,7 @@ ESM_Projection <- function(ESM.Mod,
   biva.pred = ESM.Mod$biva.predictions
   
   
-  #### check new.env
+  #### check new.env----
   if(is.matrix(new.env)){
     new.env  <- as.data.frame(new.env)
   }
@@ -54,7 +57,7 @@ ESM_Projection <- function(ESM.Mod,
     stop("name.env cannot be null")
   }
   dir.create(paste0("../",name.env))
-  ## Compute the realized combinations
+  ## Compute the realized combinations----
   combinations <- combn(colnames(env.var), 2)
   if (is.null(which.biva)) {
     which.biva <- 1:ncol(combinations)
@@ -112,7 +115,9 @@ ESM_Projection <- function(ESM.Mod,
   return(obj)
 }
 
-## Function projecting a model onto a new environment.
+## The hidden functions ----
+## .IndividualProj----
+## Function projecting a model onto a new environment
 .IndividualProj <- function(x,new.env,models,name.env,parallel, biva.pred){
   if(!is.data.frame(new.env)){
     cat(paste("\n Projections of bivariate model:",x[1],x[2]))}

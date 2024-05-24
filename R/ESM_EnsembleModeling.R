@@ -1,45 +1,45 @@
 #################################################################################################################################################
-## ESM_Ensemble.Modeling
+#' @name ESM_Ensemble.Modeling
+#' @author Flavien Collart \email{flaviencollart@hotmail.com} based on the previous code written by Frank Breiner 
+#' and Mirko Di Febbraro with the contributions of Olivier Broennimann and Flavien Collart
+#' @title Ensemble of Small Models: Average Bivariate Models into an ESM
+#' @description This function averages simple bivariate models by weighted means to Ensemble Small Models.
+#' @param ESM.Mod The object returned by \code{ESM_Modeling}.
+#' @param weighting.score \code{character}. An evaluation score used to weight single models to build ensembles:"AUC","MaxTSS","Boyce" or,"SomersD".
+#' @param threshold \code{numeric} or \code{NULL}. Threshold value of an evaluation score to select the bivariate model(s) included for building 
+#' the ensemble. \emph{Default}: 0.5 for AUC and 0 for the other metrics.
+#' @param save.obj \code{logical}. Allows or not to save the outputs from this function.
+#' @return \itemize{
+#' a \code{list} containing: 
+#' \item{data}: a \code{list} with the object resp, xy, env.var and sp.name. env.var is = to the data supplied in the argument env. 
+#' If env, was a SpatRaster, it corrsponds to the extracted values of these rasters for the species coordinates.
+#' \item{model.info}: a \code{list} of the models used, their options, the combination of bivariate models (which.biva), the modeling ID, 
+#' the path to the folder where are the stored the models (biva.path), and the failed models
+#' \item{cv.split.table}: a \code{matrix} used to train and test models. See explanation of the argument cv.split.table
+#' \item{evaluations}: a \code{matrix} The evaluation of the ensemble. 
+#' \item{EF.algo}: a \code{list} containing \code{pred.EF.algo} which is a \code{matrix} of ensemble predictions for each run 
+#' and modeling techniques; and \code{weights.algo} a \code{matrix} of weights used to generate the ensemble at the level of the algorithm.
+#' \item{EF}: a \code{list} containing \code{pred.EF} which is a \code{matrix} of ESMs predictions for each run; 
+#' and \code{weights.EF} a \code{matrix} of weights used to generate the ESMs. Note that if only one modelling technique is used 
+#' \code{EF} will be exactly the same as \code{EF.algo}.
+#' }
+#' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Projection}} and  \code{\link{ESM_Ensemble.Projection}}
+#' @references Lomba, A., L. Pellissier, C.F. Randin, J. Vicente, F. Moreira, J. Honrado and A. Guisan. 2010. Overcoming the rare species 
+#' modelling paradox: A novel hierarchical framework applied to an Iberian endemic plant. \emph{Biological Conservation}, \bold{143},2647-2657.
+#' 
+#' Breiner F.T., A. Guisan, A. Bergamini and M.P. Nobis. 2015. Overcoming limitations of modelling rare species by using ensembles of small models. \emph{Methods in Ecology and Evolution}, \bold{6},1210-1218.
+#' 
+#' Breiner F.T., Nobis M.P., Bergamini A., Guisan A. 2018. Optimizing ensembles of small models for predicting the distribution of species with few occurrences. \emph{Methods in Ecology and Evolution}. \doi{10.1111/2041-210X.12957}
+#' 
 #' @export
-##  Description:
-##    Ensemble all the bivariate models together for each modeling techniques and then
-##    make an ensemble between techniques based on a weighted mean. The ensembles are
-##    evaluated.
-##
-##  Arguments:
-## @ESM.Mod: The outputs resulted from ESM_Modeling()
-## @weighting.score: character. an evaluation score used to weight single models to build ensembles:"AUC","MaxTSS","Boyce" or,"SomersD"
-## @threshold: numeric or NULL(Default). Threshold value of an evaluation score to select the bivariate model(s) included for building the ensemble
-## @save.obj: logical. Allows or not to save each run and the final output object
-##
-## Values: 
-##        a list containing: 
-##                          data: a list with the object resp, xy, env.var and sp.name. env.var is = to the data suuplied in the argument env. 
-##                                If env, was a SpatRaster, it corrsponds to the extracted values of these rasters for the species coordinates.
-##                          model.info: contains the models used, their options, the combination of bivariate models (which.biva), the
-##                                      modeling ID, the path to the folder where are the stored the models (biva.path), and the failed models
-##                          cv.split.table: a table used to train and test models (see explanation of the argument cv.split.table)
-##                          evaluations: a data.frame containing the evaluations of each run and ensemble models. The full model is evaluated
-##                          using the mean values across the runs.
-##                          EF.algo: a list containing: 
-##                                          pred.EF.algo: a data.frame containing the predicted values for each run and the full models
-##                                          for the ensemble of bivariate models across each modeling technique.
-##                                          weights.algo: The weights used for each bivariate model to make the ensemble for each modeling technique
-##                          EF: a list containing: (if there is only one modeling technique, EF = EF.algo)
-##                                          pred.EF: a data.frame containing the predicted values for the final ESM 
-##                                          weights.EF: The weights used for each modeling algorithm to make the final ESM.
-##  Authors:
-##          Flavien Collart based on the previous code written by Frank Breiner with the contributions of 
-##          Olivier Broennimann and Flavien Collart
-#################################################################################################################################################
 
-
+## ESM_Ensemble.Modeling----
 ESM_Ensemble.Modeling <- function(ESM.Mod,
                                  weighting.score,
                                  threshold = NULL,
                                  save.obj = TRUE){
   
-  ## Check some arguments
+  ## Check some arguments----
   if(!weighting.score %in% c("AUC", "MaxTSS", "Boyce", 
                               "SomersD")) {
     stop("weighting score not supported! Choose one of the following: AUC, MaxTSS, Boyce, or SomersD")
@@ -59,8 +59,7 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
   newwd <- ESM.Mod$model.info$biva.path
   setwd(newwd)
   
-  ###############
-  ### First generate the first level of aggregation (on algo)
+  ### First generate the first level of aggregation (on algo)----
   
   models <- ESM.Mod$model.info$models
   biva.eval <- ESM.Mod$biva.evaluations
@@ -71,7 +70,7 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
   resp <- ESM.Mod$data$resp
   
   for(i in 1:length(models)){
-    ##Get the weights of the full model (which is = to mean across the cv)
+    ##Get the weights of the full model (which is = to mean across the cv)----
     w <- as.data.frame(lapply(biva.eval,FUN = function(x,model,ws){
       x[paste0("Full.",model),ws]
     },model = models[i],ws=weighting.score))
@@ -83,7 +82,7 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
       weights.algo <- rbind(weights.algo,w)
     }
 
-    ## Then make the ensemble
+    ## Then make the ensemble----
     pred.EF.algo <- sapply(run.names,.bivaToEnsemble,model = models[i],
                            w = w,biva.pred = biva.pred) 
     pred.EF.algo <- do.call(cbind.data.frame,pred.EF.algo)
@@ -95,14 +94,13 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
     }
     
   }
-  ## Evaluate the ensembles per Run + extract w.scores
+  ## Evaluate the ensembles per Run + extract w.scores----
   EF.algo.eval <- .bivaEvaluation(biva = pred.EF,
                                   resp=resp, models=models,
                                   cv.split.table=cv.split.table)
   rownames(EF.algo.eval) = paste0(rownames(EF.algo.eval),".EF")
-  #########################
-  
-  ### Make the ensemble across the modeling techniques. 
+
+  ### Make the ensemble across the modeling techniques----
   if(length(models)>1){
     ## Take the weights for each modeling technique
     weights.EF <- EF.algo.eval[grep("Full",row.names(EF.algo.eval)),weighting.score]
@@ -112,7 +110,7 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
                            w = weights.EF,pred.EF = pred.EF)
     colnames(EF) = paste0(colnames(EF),".EF")
     
-    ##Evaluate the model for each run
+    ##Evaluate the model for each run----
     EF.eval <- .bivaEvaluation(biva = EF,
                                     resp=resp, models="EF",
                                     cv.split.table=cv.split.table)
@@ -124,7 +122,7 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
     weights.EF <- weights.algo
   }
   
-  ### Save the outputs.
+  ### Save the outputs----
   obj <- list(data=ESM.Mod$data,
               model.info = ESM.Mod$model.info,
               cv.split.table = cv.split.table,
@@ -139,6 +137,8 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
   return(obj)
 }
 
+### The hidden functions ----
+##.bivaToEnsemble----
 ## Allows to ensemble each bivariate model from a single algo
 .bivaToEnsemble <- function(x,model,w,biva.pred){
   
@@ -149,7 +149,7 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
     colnames(pred.EF.run) = model
     return(pred.EF.run)
 }
-
+##.EFToEnsemble----
 ## Allows to ensemble each algo 
 .EFToEnsemble <- function(x,pred.EF,w){
   pred.EF.algo <- pred.EF[,grep(paste0(x,"."),colnames(pred.EF),fixed = T)]
