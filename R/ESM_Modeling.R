@@ -1,4 +1,4 @@
-##########################################################################################################################################
+
 #' @name ESM_Modeling
 #' @author Flavien Collart \email{flaviencollart@hotmail.com} based on the previous code written by Frank Breiner 
 #' and Mirko Di Febbraro with the contributions of Olivier Broennimann and Flavien Collart
@@ -141,8 +141,8 @@
 #'
 #' }
 #' @export
-
-ESM_Modeling <- function( resp,
+#### ESM_Modeling----
+ESM_Modeling <- function(resp,
                           xy,
                           env,
                           sp.name,
@@ -162,7 +162,7 @@ ESM_Modeling <- function( resp,
                           save.models = TRUE,
                           save.obj = TRUE){
   
-  ## Check resp, XY, sp.name and prevalence
+  ## Check resp, XY, sp.name and prevalence----
   if(length(resp) != nrow(xy)){
     stop("resp and xy must have the same length")
   }
@@ -186,15 +186,13 @@ ESM_Modeling <- function( resp,
     stop("prevalence must be inside ]0;1[ or null")
   }
   
-  #########################################
-  ## Check model names 
+  ## Check model names ----
   
   if(any(!(models  %in% c("GLM","GBM","MAXNET","ANN", "CTA")))){
     stop("models should be = to ANN, CTA, GLM, GBM, and/or MAXNET")
   }
   
-  #######################################
-  ## Check model options
+  ## Check model options----
   if(is.null(models.options)){
     models.options = ESM_Models.Options()
   }else{
@@ -203,8 +201,7 @@ ESM_Modeling <- function( resp,
     }
   }
   
-  ###############################################
-  ## Check env and extract values if SpatRaster
+  ## Check env and extract values if SpatRaster----
   if(is.data.frame(env)){
     if(length(resp) != nrow(env) | nrow(env) != nrow(xy)){
       stop("resp, xy and env must have the same length")
@@ -221,8 +218,7 @@ ESM_Modeling <- function( resp,
   
 
   
-  ###############################################
-  ## Check split.tables and generate one if it is null
+  ## Check split.tables and generate one if it is null----
   if(sum(cv.method %in% c("split-sampling","block","custom")) != 1){
     stop("cv.method shoud be either split-sampling, block or custom ")
   }
@@ -261,8 +257,7 @@ ESM_Modeling <- function( resp,
                                                  cv.n.blocks = cv.n.blocks)
   }
   
-  ####################################
-  ## Remove NAs in env.var
+  ## Remove NAs in env.var----
   is.thereNAs <- is.na(apply(env.var,1,sum))
   if(sum(is.thereNAs)>0){
     n.presAbs <- table(resp)
@@ -275,13 +270,12 @@ ESM_Modeling <- function( resp,
     xy <- xy[!(is.thereNAs),]
     env.var = na.omit(env.var)
   }
-  # Check if presences and absences are present even after removing possible NAs
+  # Check if presences and absences are present even after removing possible NAs----
   if(sum(resp)==0 | sum(resp==0) == 0){
     stop("presences and absences/pseudo-absences should be present in resp")
   }
   
-  ################################
-  ### Start the process
+  ### Start the modeling ----
   
   # Create a folder to store objects
   iniwd <- getwd()
@@ -346,7 +340,7 @@ ESM_Modeling <- function( resp,
   cat("\n############### Start evaluations ###############")
   
   
-  ## Evaluation
+  ## Evaluation----
   biva.eval <- lapply(biva.mods.filt,.bivaEvaluation,
                       resp=resp, models=models,
                       cv.split.table=cv.split.table,
@@ -357,7 +351,7 @@ ESM_Modeling <- function( resp,
                        cv.split.table=!(cv.split.table),
                        validation = FALSE)
 
-  
+  ## Return outputs ----
   obj <- list(data = list(resp = resp,
                           xy = xy,
                           env.var = env.var,
@@ -382,14 +376,10 @@ ESM_Modeling <- function( resp,
   return(obj)
 }
 
-##################################################################################################
-
-##
+#### The Hidden Functions ----
 ## Functions used inside ESM_Modeling
-
-######
-
-#Function to generate the argument DataSplitTable in the function ecospat.ESM.Modeling                                                                        
+## .ESM.CreatingDataSplitTable----
+# Function to generate the argument DataSplitTable                                                                     
 .ESM.CreatingDataSplitTable <- function(resp,
                                        cv.method,
                                        cv.rep = NULL,
@@ -441,9 +431,8 @@ ESM_Modeling <- function( resp,
 }
 
 
-## .bivaModeling allow to run the functions .doModeling to model each run of a bivariate models
-
-
+## .bivaModeling---- 
+#allow to run the functions .doModeling to model each run of a bivariate models
 .bivaModeling <- function(x,
                           resp,
                           env.var,
@@ -464,9 +453,8 @@ ESM_Modeling <- function( resp,
   return(do.call(cbind,d))
 }
 
-
-##################################################################################################
-## .doModeling generates the bivariate models
+## .doModeling ----
+# generates the bivariate models
 
 .doModeling <- function(x,
                         resp,
@@ -775,7 +763,8 @@ ESM_Modeling <- function( resp,
     }
     return(predFin)
 }
-## .makeGLMFormula allows to generate the formula for GLM to allow linear, quadratic or polynomial terms (and for GBM)
+## .makeGLMFormula ---- 
+# allows to generate the formula for GLM to allow linear, quadratic or polynomial terms (and for GBM)
 .makeGLMFormula <- function(env.var = env.var,model.option){
   
   formula <- paste0("resp~", paste0(colnames(env.var),collapse = "+"))
@@ -793,8 +782,8 @@ ESM_Modeling <- function( resp,
   return(as.formula(formula))
   
 }
-
-### Check Failed Mods
+## .checkFailedMods----
+# Check Failed Mods
 .checkFailedMods <- function(biva.mod){
   IsNa <- apply(biva.mod, 2, anyNA)
   IsFlat <- apply(biva.mod, 2, sd) == 0
@@ -802,12 +791,14 @@ ESM_Modeling <- function( resp,
   Failed <- IsNa | IsFlat
   return(Failed)
 }
-### Transform Failed models into NAs
+##.PutNAsFailed ----
+# Transform Failed models into NAs
 .PutNAsFailed <- function(biva,biva.mods,failed.mods){
   biva.mods[[biva]][failed.mods[[biva]]] = NA
   return(biva.mods[[biva]])
 }
-### Print Failed Mods
+## .PrintFailedMods----
+# Print Failed Mods
 .PrintFailedMods <- function(biva,biva.mods,failed.mods){
   if(sum(failed.mods[[biva]])>0){
     cat(paste("\nFailed Models for combination",names(biva.mods)[biva],":",colnames(biva.mods[[biva]])[failed.mods[[biva]]] ))
