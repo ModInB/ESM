@@ -120,8 +120,8 @@ ESM_Modeling <- function( resp,
   #########################################
   ## Check model names 
   
-  if(any(!(models  %in% c("GLM","GBM","MAXNET","ANN")))){
-    stop("models should be = to ANN, GLM, GBM, and/or MAXNET")
+  if(any(!(models  %in% c("GLM","GBM","MAXNET","ANN", "CTA")))){
+    stop("models should be = to ANN, CTA, GLM, GBM, and/or MAXNET")
   }
   
   #######################################
@@ -129,7 +129,7 @@ ESM_Modeling <- function( resp,
   if(is.null(models.options)){
     models.options = ESM_Models.Options()
   }else{
-    if(!is.list(models.options) | deparse(names(models.options))!= deparse(c("GLM","GBM"))){
+    if(!is.list(models.options) | deparse(names(models.options))!= deparse(c("ANN", "CTA","GLM","GBM"))){
      stop("models.options should null or formatted via ESM_Models.Options()") 
     }
   }
@@ -427,7 +427,91 @@ ESM_Modeling <- function( resp,
   data.ann$resp <- as.factor(data.ann$resp)
     for(j in 1: length(models)){
       err <- FALSE
-      
+      if(models[j] == "ANN"){
+        cat(paste("\nANN", nameRun,"\n"))
+        formula <- .makeGLMFormula(env.var,
+                                   model.option=list(type="linear"))
+        
+        tryCatch(expr={mod <- nnet::nnet(formula,data = data.ann,
+                                         size = models.options$ANN$size,
+                                         decay = models.options$ANN$decay,
+                                         rang = models.options$ANN$rang,
+                                         maxit = models.options$ANN$maxit, 
+                                         trace= FALSE)}, 
+                 error=function(e){
+                   cat(paste("\n model",models[j],nameRun,"failed"))
+                   err <<-TRUE
+                 })
+        
+        if(err){
+          pred <- as.data.frame(rep(NA,nrow(env.var)))
+          colnames(pred) = "ANN" 
+        }else{
+          pred <- predict(mod,newdata = env.var,type="raw")
+          colnames(pred) = "ANN" 
+          
+        }
+        
+        if(save.obj & !(err)){
+          save(mod,file=paste("ESM",nameRun,
+                              colnames(env.var)[1],
+                              colnames(env.var)[2],
+                              models[j],"model.out",
+                              sep="_"))
+        }else if(nameRun == "Full"& !(err)){
+          save(mod,file=paste("ESM",nameRun,
+                              colnames(env.var)[1],
+                              colnames(env.var)[2],
+                              models[j],"model.out",
+                              sep="_"))
+        }
+        
+      }
+      if(models[j] == "CTA"){
+        
+        cat(paste("\nCTA", nameRun,"\n"))
+        formula <- .makeGLMFormula(env.var,
+                                   model.option=list(type="linear"))
+        
+        tryCatch(expr={mod <- rpart::rpart(formula = formula,
+                                           data = data,
+                                           weights = w,
+                                           na.action = models.options$CTA$na.action,
+                                           method = models.options$CTA$method,
+                                           model = models.options$CTA$model,
+                                           x = models.options$CTA$x,
+                                           y = models.options$CTA$y,
+                                           control = models.options$CTA$control
+                                           )}, 
+                 error=function(e){
+                   cat(paste("\n model",models[j],nameRun,"failed"))
+                   err <<-TRUE
+                 })
+        
+        if(err){
+          pred <- as.data.frame(rep(NA,nrow(env.var)))
+          colnames(pred) = "CTA" 
+        }else{
+          pred <- as.data.frame(predict(mod,newdata = env.var,type="prob")[,2])
+          colnames(pred) = "CTA" 
+          
+        }
+        
+        if(save.obj & !(err)){
+          save(mod,file=paste("ESM",nameRun,
+                              colnames(env.var)[1],
+                              colnames(env.var)[2],
+                              models[j],"model.out",
+                              sep="_"))
+        }else if(nameRun == "Full"& !(err)){
+          save(mod,file=paste("ESM",nameRun,
+                              colnames(env.var)[1],
+                              colnames(env.var)[2],
+                              models[j],"model.out",
+                              sep="_"))
+        }
+        
+      }
       if(models[j] == "GLM"){
         cat(paste("\nGLM", nameRun))
         
@@ -538,7 +622,6 @@ ESM_Modeling <- function( resp,
         }
       
       }
-      
       if(models[j]=="GBM"){
         cat(paste("\nGBM", nameRun,"\n"))
         formula <- .makeGLMFormula(env.var,
@@ -582,7 +665,6 @@ ESM_Modeling <- function( resp,
                               sep="_"))
         }
       }
-      
       if(models[j] == "MAXNET"){
         cat(paste("\nMAXNET", nameRun,"\n"))
         tryCatch(expr={mod <- maxnet::maxnet(p = data.maxnet$resp,data = data.maxnet[,-1])}, error=function(e){
@@ -613,46 +695,7 @@ ESM_Modeling <- function( resp,
         }
       }
       
-      if(models[j] == "ANN"){
-        cat(paste("\nANN", nameRun,"\n"))
-        formula <- .makeGLMFormula(env.var,
-                                   model.option=list(type="linear"))
-        
-        tryCatch(expr={mod <- nnet::nnet(formula,data = data.ann,
-                                         size = models.options$ANN$size,
-                                         decay = models.options$ANN$decay,
-                                         rang = models.options$ANN$rang,
-                                         maxit = models.options$ANN$maxit, 
-                                         trace= FALSE)}, 
-                 error=function(e){
-              cat(paste("\n model",models[j],nameRun,"failed"))
-              err <<-TRUE
-        })
-        
-        if(err){
-          pred <- as.data.frame(rep(NA,nrow(env.var)))
-          colnames(pred) = "ANN" 
-        }else{
-          pred <- predict(mod,newdata = env.var,type="raw")
-          colnames(pred) = "ANN" 
-        
-        }
-        
-        if(save.obj & !(err)){
-          save(mod,file=paste("ESM",nameRun,
-                              colnames(env.var)[1],
-                              colnames(env.var)[2],
-                              models[j],"model.out",
-                              sep="_"))
-        }else if(nameRun == "Full"& !(err)){
-          save(mod,file=paste("ESM",nameRun,
-                              colnames(env.var)[1],
-                              colnames(env.var)[2],
-                              models[j],"model.out",
-                              sep="_"))
-        }
-        
-      }
+      
       
       if(j == 1){
         predFin <- pred

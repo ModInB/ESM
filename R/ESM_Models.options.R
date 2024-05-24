@@ -1,13 +1,36 @@
 
 #' @export
-ESM_Models.Options <- function(GLM = NULL,
-                               GBM = NULL,
-                               ANN = NULL){
+ESM_Models.Options <- function(ANN = NULL,
+                               CTA = NULL,
+                               GLM = NULL,
+                               GBM = NULL
+                               ){
   ## Default options
-  opt <- list(GLM = list(type = 'quadratic',
+  opt <- list(ANN = list(size = 8,
+                         decay = 0.001,
+                         rang = 0.1,
+                         maxit = 200
+                         ),
+              CTA = list(na.action= rpart::na.rpart,
+                         method = "class",
+                         x = FALSE,
+                         y = TRUE,
+                         model = FALSE,
+                         control = list(xval = 5, 
+                                        minbucket = 5,
+                                        minsplit = 5,
+                                        cp = 0, 
+                                        maxdepth = 25,
+                                        maxcompete = 4,
+                                        maxsurrogate = 5,
+                                        usesurrogate = 2,
+                                        surrogatestyle = 0)
+                         ),
+              GLM = list(type = 'quadratic',
                          myFormula = NULL,
                          test = 'none',
-                         family = binomial(link = 'logit')),
+                         family = binomial(link = 'logit')
+                         ),
               GBM = list(distribution = 'bernoulli',
                          n.trees = 1000,
                          interaction.depth = 4,
@@ -18,13 +41,71 @@ ESM_Models.Options <- function(GLM = NULL,
                          cv.folds = 3,
                          verbose = FALSE,
                          n.cores = NULL
-                          ),
-              ANN = list(size = 8,
-                         decay = 0.001,
-                         rang = 0.1,
-                         maxit = 200))
+                          )
+              )
   
-  ### Adapted Code from biomod2
+  ### Adapted Code from biomod2 4.2.4
+  if (!is.null(ANN)){
+    if(!is.null(ANN$size)){
+      if(!is.integer(ANN$size)){
+        stop("ANN$size should be an integer")
+      }
+      opt$ANN$size = ANN$size
+    }
+    if(!is.null(ANN$decay)){
+      if(!is.numeric(ANN$decay)){
+        stop("ANN$decay should be a numeric")
+      }
+      opt$ANN$decay = ANN$decay 
+    }
+    if(!is.null(ANN$rang)){
+      if(!is.numeric(ANN$rang)){
+        stop("ANN$rang should be a numeric")
+      }
+      opt$ANN$rang = ANN$rang 
+    }
+    if(!is.null(ANN$maxit)){
+      if(!is.integer(ANN$maxit)){
+        stop("ANN$maxit should be a numeric")
+      }
+      opt$ANN$maxit = ANN$maxit 
+    }
+  }
+  if (!is.null(CTA)){
+    if(!is.null(CTA$na.action)){
+      opt$CTA$na.action = CTA$na.actio
+    }
+    if(!is.null(CTA$method)){
+      if(CTA$method != "class"){
+        stop("CTA$method should be 'class'.")
+      }
+    }
+    if(!is.null(CTA$x)){
+      if(!is.logical(CTA$x)){
+        stop("CTA$x should be logical")
+      }
+      opt$CTA$x = CTA$x 
+    }
+    if(!is.null(CTA$y)){
+      if(!is.logical(CTA$y)){
+        stop("CTA$y should be logical")
+      }
+      opt$CTA$y = CTA$y 
+    }
+    if(!is.null(CTA$model)){
+      if(!is.logical(CTA$model)){
+        stop("CTA$model should be logical")
+      }
+      opt$CTA$model = CTA$model 
+    }
+    if(!is.null(CTA$control)){
+      if(!is.list(CTA$control) | length(CTA$control) != 9 ){
+        stop("CTA$control should be a list with 9 elements. Please use the function rpart::rpart.control to generate this object")
+      }
+      cat("\n CTA$control has been changed, Please note this parameter is not checked")
+      opt$CTA$control = CTA$control
+    }
+  }
   if (!is.null(GLM)) {
     if (!is.null(GLM$type)) {
       if(!(any(GLM$type %in% c("linear","quadratic","polynomial")))){
@@ -96,32 +177,6 @@ ESM_Models.Options <- function(GLM = NULL,
         stop("GBM$n.cores should be an integer")
       }
       opt$GBM$n.cores <- GBM$n.cores
-    }
-  }
-  if (!is.null(ANN)){
-    if(!is.null(ANN$size)){
-      if(!is.integer(ANN$size)){
-        stop("ANN$size should be an integer")
-      }
-      opt$ANN$size = ANN$size
-    }
-    if(!is.null(ANN$decay)){
-      if(!is.numeric(ANN$decay)){
-        stop("ANN$decay should be a numeric")
-      }
-      opt$ANN$decay = ANN$decay 
-    }
-    if(!is.null(ANN$rang)){
-      if(!is.numeric(ANN$rang)){
-        stop("ANN$rang should be a numeric")
-      }
-      opt$ANN$rang = ANN$rang 
-    }
-    if(!is.null(ANN$maxit)){
-      if(!is.integer(ANN$maxit)){
-        stop("ANN$maxit should be a numeric")
-      }
-      opt$ANN$maxit = ANN$maxit 
     }
   }
   ####

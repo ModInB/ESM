@@ -102,7 +102,7 @@ ESM_Projection <- function(ESM.Mod,
     }
   }
   
-  obj = list(projection.path=proj,
+  obj = list(projection.path=as.list(proj),
              model.info = ESM.Mod$model.info,
              name.env = name.env,
              proj.type=proj.type)
@@ -131,10 +131,13 @@ ESM_Projection <- function(ESM.Mod,
           pred <- round(1000 * predict.glm(mod, newdata = new.env, type = "response"))
           
         }else if(models[j]=="GBM"){
-          pred <- invisible(round(1000 *gbm::predict.gbm(mod,newdata = new.env, type = "response")))
+          pred <- invisible(round(1000 * gbm::predict.gbm(mod,newdata = new.env, type = "response")))
         }else if(models[j]=="MAXNET"){
           require(maxnet)
           pred <- invisible(round(1000 * predict(mod, newdata = new.env, type = "cloglog",clamp=FALSE))) ##invisible not working
+        }else if(models[j]=="CTA"){
+          require(rpart)
+          pred <- invisible(round(1000 * as.data.frame(predict(mod, newdata = new.env, type = "prob")[,2]))) ##invisible not working
         }else{
           require(nnet)
           pred <- invisible(round(1000 * predict(mod, newdata = new.env, type = "raw")))
@@ -155,6 +158,9 @@ ESM_Projection <- function(ESM.Mod,
         }else if(models[j]=="MAXNET"){
           require(maxnet)
           pred <- invisible(round(1000 * terra::predict(new.env,mod, fun = predict, type = "cloglog",clamp=FALSE,na.rm=T))) ##invisible not working
+        }else if(models[j]=="CTA"){
+          require(rpart)
+          pred <- invisible(round(1000 *  terra::predict(new.env,mod, type = "prob",na.rm = T)[[2]])) ##invisible not working
         }else{
           require(nnet)
           pred <- invisible(round(1000 * terra::predict(new.env,mod, fun = predict, type = "raw",na.rm=T))) ##invisible not working

@@ -17,7 +17,7 @@ resp <- ecospat.testData$Veronica_alpina
 
 ### Formating the data with the BIOMOD_FormatingData() function from the package biomod2
 sp.name = "bc"
-models = c("ANN","GLM")
+models = c("GLM","CTA")
 models.options = ESM_Models.Options(GLM=list(test="none",
                                              type="quadratic"))
 prevalence = 0.5
@@ -42,7 +42,7 @@ my.ESM <- ESM_Modeling(resp = resp,
                        cv.ratio = 0.7,
                        cv.split.table = NULL,
                        which.biva = NULL,
-                       parallel = T,
+                       parallel = F,
                        n.cores = 5,
                        modeling.id = as.character(format(Sys.time(), "%s")),
                        pathToSaveObject = getwd(),
@@ -70,8 +70,8 @@ eval$ESM.evaluations.bivariate.models
 
 proj <- ESM_Projection(ESM.Mod = my.ESM,
                        new.env = env,
-                       name.env = "current",
-                       parallel = T,
+                       name.env = "a",
+                       parallel = F,
                        n.cores = 5,
                        save.obj = F)
 
