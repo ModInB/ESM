@@ -8,9 +8,9 @@
 #' @param resp \code{numeric} of 0-1. 0 the species si absent and 1 when present.
 #' @param xy \code{matrix} or \code{data.frame} containing the X and Y coordinate of the species.
 #' @param env \code{matrix}, \code{data.frame} or \code{SpatRaster} of the species predictors.
-#' @param spName \code{character}. Name of the species (To generate of ESM folder with this name).
+#' @param sp.name \code{character}. Name of the species (To generate of ESM folder with this name).
 #' @param models  \code{character} of the wanted algorithm methods. Can be c("ANN","CTA","GLM","GBM","MAXNET) or a subset of these 5 techniques.
-#' @param models.options \code{NULL} or the output from \code{\link{ESM.Models.Options}}
+#' @param models.options \code{NULL} or the output from \code{\link{ESM_Models.Options}}
 #' @param prevalence \code{NULL} or a \code{numeric} comprised between 0-1. Prevalence value is used to build 
 #' 'weighted response weights'. The default is 0.5 (weighting presences equally to the absences). 
 #' If \code{NULL} each observation (presence or absence) has the same weight (independent of the number of presences and absences). 
@@ -25,9 +25,9 @@
 #' @param cv.split.table a \code{matrix} or a \code{data.frame} filled with TRUE/FALSE to specify which part of data must be used for models calibration (TRUE) 
 #' and for models validation (FALSE). Each column corresponds to a 'RUN' and should be named "RUNX" where X correspond to the number of the run. 
 #' The last column should be filled with only TRUE and named "Full" to make a full model used for the future projection. Only applicable when cv.method="custom".
-#' @param which.biva\code{numeric}. which bivariate combinations should be used for modeling. \emph{Default}: \code{NULL}, 
+#' @param which.biva \code{numeric}. which bivariate combinations should be used for modeling. \emph{Default}: \code{NULL}, 
 #' meaning that all the combinations will be made.
-#' @param parallel \code{numeric}. \code{logical}. Allows or not parallel job using the function \link{parallel::makeCluster}.
+#' @param parallel \code{numeric}. \code{logical}. Allows or not parallel job using the function parallel::makeCluster.
 #' @param n.cores \code{numeric}. Number of cores used to make the models.
 #' @param modeling.id  \code{character}. the ID (=name) of modeling procedure. A random number by default.
 #' @param pathToSaveObject a \code{character} of a full path to store the objects. \emph{Default}: Takes the value from getwd().
@@ -66,11 +66,13 @@
 #' 
 #' Breiner F.T., Nobis M.P., Bergamini A., Guisan A. 2018. Optimizing ensembles of small models for predicting the distribution of species with few occurrences. \emph{Methods in Ecology and Evolution}. \doi{10.1111/2041-210X.12957}
 #' 
+#' @importFrom stats as.formula binomial glm na.omit sd step weighted.mean
+#' @importFrom utils combn
 #' @seealso \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Modeling}},   \code{\link{ESM_Ensemble.Projection}}, 
 #' \code{\link{ESM_Pooling.Evaluation}}
 #' 
 #' @examples \donttest{library(ecospat)
-#' Loading test data
+#' #Loading test data
 #' data(ecospat.testNiche.inv)
 #' inv <- ecospat.testNiche.inv
 #' #species occurrences
@@ -128,7 +130,7 @@
 #'
 #'
 #' ### Binary Projection based on max TSS of calibrated ESMs into new space                                                
-#' my.ESM_EFproj_current_binary <- (my.ESM_EFproj_current > 
+#' my.ESM_EFproj_current_binary <- (Ens.proj > 
 #'                                 (my.ESM_thresholds$TSS.th*1000))*1
 #'
 #' ### get the variable contributions of ESMs
@@ -138,7 +140,9 @@
 #' my.ESM_responsePlot<- ESM_Response.Plot(my.ESM,
 #'                                         my.ESM_EF,
 #'                                         fixed.var.metric = 'mean')
-#'
+#'                                         
+#' #To avoid a note: DO NOT RUN 
+#' unlink("ESM.output_test", recursive = TRUE)
 #' }
 #' @export
 #### ESM_Modeling----

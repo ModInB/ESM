@@ -3,7 +3,7 @@
 #' and Mirko Di Febbraro with the contributions of Olivier Broennimann and Flavien Collart
 #' @title Ensemble of Small Models: Projections of ESMs
 #' @description Generate the ESMs into a new space
-#' @param ESM.Mod The object returned by \code{\link{ESM_Projection}}.
+#' @param ESM.proj The object returned by \code{\link{ESM_Projection}}.
 #' @param ESM.ensembleMod The object returned by \code{\link{ESM_Ensemble.Modeling}}.
 #' @param chosen.models a \code{character} allowing to only make the ensemble maps on a selection of modeling techniques. \emph{Default}: "all".
 #' @param save.obj   \code{logical}. If \code{TRUE}, the map or the data.frame will be saved. Maps or data.frame wiil be stored in the 
@@ -119,7 +119,7 @@ ESM_Ensemble.Projection <- function(ESM.proj,
     }
     EF <- round(EF)
     if(save.obj){
-      writeRaster(EF,paste0("ESM_Ensemble_",name.env,".tif"),gdal=c("COMPRESS=DEFLATE","PREDICTOR=2"), datatype = "INT2U",overwrite=TRUE)
+      terra::writeRaster(EF,paste0("ESM_Ensemble_",name.env,".tif"),gdal=c("COMPRESS=DEFLATE","PREDICTOR=2"), datatype = "INT2U",overwrite=TRUE)
       
     }
   }

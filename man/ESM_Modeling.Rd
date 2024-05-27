@@ -33,9 +33,11 @@ ESM_Modeling(
 
 \item{env}{\code{matrix}, \code{data.frame} or \code{SpatRaster} of the species predictors.}
 
+\item{sp.name}{\code{character}. Name of the species (To generate of ESM folder with this name).}
+
 \item{models}{\code{character} of the wanted algorithm methods. Can be c("ANN","CTA","GLM","GBM","MAXNET) or a subset of these 5 techniques.}
 
-\item{models.options}{\code{NULL} or the output from \code{\link{ESM.Models.Options}}}
+\item{models.options}{\code{NULL} or the output from \code{\link{ESM_Models.Options}}}
 
 \item{prevalence}{\code{NULL} or a \code{numeric} comprised between 0-1. Prevalence value is used to build 
 'weighted response weights'. The default is 0.5 (weighting presences equally to the absences). 
@@ -57,7 +59,10 @@ but where the presences (and absences) are equally split into the k blocks. If "
 and for models validation (FALSE). Each column corresponds to a 'RUN' and should be named "RUNX" where X correspond to the number of the run. 
 The last column should be filled with only TRUE and named "Full" to make a full model used for the future projection. Only applicable when cv.method="custom".}
 
-\item{parallel}{\code{numeric}. \code{logical}. Allows or not parallel job using the function \link{parallel::makeCluster}.}
+\item{which.biva}{\code{numeric}. which bivariate combinations should be used for modeling. \emph{Default}: \code{NULL}, 
+meaning that all the combinations will be made.}
+
+\item{parallel}{\code{numeric}. \code{logical}. Allows or not parallel job using the function parallel::makeCluster.}
 
 \item{n.cores}{\code{numeric}. Number of cores used to make the models.}
 
@@ -69,11 +74,6 @@ The last column should be filled with only TRUE and named "Full" to make a full 
 saved to make the projections possible.}
 
 \item{save.obj}{\code{logical}. Allows or not to save the final output.}
-
-\item{spName}{\code{character}. Name of the species (To generate of ESM folder with this name).}
-
-\item{which.biva\code{numeric}.}{which bivariate combinations should be used for modeling. \emph{Default}: \code{NULL}, 
-meaning that all the combinations will be made.}
 }
 \value{
 \itemize{
@@ -107,7 +107,7 @@ This allows to run different biva splits on different computers. However, it is 
 }
 \examples{
 \donttest{library(ecospat)
-Loading test data
+#Loading test data
 data(ecospat.testNiche.inv)
 inv <- ecospat.testNiche.inv
 #species occurrences
@@ -165,7 +165,7 @@ my.ESM_thresholds <- ESM_Threshold(my.ESM_EF)
 
 
 ### Binary Projection based on max TSS of calibrated ESMs into new space                                                
-my.ESM_EFproj_current_binary <- (my.ESM_EFproj_current > 
+my.ESM_EFproj_current_binary <- (Ens.proj > 
                                 (my.ESM_thresholds$TSS.th*1000))*1
 
 ### get the variable contributions of ESMs
@@ -175,7 +175,9 @@ ESM_Variable.Contributions(my.ESM,my.ESM_EF)
 my.ESM_responsePlot<- ESM_Response.Plot(my.ESM,
                                         my.ESM_EF,
                                         fixed.var.metric = 'mean')
-
+                                        
+#To avoid a note: DO NOT RUN 
+unlink("ESM.output_test", recursive = TRUE)
 }
 }
 \references{

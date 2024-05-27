@@ -180,22 +180,22 @@ ESM_Threshold <- function (ESM.ensembleMod)
                   Full.models[, i])
     AUC <- PresenceAbsence::auc(DATA, st.dev = FALSE,which.model = 1, na.rm = TRUE)
     
-    TSS <- ecospat.max.tss(Pred = Full.models[, i],Sp.occ = resp)
+    TSS <- ecospat::ecospat.max.tss(Pred = Full.models[, i],Sp.occ = resp)
     TSS.th <- TSS$max.threshold
     TSS <- TSS$max.TSS
-    meva <- ecospat.meva.table(Pred = Full.models[, i],
+    meva <- ecospat::ecospat.meva.table(Pred = Full.models[, i],
                                Sp.occ = resp,
                                th = TSS.th)
     EVAL1 <- t(as.data.frame(meva$EVALUATION_METRICS$Value[2:9]))
     colnames(EVAL1) = meva$EVALUATION_METRICS$Metric[2:9]
     
     SomersD <- AUC * 2 - 1
-    boyce <- ecospat.boyce(fit = Full.models[, i],
+    boyce <- ecospat::ecospat.boyce(fit = Full.models[, i],
                            obs = Full.models[resp==1, i], PEplot = FALSE)
     Boyce <- boyce$cor
-    MPA1.0 <- ecospat.mpa(Full.models[resp==1, i], perc = 1)
-    MPA0.95 <- ecospat.mpa(Full.models[resp==1, i], perc = 0.95)
-    MPA0.90 <- ecospat.mpa(Full.models[resp==1, i], perc = 0.90)
+    MPA1.0 <- ecospat::ecospat.mpa(Full.models[resp==1, i], perc = 1)
+    MPA0.95 <- ecospat::ecospat.mpa(Full.models[resp==1, i], perc = 0.95)
+    MPA0.90 <- ecospat::ecospat.mpa(Full.models[resp==1, i], perc = 0.90)
     
     pos.F <- which(boyce$F.ratio > 1)
     neg.F <- which(boyce$F.ratio <= 1)
@@ -234,7 +234,7 @@ ESM_Threshold <- function (ESM.ensembleMod)
 #' models where the focal variable was not used. The ratio is corrected for the number of models with or without the focal variable. 
 #' This ratio gives an indication on the proportional contribution of the variable in the final ensemble model. A value of higher than 1 
 #' indicate that the focal variable has a higher contribution than average.
-#' In the case of multiple methods (e.g., GLM, GAM...), the contributions are counted per method. For ensemble model, the contributions 
+#' In the case of multiple methods (e.g., GLM,...), the contributions are counted per method. For ensemble model, the contributions 
 #' are then weighted means (based on the weighting score as chosen in ecospat.ESM.EnsembleModeling of single methods.
 #' 
 #' @return 
@@ -294,6 +294,7 @@ ESM_Variable.Contributions <- function (ESM.Mod,
 #' responses from species distribution models. Ecological Modelling 186, 280-289.
 #' 
 #' @seealso \code{\link{ESM_Modeling}}
+#' @importFrom graphics legend points rug
 #' @export
 ###############
 

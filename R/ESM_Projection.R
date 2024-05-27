@@ -28,6 +28,8 @@
 #' 
 #' Breiner F.T., Nobis M.P., Bergamini A., Guisan A. 2018. Optimizing ensembles of small models for predicting the distribution of species with few occurrences. \emph{Methods in Ecology and Evolution}. \doi{10.1111/2041-210X.12957}
 #' 
+#' @importFrom stats predict.glm predict
+#' @importFrom utils read.table write.table
 #' @export
 
 ESM_Projection <- function(ESM.Mod,

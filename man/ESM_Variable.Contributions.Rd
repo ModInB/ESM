@@ -22,7 +22,7 @@ Calculates the ratio between sum of weights of bivariate models where a focal va
 models where the focal variable was not used. The ratio is corrected for the number of models with or without the focal variable. 
 This ratio gives an indication on the proportional contribution of the variable in the final ensemble model. A value of higher than 1 
 indicate that the focal variable has a higher contribution than average.
-In the case of multiple methods (e.g., GLM, GAM...), the contributions are counted per method. For ensemble model, the contributions 
+In the case of multiple methods (e.g., GLM,...), the contributions are counted per method. For ensemble model, the contributions 
 are then weighted means (based on the weighting score as chosen in ecospat.ESM.EnsembleModeling of single methods.
 }
 \seealso{

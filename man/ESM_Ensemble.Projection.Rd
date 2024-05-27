@@ -12,6 +12,8 @@ ESM_Ensemble.Projection(
 )
 }
 \arguments{
+\item{ESM.proj}{The object returned by \code{\link{ESM_Projection}}.}
+
 \item{ESM.ensembleMod}{The object returned by \code{\link{ESM_Ensemble.Modeling}}.}
 
 \item{chosen.models}{a \code{character} allowing to only make the ensemble maps on a selection of modeling techniques. \emph{Default}: "all".}
@@ -19,8 +21,6 @@ ESM_Ensemble.Projection(
 \item{save.obj}{\code{logical}. If \code{TRUE}, the map or the data.frame will be saved. Maps or data.frame wiil be stored in the 
 folder named by sp.name. Values are multiplied by 1000 and rounded. Note that the maps are in .tif and compressed with the option 
 COMPRESS=DEFLATE and PREDICTOR=2.}
-
-\item{ESM.Mod}{The object returned by \code{\link{ESM_Projection}}.}
 }
 \value{
 a \code{SpatRaster} or \code{data.frame}. EF = the ensemble across the modeling techniques.
