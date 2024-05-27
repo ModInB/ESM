@@ -1,17 +1,13 @@
 Package: ESM
 Version: 0.1
-Date: 2023-11-30
+Date: 2024-05-27
 Title: Ensemble of Small Models
 Authors@R: c(
 	person("Flavien", "Collart", role = c("cre","aut","ctb"), email = "flaviencollart@hotmail.com"),
 	person("Olivier", "Broennimann", role = c("aut","ctb"), email = "olivier.broennimann@unil.ch"),
-	person("Frank", "Breiner", role = "ctb"),
-	person("Mirko", "Di Febbraro", role = "ctb"),
 	person("Antoine", "Guisan", role = "aut", email = "antoine.guisan@unil.ch"))
 Author: Flavien Collart [cre, aut, ctb],
-	Olivier Broennimann [aut,ctb],
-	Frank Breiner [ctb],
-	Mirko Di Febbraro [ctb],
+	Olivier Broennimann [aut, ctb],
 	Antoine Guisan [aut]
 Maintainer: Flavien Collart <flaviencollart@hotmail.com>
 Encoding: UTF-8
