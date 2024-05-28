@@ -64,7 +64,7 @@ ESM_Ensemble.Projection <- function(ESM.proj,
       algo.proj <- algo.proj[,w>0]
       w <- w[w>0]
       ## Make the ensemble for each algo
-      EF.algo <- apply(algo.proj, 1, weighted.mean,w=w)
+      EF.algo <- apply(algo.proj, 1, stats::weighted.mean,w=w)
       if(j==1){
         EF.toMerge <- as.data.frame(EF.algo)
       }else{
@@ -75,7 +75,7 @@ ESM_Ensemble.Projection <- function(ESM.proj,
     colnames(EF.toMerge) = models
     ## Make the ensemble between algo
     if(length(models)>1){
-      EF <- apply(EF.toMerge,1,weighted.mean,w=weights.EF[paste0(models,".EF")])
+      EF <- apply(EF.toMerge,1,stats::weighted.mean,w=weights.EF[paste0(models,".EF")])
       EF <- cbind.data.frame(EF.toMerge,EF)
     }else{
       EF <- EF.toMerge

@@ -127,6 +127,8 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
               model.info = ESM.Mod$model.info,
               cv.split.table = cv.split.table,
               evaluations = EF.eval,
+              weighting.score = weighting.score,
+              threshold = threshold,
               EF.algo = list(pred.EF.algo = pred.EF,
                              weights.algo = weights.algo),
               EF = list(pred.EF = EF,
@@ -143,7 +145,7 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
 .bivaToEnsemble <- function(x,model,w,biva.pred){
   
     pred.algo <- biva.pred[,grep(paste0(x,".",model),colnames(biva.pred),fixed = T)]
-    pred.EF.run <- as.data.frame(apply(pred.algo,1,weighted.mean,
+    pred.EF.run <- as.data.frame(apply(pred.algo,1,stats::weighted.mean,
                                        w=w[sub(paste0(".",x,".",model), "",colnames(pred.algo),fixed = T)],na.rm=T))
     ## For the w, I make sure that it is in the same order as pred.algo
     colnames(pred.EF.run) = model
@@ -153,6 +155,6 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
 ## Allows to ensemble each algo 
 .EFToEnsemble <- function(x,pred.EF,w){
   pred.EF.algo <- pred.EF[,grep(paste0(x,"."),colnames(pred.EF),fixed = T)]
-  EF <- apply(pred.EF.algo,1,weighted.mean,w=w)
+  EF <- apply(pred.EF.algo,1,stats::weighted.mean,w=w)
   return(EF)
 }

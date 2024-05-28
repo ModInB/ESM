@@ -75,7 +75,7 @@ ESM_Models.Options <- function(ANN = NULL,
               GLM = list(type = 'quadratic',
                          myFormula = NULL,
                          test = 'none',
-                         family = binomial(link = 'logit')
+                         family = stats::binomial(link = 'logit')
                          ),
               GBM = list(distribution = 'bernoulli',
                          n.trees = 1000,

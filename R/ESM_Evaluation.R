@@ -85,7 +85,7 @@ ESM_Pooling.Evaluation <- function (ESM.Mod,
   if (length(modelling.techniques) > 1) {
     weights <- ESM.ensembleMod$EF$weights.EF
     PredEns <- cbind.data.frame(resp = PredFin[, 1], apply(PredFin[, 
-                                                                   -1], 1, weighted.mean, w = weights))
+                                                                   -1], 1, stats::weighted.mean, w = weights))
     PredFin <- cbind(PredFin, PredEns[, -1])
     colnames(PredFin)[ncol(PredFin)] = "Fit_ensemble"
     evalInter <- .evaluationScores(Pred = PredEns[,-1],
@@ -109,7 +109,7 @@ ESM_Pooling.Evaluation <- function (ESM.Mod,
                                               models.prediction)
         Pred <- .ecospat.pooling(calib = calib, models.prediction = models.prediction)
         PredBiva <- cbind(PredBiva, Pred)
-        Pred <- na.omit(Pred)
+        Pred <- stats::na.omit(Pred)
         colnames(PredBiva)[ncol(PredBiva)] = paste0("Fit_", 
                                                     modelling.techniques[d])
         evalInter <- .evaluationScores(Pred = Pred[,-1], 
@@ -251,8 +251,8 @@ ESM_Variable.Contributions <- function (ESM.Mod,
   contrib <- data.frame(matrix(nrow = length(var), ncol = length(models), 
                                dimnames = list(var, c(models))))
   weights <- ESM.ensembleMod$EF.algo$weights.algo
-  cb1 <- combn(var, 2)[1, ]
-  cb2 <- combn(var, 2)[2, ]
+  cb1 <- utils::combn(var, 2)[1, ]
+  cb2 <- utils::combn(var, 2)[2, ]
   for (m in models) {
     for (v in var) {
       pos_models <- rownames(weights) == m
@@ -294,7 +294,6 @@ ESM_Variable.Contributions <- function (ESM.Mod,
 #' responses from species distribution models. Ecological Modelling 186, 280-289.
 #' 
 #' @seealso \code{\link{ESM_Modeling}}
-#' @importFrom graphics legend points rug
 #' @export
 ###############
 
@@ -344,7 +343,7 @@ ESM_Response.Plot <- function (ESM.Mod,
                                                          })), max(sapply(proj.fixed.list, function(x) {
                                                            max(x[, -1])
                                                          }))), type = "n", las = TRUE)
-      points(proj.fixed.list[[i]][, 2] ~ proj.fixed.list[[i]][, 
+      graphics::points(proj.fixed.list[[i]][, 2] ~ proj.fixed.list[[i]][, 
                                                               1], xlab = names(proj.fixed.list)[i], col = "red", 
              lwd = 2, type = "l")
     }
@@ -357,14 +356,14 @@ ESM_Response.Plot <- function (ESM.Mod,
                                                          })), max(sapply(proj.fixed.list, function(x) {
                                                            max(x[, -1])
                                                          }))), type = "l", lwd=2, col = "red")
-      legend("topleft", legend = c("ensemble", models), 
+      graphics::legend("topleft", legend = c("ensemble", models), 
              fill = c("red", ColModels[1:length(models)]), 
              box.lty = 0)
       for (mod.i in models) {
-        points(proj.fixed.list[[i]][, mod.i] ~ proj.fixed.list[[i]][, 
+        graphics::points(proj.fixed.list[[i]][, mod.i] ~ proj.fixed.list[[i]][, 
                                                                     1], col = ColModels[which(models == mod.i)], 
                lwd = 2, type = "l")
-        rug(data[, i], col = "black")
+        graphics::rug(data[, i], col = "black")
       }
     }
   }

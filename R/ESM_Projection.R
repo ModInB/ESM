@@ -60,7 +60,7 @@ ESM_Projection <- function(ESM.Mod,
   }
   dir.create(paste0("../",name.env))
   ## Compute the realized combinations----
-  combinations <- combn(colnames(env.var), 2)
+  combinations <- utils::combn(colnames(env.var), 2)
   if (is.null(which.biva)) {
     which.biva <- 1:ncol(combinations)
   }
@@ -138,13 +138,13 @@ ESM_Projection <- function(ESM.Mod,
           pred <- round(1000 * predict.glm(mod, newdata = new.env, type = "response"))
           
         }else if(models[j]=="GBM"){
-          pred <- invisible(round(1000 * gbm::predict.gbm(mod,newdata = new.env, type = "response")))
+          pred <- spsUtil::quiet(round(1000 * gbm::predict.gbm(mod,newdata = new.env, type = "response")))
         }else if(models[j]=="MAXNET"){
-          pred <- invisible(round(1000 * maxnet:::predict.maxnet(mod, newdata = new.env, type = "cloglog",clamp=FALSE))) ##invisible not working
+          pred <- spsUtil::quiet(round(1000 * maxnet:::predict.maxnet(mod, newdata = new.env, type = "cloglog",clamp=FALSE))) ##invisible not working
         }else if(models[j]=="CTA"){
-          pred <- invisible(round(1000 * as.data.frame(rpart:::predict.rpart(mod, newdata = new.env, type = "prob")[,2]))) ##invisible not working
+          pred <- spsUtil::quiet(round(1000 * as.data.frame(rpart:::predict.rpart(mod, newdata = new.env, type = "prob")[,2]))) ##invisible not working
         }else{
-          pred <- invisible(round(1000 * nnet:::predict.nnet(mod, newdata = new.env, type = "raw")))
+          pred <- spsUtil::quiet(round(1000 * nnet:::predict.nnet(mod, newdata = new.env, type = "raw")))
         }
         done <- c(done,paste0(name.env,"/ESM_",x[1],"_",x[2],"_",models[j],".txt"))
         write.table(pred,paste0("../",name.env,"/ESM_",x[1],"_",x[2],"_",models[j],".txt"),sep="\t")
@@ -158,13 +158,13 @@ ESM_Projection <- function(ESM.Mod,
         if(models[j]=="GLM"){
           pred <- round(1000 * terra::predict(new.env, mod, type = "response",na.rm=T))
         }else if(models[j]=="GBM"){
-          pred <- invisible(round(1000 * terra::predict(new.env,mod, fun = gbm::predict.gbm, type = "response",na.rm=T))) ##need to test again
+          pred <- spsUtil::quiet(round(1000 * terra::predict(new.env,mod, fun = gbm::predict.gbm, type = "response",na.rm=T))) ##need to test again
         }else if(models[j]=="MAXNET"){
-          pred <- invisible(round(1000 * terra::predict(new.env,mod, fun = maxnet:::predict.maxnet, type = "cloglog",clamp=FALSE,na.rm=T))) ##invisible not working
+          pred <- spsUtil::quiet(round(1000 * terra::predict(new.env,mod, fun = maxnet:::predict.maxnet, type = "cloglog",clamp=FALSE,na.rm=T))) ##invisible not working
         }else if(models[j]=="CTA"){
-          pred <- invisible(round(1000 *  terra::predict(new.env,mod, fun = rpart:::predict.rpart, type = "prob",na.rm = T)[[2]])) ##invisible not working
+          pred <- spsUtil::quiet(round(1000 *  terra::predict(new.env,mod, fun = rpart:::predict.rpart, type = "prob",na.rm = T)[[2]])) ##invisible not working
         }else{
-          pred <- invisible(round(1000 * terra::predict(new.env,mod, fun = nnet:::predict.nnet, type = "raw",na.rm=T))) ##invisible not working
+          pred <- spsUtil::quiet(round(1000 * terra::predict(new.env,mod, fun = nnet:::predict.nnet, type = "raw",na.rm=T))) ##invisible not working
         }
         done <- c(done,paste0(name.env,"/ESM_",x[1],"_",x[2],"_",models[j],".tif"))
         terra::writeRaster(pred,paste0("../",name.env,"/ESM_",x[1],"_",x[2],"_",models[j],".tif"),

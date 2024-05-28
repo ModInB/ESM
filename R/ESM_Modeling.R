@@ -66,8 +66,6 @@
 #' 
 #' Breiner F.T., Nobis M.P., Bergamini A., Guisan A. 2018. Optimizing ensembles of small models for predicting the distribution of species with few occurrences. \emph{Methods in Ecology and Evolution}. \doi{10.1111/2041-210X.12957}
 #' 
-#' @importFrom stats as.formula binomial glm na.omit sd step weighted.mean
-#' @importFrom utils combn
 #' @seealso \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Modeling}},   \code{\link{ESM_Ensemble.Projection}}, 
 #' \code{\link{ESM_Pooling.Evaluation}}
 #' 
@@ -272,7 +270,7 @@ ESM_Modeling <- function(resp,
     change.n <- n.presAbs - n.presAbs.new 
     warning(paste("\nNAs were found in env and were thus removed.\n",change.n["0"],"absences",change.n["1"], "presences were removed"))
     xy <- xy[!(is.thereNAs),]
-    env.var = na.omit(env.var)
+    env.var = stats::na.omit(env.var)
   }
   # Check if presences and absences are present even after removing possible NAs----
   if(sum(resp)==0 | sum(resp==0) == 0){
@@ -289,7 +287,7 @@ ESM_Modeling <- function(resp,
   setwd(newwd)
   
   # Generate all the possible combination variables
-  combinations <- combn(colnames(env.var), 2)
+  combinations <- utils::combn(colnames(env.var), 2)
   
   if (is.null(which.biva)) {
     which.biva <- 1:ncol(combinations)
@@ -365,8 +363,10 @@ ESM_Modeling <- function(resp,
                                 which.biva = which.biva,
                                 failed.mod = failed.mods,
                                 modeling.id = modeling.id,
+                                prevalence = prevalence,
                                 biva.path = newwd),
               cv.split.table = cv.split.table,
+              cv.method = cv.method,
               biva.predictions = biva.mods.filt,
               biva.calibration = biva.calib,
               biva.evaluations = biva.eval
@@ -581,7 +581,7 @@ ESM_Modeling <- function(resp,
             
             formula <- .makeGLMFormula(env.var,
                                        models.options$GLM)
-            tryCatch(expr={mod <- glm(formula = formula,
+            tryCatch(expr={mod <- stats::glm(formula = formula,
                        family = models.options$GLM$family,
                        weights = w,
                        data = data)}, error=function(e){
@@ -613,12 +613,12 @@ ESM_Modeling <- function(resp,
           }else if(models.options$GLM$test == "AIC"){
             formula <- .makeGLMFormula(env.var,
                                        models.options$GLM)
-            mod.full<- glm(formula = formula,
+            mod.full<- stats::glm(formula = formula,
                            family = models.options$GLM$family,
                            weights = w,
                            data = data)
             tryCatch(expr={
-              mod <- step(mod.full,
+              mod <- stats::step(mod.full,
                         scope = "resp~1",
                         direction = "both",
                         trace=F)
@@ -651,7 +651,7 @@ ESM_Modeling <- function(resp,
           } 
           
         }else{
-         tryCatch(expr={mod <- glm(formula = models.options$GLM$myFormula,
+         tryCatch(expr={mod <- stats::glm(formula = models.options$GLM$myFormula,
                      family = models.options$GLM$family,
                      weights = w,
                      data = data)}, error=function(e){
@@ -783,14 +783,14 @@ ESM_Modeling <- function(resp,
     }
   }
   
-  return(as.formula(formula))
+  return(stats::as.formula(formula))
   
 }
 ## .checkFailedMods----
 # Check Failed Mods
 .checkFailedMods <- function(biva.mod){
   IsNa <- apply(biva.mod, 2, anyNA)
-  IsFlat <- apply(biva.mod, 2, sd) == 0
+  IsFlat <- apply(biva.mod, 2, stats::sd) == 0
   
   Failed <- IsNa | IsFlat
   return(Failed)
