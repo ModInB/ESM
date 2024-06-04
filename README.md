@@ -1,10 +1,11 @@
 [![Github Version](https://img.shields.io/badge/dev%20version-0.1-53AA93.svg)](https://github.com/FlavienCollart/ESMTest)
 [![Last Commit](https://img.shields.io/badge/Last%20Commit-June-8E3145.svg)](https://github.com/FlavienCollart/ESMTest/commits/main)
-# ESM <img src="inst/logo/ESM.png" align="right" height = 150/>
+<img src="inst/logo/ESM.png" align="right" height = 150/>
 <div align="center">
 <b>------------------------------------------------------------<br/>
 <b>ESM - Ensemble of Small Models<br/>
 <b>------------------------------------------------------------<br/>
+
 </b>
 </div>
 
