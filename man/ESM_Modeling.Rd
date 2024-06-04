@@ -62,7 +62,7 @@ The last column should be filled with only TRUE and named "Full" to make a full 
 \item{which.biva}{\code{numeric}. which bivariate combinations should be used for modeling. \emph{Default}: \code{NULL}, 
 meaning that all the combinations will be made.}
 
-\item{parallel}{\code{numeric}. \code{logical}. Allows or not parallel job using the function parallel::makeCluster.}
+\item{parallel}{\code{logical}. Allows or not parallel job using the function parallel::makeCluster.}
 
 \item{n.cores}{\code{numeric}. Number of cores used to make the models.}
 

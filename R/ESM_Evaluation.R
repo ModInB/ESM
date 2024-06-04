@@ -379,8 +379,7 @@ ESM_Response.Plot <- function (ESM.Mod,
 ## The dark side of the moon: the hidden functions
 
 ## Compute diverse metrics
-.evaluationScores <- function (Pred, resp) 
-{
+.evaluationScores <- function (Pred, resp){
 
   pred.esmPres <- Pred[resp == 1]
   pred.esmAbs <- Pred[resp == 0]

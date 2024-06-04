@@ -1,12 +1,54 @@
+#' @name ESM_Null.Models
+#' @author Flavien Collart \email{flaviencollart@hotmail.com}
+#' @title Ensemble of Small Models: Evaluation using Null Models
+#' @description Performed null models to test the significativity of the ESM evaluatuion as recommended in Collart & Guisan (2023) and performed in 
+#' van Proosdij et al (2016). 
+#' It consists of running a series of null models, randomly shuffling the presences and absences, thus generating ‘fake’ occurrences.
+#' These models are performed folowing the same methodology as for the ESM (same model parameters, same number of cross-validations and 
+#' same threshold for the ensemble). The pooling evaluation can also be combined with these null models with the option pooling = TRUE 
+#' (as recommended in Collart & Guisan, 2023). In addition to the pvalue, the observed evaluation metrics are then reajusted using the 
+#' value of the evaluation metric at a certain quantile following the methology developped in Verdon et al (2024). 
+#' 
+#' @param  ESM.Mod The object returned by \code{ESM_Modeling}.
+#' @param ESM.ensembleMod The object returned by \code{\link{ESM_Ensemble.Modeling}}.
+#' @param n.rep \code{integer}. The number of null models. \emph{Default: 99}.
+#' @param pooling \code{logical}. Should the pooling evaluation be performed? \emph{Default: FALSE}.
+#' @param hist.plot \code{logical}. Should an histogram representing the null distribution be performed? \emph{Default: FALSE}.
+#' @param quant \code{numeric}. The quantile used to recalibrated the evaluation metrics (between 0 and 1). \emph{Default: 0.95}.
+#' @param parallel \code{logical}. Allows or not parallel job using the function parallel::makeCluster. \emph{Default: FALSE} 
+#' but It is highly recommended to perform the null models in parallel as it takes quite a lot of time.
+#' @param n.cores \code{integer}. Number of cores used to make the models.
+#' @param pathToSaveObject The path to save the objects (temporally if save.obj = FALSE). \emph{Default: working directory}
+#' @param save.obj \code{logical}. Should all the null models be kept? \emph{Default: FALSE}.
+#' 
+#' @return \itemize{
+#' a \code{list} containing: 
+#' \item{pval}: \code{numeric}. The pvalue computed for each metric.
+#' \item{adj.evaluation}: \code{numeric}. Adjusted evaluation metrics for the ESM based on a certain quantile from the null distribution.
+#' \item{evaluations}: \code{matrix}. Observed and null values for each metrics.
+#' }
+#' 
+#' @references 
+#' Collart, F., & Guisan, A. 2023. Small to train, small to test: Dealing with low sample size in model evaluation. 
+#' \emph{Ecological Informatics}. \bold{75}, 102106. \doi{10.1016/j.ecoinf.2023.102106}.
+#' 
+#' van Proosdij, A.S.J., Sosef, M.S.M., Wieringa, J.J. and Raes, N. 2016. Minimum required number of specimen records to 
+#' develop accurate species distribution models. \emph{Ecography}. \bold{39}, 542-552. \doi{10.1111/ecog.01509}.
+#' 
+#' Verdon, V., Malard, L., Collart, F., Adde, A., Yashiro, E., Lara Pandi, E., Mod, H., Singer, D., Niculita-Hirzel, H., 
+#' Guex, N. and Guisan, A. 2024. Can we accurately predict the distribution of soil microorganism presence and relative abundance? 
+#' \emph{Ecography}. e07086. \doi{10.1111/ecog.07086}.
+#' 
 #' @export
 ESM_Null.Models <- function(ESM.Mod,
                             ESM.ensembleMod,
                             n.rep = 99,
+                            quant = 95,
                             pooling = FALSE,
                             hist.plot = FALSE,
-                            pathToSaveObject = getwd(),
                             parallel = FALSE,
                             n.cores = 1,
+                            pathToSaveObject = getwd(),
                             save.obj = FALSE){
  
   ## check info
@@ -17,6 +59,27 @@ ESM_Null.Models <- function(ESM.Mod,
     cv.ratio <- round(sum(ESM.Mod$cv.split.table[,1])/length(ESM.Mod$cv.split.table[,1]),1)
     cat(paste("\ncv.ratio has been estimated to be:", cv.ratio))
   }
+  
+  if((n.rep%%1) !=0){
+    stop("nrep should be an integer")
+  }
+  if(!is.logical(pooling)){
+    stop("pooling should be a logical")
+  }
+  if(!is.logical(hist.plot)){
+    stop("hist.plot should be a logical")
+  }
+  if(!is.logical(parallel)){
+    stop("parallel should be a logical")
+  }
+  if(!is.logical(save.obj)){
+    stop("save.obj should be a logical")
+  }
+  if(parallel & (n.cores%%1) !=0){
+    stop("ncores should be an integer")
+  }
+  
+  ##Create a check for quantile
   models <- ESM.Mod$model.info$models
   if(parallel){
     cl <- parallel::makeCluster(n.cores)
@@ -58,8 +121,14 @@ ESM_Null.Models <- function(ESM.Mod,
   }
   
   colnames(eval.nullModel) = c("Observed",paste0("NullModel",1:n.rep))
-  pval <- apply(eval.nullModel >= eval.nullModel[,1],1,sum, na.rm =T)/(apply(!is.na(eval.nullModel),1,sum))
+  pval <- apply(eval.nullModel >= eval.nullModel[,1],1, sum, na.rm =T)/(apply(!is.na(eval.nullModel),1,sum))
   
+  val.quantile <- apply(eval.nullModel[,-1],1,stats::quantile, probs = quant, na.rm = T) 
+  adj.evaluation <- (eval.nullModel[,1] - val.quantile)/ (1-val.quantile)
+  names(adj.evaluation) = paste0("Adjusted_",names(adj.evaluation))
+  
+  pval <- pval[-2]
+  adj.evaluation <- adj.evaluation[-2]
   if(!save.obj){
     unlink(paste0(pathToSaveObject,"/ESM.output_",ESM.Mod$data$sp.name,".Null"),recursive = T, force = T)
   }
@@ -81,9 +150,12 @@ ESM_Null.Models <- function(ESM.Mod,
   
   
   obj <- list(pval = pval,
-              evaluations = eval.nullModel)
+              adj.evaluation = adj.evaluation,
+              evaluations = eval.nullModel[-2,])
   return(obj)
 }
+
+### Hidden function To perform individiual Null Models ----
 
 .NullModelling <- function(x,
                            ESM.Mod,

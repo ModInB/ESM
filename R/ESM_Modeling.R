@@ -27,7 +27,7 @@
 #' The last column should be filled with only TRUE and named "Full" to make a full model used for the future projection. Only applicable when cv.method="custom".
 #' @param which.biva \code{numeric}. which bivariate combinations should be used for modeling. \emph{Default}: \code{NULL}, 
 #' meaning that all the combinations will be made.
-#' @param parallel \code{numeric}. \code{logical}. Allows or not parallel job using the function parallel::makeCluster.
+#' @param parallel \code{logical}. Allows or not parallel job using the function parallel::makeCluster.
 #' @param n.cores \code{numeric}. Number of cores used to make the models.
 #' @param modeling.id  \code{character}. the ID (=name) of modeling procedure. A random number by default.
 #' @param pathToSaveObject a \code{character} of a full path to store the objects. \emph{Default}: Takes the value from getwd().
