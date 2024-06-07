@@ -168,6 +168,7 @@ ESM_Modeling <- function(resp,
   if(length(resp) != nrow(xy)){
     stop("resp and xy must have the same length")
   }
+  
   if(anyNA(resp)){
     
     warning("NAs were present in resp and were converted to 0")
@@ -177,6 +178,10 @@ ESM_Modeling <- function(resp,
       cat("\nAs NAs were present in resp, we assume that you use pseudo-absences and we thus set prevalence to 0.5")
       prevalence = 0.5
     }
+  }
+  
+  if(!all(sort(unique(resp)) == c(0,1))){
+    stop("resp should only contain 0 and 1")
   }
   if(ncol(xy)!=2){
     stop("xy should be a two-column matrix or data.frame")
