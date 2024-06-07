@@ -9,14 +9,91 @@ ESM_Bp.Sampling(
   n.points = 10000,
   method = "rand.geo",
   aggr.fact.geo = 5,
+  digit.val.env = 1,
   n.strat.env = 3,
-  round.val.env = 2,
   To.plot = FALSE,
   xy.pres = NULL
 )
 }
+\arguments{
+\item{env}{a \code{SpatRaster} of at least one layer. if \emph{method = "strat.geo"}, a minimum of 2 layers are needed.}
+
+\item{n.points}{\code{integer}. The number of background to be selected. \emph{Note that this number can change depending on the technique}}
+
+\item{method}{\code{character}. one of: "rand.geo", "strat.geo", "rand.env" or "strat.env". \emph{see Details}.}
+
+\item{aggr.fact.geo}{\code{integer}. The aggregating factor to generate the checkerboard. Only needed 
+when method = "strat.geo". \emph{see Details}. \emph{Default: 5}.}
+
+\item{digit.val.env}{\code{integer}. The number of digit to keep to remove too similar environmental values.
+Only needed when method = "rand.env". \emph{Default: 1}.}
+
+\item{n.strat.env}{\code{integer}. The number of classes to create for each environmental layer. Only needed
+when method = "strat.env". \emph{see Details}. \emph{Default: 3}.}
+
+\item{To.plot}{\code{logical}. Should the background point plotted on a map (in black).}
+
+\item{xy.pres}{A two-column \code{matrix} or \code{data.frame} containing the coordinates of the species occurrences.
+Optional and only used when To.plot = TRUE. Plot the occurrences on the map (in aquamarine). \emph{Default: NULL}.}
+}
+\value{
+a \code{matrix} containing the selected background points. The two first columns correspond to the coordinates.
+The other columns correspond to the environmental values of these points and the last column correspond to the geographic 
+or environmental classes (named "BigClass) to which the observation belongs (only for method = "strat.geo" or "strat.env")
+}
 \description{
-Ensemble of Small Models: Sampling background points using 4 different methods.
+This function generates background following the 4 different methods described by Steen et al (2024).
+Two are generated in the environmental space whereas the remaining is in the geographic space (see details).
+}
+\details{
+The "rand.geo" method corresponds to a random selection of background points in the geographic space. 
+This is the most used techniques in SDM studies. This selection can also be stratified (method ="strat.geo"). To 
+realise this stratification, a checkerboard is created with a pixel of a certain resolution. The size of these
+pixels can be modified with the argument 'aggr.fact.geo'. For each pixel of the checkerboard the same number of 
+background points are randomly selected to reach the value of \emph{n.points}. Selecting background points can also 
+be performed in the environmental space (see Steen et al, 2024). The first method is the full random background
+point selection (method = "rand.env"). To do so, a PCA is first performed and the two fist axes are kept to 
+reflect the environmental space. Then, a grid of 100*100 pixel is created. To reduce too similar points, 
+the PCA scores of each observation are rounded at a certain digit (argument digit.val.env) and only 
+one observation among the similar ones is kept. Several points are then randomly selected in each pixel of this grid.
+By doing this, the entire environmental is captured avoiding the over-abundance of some common environment. The
+second method is the stratified selection of background point in the environmental spaces (method = "strat.env").
+To perform this selection, each environmental layer is converted into classes of \emph{n.strat.env} (Default: 3)
+by dividing the range of the environmental predictor by \emph{n.strat.env} of the same size. For each pixel 
+constituting the grid, we then combined all the predictor together, creating a combination of classes. For each 
+of the different possible combination of classes available, the same number of background point is selected  to 
+reach the value of \emph{n.points}.
+}
+\examples{
+library(terra)
+library(ecospat)
+env <- terra::rast(system.file("extdata","ecospat.testEnv.tif",package="ecospat"))
+# Selection full random in the geographic space
+Bp <- ESM_Bp.Sampling(env = env,
+                      n.points = 1000,
+                      method = "rand.geo",
+                      To.plot = FALSE)
+                       
+# Selection stratified  in the geographic space                     
+Bp <- ESM_Bp.Sampling(env = env,
+                      n.points = 1000,
+                      method = "strat.geo",
+                      aggr.fact.geo = 2,
+                      To.plot = FALSE)
+                       
+# Selection full random in the environmental space                     
+Bp <- ESM_Bp.Sampling(env = env,
+                      n.points = 1000,
+                      method = "rand.env",
+                      digit.val.env = 2,
+                      To.plot = FALSE)       
+                                        
+# Selection stratified in the environmental space                     
+Bp <- ESM_Bp.Sampling(env = env,
+                      n.points = 1000,
+                      method = "strat.env",
+                      n.strat.env = 3,
+                      To.plot = FALSE)                          
 }
 \references{
 Steen,B., Broennimann, O., Maiorano, L., Guisan, . 2024. How sensitive are species distribution models to different background point 
