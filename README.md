@@ -22,7 +22,7 @@ devtools::install_github("FlavienCollart/ESMTest", dependencies = TRUE)
 
 ### Information
 
-New version of the functions in the ecospat package to reduce storage needs (alpha version).
+Functions to perform and evaluate Ensemble of small models, whiich is a method for rare species (alpha version).
 
 
 ### References
