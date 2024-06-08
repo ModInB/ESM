@@ -313,8 +313,8 @@ ESM_Null.Models <- function(ESM.Mod,
 #' @export
 ###############
 
-ESM_Threshold <- function (ESM.ensembleMod) 
-{
+ESM_Threshold <- function (ESM.ensembleMod){
+  
   models = ESM.ensembleMod$model.info$models 
   resp <-  ESM.ensembleMod$data$resp
   
@@ -421,8 +421,9 @@ ESM_Variable.Contributions <- function (ESM.Mod,
     }
   }
   if (length(models) > 1) {
-    EF <- matrixStats::rowWeightedMeans(x = data.matrix(contrib[, 
-                                                                models]), w =ESM.ensembleMod$EF$weights.EF , na.rm = TRUE)
+    EF <- apply(x = data.matrix(contrib[,models]),1,stats::weighted.mean, 
+                w =ESM.ensembleMod$EF$weights.EF , na.rm = TRUE)
+    
     contrib <- cbind(contrib, EF)
   }
   return(contrib)
