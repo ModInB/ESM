@@ -50,15 +50,17 @@
 #' \itemize{
 #' a \code{list} containing: 
 #' \item{data}: a \code{list} with the object resp, xy, env.var and sp.name. env.var is = to the data supplied in the argument env. 
-#' If env, was a SpatRaster, it corrsponds to the extracted values of these rasters for the species coordinates.
-#' \item{model.info}: a \code{list} of the models used, their options, the combination of bivariate models (which.biva), 
-#' the modeling ID, the path to the folder where are the stored the models (biva.path), and the failed models.
+#' If env, was a SpatRaster, it corresponds to the extracted values of these rasters.
+#' \item{model.info}: a \code{list} of the models used (models), their options (model.options), the combination of bivariate models (which.biva), 
+#' the failed models (failed.mod), the modeling ID (modeling.id), the prevalence argument and, the path to the folder where are the stored the models (biva.path).
 #' \item{cv.split.table}: a \code{matrix} used to train and test models. See explanation of the argument cv.split.table.
+#' \item{cv.method }: a \code{character} corresponding to the used cross-validation method.
 #' \item{biva.predictions}: a \code{list} of the predictions of all the runs for each bivariate models.
 #' \item{biva.evaluations}: a \code{list} of the evaluation of each bivariate model runs. The evaluation of the full model correspond 
 #' to the mean of all the runs. Note that if one of the run has a Boyce = NA, we will consider this has a 0 when averaging.
 #' \item{biva.calibration}: a \code{list} of the calibration power of each bivariate model runs including the full model.
 #' }
+#' 
 #' @references Lomba, A., L. Pellissier, C.F. Randin, J. Vicente, F. Moreira, J. Honrado and A. Guisan. 2010. Overcoming the rare species 
 #' modelling paradox: A novel hierarchical framework applied to an Iberian endemic plant. \emph{Biological Conservation}, \bold{143},2647-2657.
 #' 
@@ -119,7 +121,7 @@
 #'
 #'
 #' ### Ensemble predictions
-#'Ens.proj <- ESM_Ensemble.Projection(ESM.proj = proj,
+#' Ens.proj <- ESM_Ensemble.Projection(ESM.proj = proj,
 #'                                    ESM.ensembleMod = my.ESM_EF,
 #'                                    save.obj = TRUE)
 #'

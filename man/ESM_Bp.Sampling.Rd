@@ -8,8 +8,8 @@ ESM_Bp.Sampling(
   env,
   n.points = 10000,
   method = "rand.geo",
-  aggr.fact.geo = 5,
   digit.val.env = 1,
+  aggr.fact.geo = 5,
   n.strat.env = 3,
   To.plot = FALSE,
   xy.pres = NULL
@@ -22,11 +22,11 @@ ESM_Bp.Sampling(
 
 \item{method}{\code{character}. one of: "rand.geo", "strat.geo", "rand.env" or "strat.env". \emph{see Details}.}
 
-\item{aggr.fact.geo}{\code{integer}. The aggregating factor to generate the checkerboard. Only needed 
-when method = "strat.geo". \emph{see Details}. \emph{Default: 5}.}
-
 \item{digit.val.env}{\code{integer}. The number of digit to keep to remove too similar environmental values.
 Only needed when method = "rand.env". \emph{Default: 1}.}
+
+\item{aggr.fact.geo}{\code{integer}. The aggregating factor to generate the checkerboard. Only needed 
+when method = "strat.geo". \emph{see Details}. \emph{Default: 5}.}
 
 \item{n.strat.env}{\code{integer}. The number of classes to create for each environmental layer. Only needed
 when method = "strat.env". \emph{see Details}. \emph{Default: 3}.}

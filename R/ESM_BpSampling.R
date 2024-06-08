@@ -7,10 +7,10 @@
 #' @param env a \code{SpatRaster} of at least one layer. if \emph{method = "strat.geo"}, a minimum of 2 layers are needed.
 #' @param n.points \code{integer}. The number of background to be selected. \emph{Note that this number can change depending on the technique}
 #' @param method \code{character}. one of: "rand.geo", "strat.geo", "rand.env" or "strat.env". \emph{see Details}.
-#' @param aggr.fact.geo \code{integer}. The aggregating factor to generate the checkerboard. Only needed 
-#' when method = "strat.geo". \emph{see Details}. \emph{Default: 5}.
 #' @param digit.val.env \code{integer}. The number of digit to keep to remove too similar environmental values.
 #' Only needed when method = "rand.env". \emph{Default: 1}.
+#' @param aggr.fact.geo \code{integer}. The aggregating factor to generate the checkerboard. Only needed 
+#' when method = "strat.geo". \emph{see Details}. \emph{Default: 5}.
 #' @param n.strat.env \code{integer}. The number of classes to create for each environmental layer. Only needed
 #' when method = "strat.env". \emph{see Details}. \emph{Default: 3}.
 #' @param To.plot \code{logical}. Should the background point plotted on a map (in black).
@@ -80,21 +80,21 @@
 ESM_Bp.Sampling <- function(env,
                             n.points = 10000,
                             method = "rand.geo",
-                            aggr.fact.geo = 5,
                             digit.val.env = 1,
+                            aggr.fact.geo = 5,
                             n.strat.env = 3,
                             To.plot = FALSE,
                             xy.pres = NULL){
   
   if(!inherits(env,"SpatRaster")){
-    stop("env should be a SpatRaster from terra package.")
+    stop("env must be a SpatRaster from terra package.")
   }
   if(!is.numeric(n.points) | n.points%%1 != 0 |  n.points <= 0){
-    stop("n.points should be a positive integer")
+    stop("n.points must be a positive integer")
     
   }
   if(!(method %in% c("rand.geo", "rand.env", "strat.geo", "strat.env")) | length(method)>1){
-    stop("method should be one of: 'rand.geo', 'rand.env', 'strat.geo' or, 'strat.env'")
+    stop("method must be one of: 'rand.geo', 'rand.env', 'strat.geo' or, 'strat.env'")
   }
   
   ## Start the process ----
@@ -103,12 +103,11 @@ ESM_Bp.Sampling <- function(env,
     coord.Env <- terra::crds(env)
     if(n.points > nrow(coord.Env)){
       cat("\nn.points is greater than the number of pixels with values. All pixels are taken")
-      test.bp <- coord.Env
+      bp <- coord.Env
     }else{
-      test.bp <- coord.Env[sample(1:nrow(coord.Env), size = n.points, replace = FALSE),]
+      bp <- coord.Env[sample(1:nrow(coord.Env), size = n.points, replace = FALSE),]
     }
-    test.bp <-  cbind.data.frame(test.bp,
-                                 terra::extract(env,test.bp))
+    bp <-  cbind.data.frame(bp,terra::extract(env,bp))
     
     
   }else if(method == "rand.env"){
@@ -116,24 +115,27 @@ ESM_Bp.Sampling <- function(env,
     if(terra::nlyr(env)<2){
       stop("when method == rand.env or strat.env, a minimum of 2 environnmental layers is needed in env.")
     }
+    if(digit.val.env %%1 !=0 | digit.val.env < 0){
+      stop("digit.val.env must be an integer greater than 0")
+    }
     
-    test <- terra::as.data.frame(env, xy = T)
-    test <- stats::na.omit(test)
-    test.env.pca <- ade4::dudi.pca(test[,-c(1:2)], scale = TRUE, scannf = FALSE, nf = 2)
-    Total.variance <- 100 * (cumsum(test.env.pca$eig/sum(test.env.pca$eig)))[2]
+    env.dat <- terra::as.data.frame(env, xy = T)
+    env.dat <- stats::na.omit(env.dat)
+    env.pca <- ade4::dudi.pca(env.dat[,-c(1:2)], scale = TRUE, scannf = FALSE, nf = 2)
+    Total.variance <- 100 * (cumsum(env.pca$eig/sum(env.pca$eig)))[2]
     cat(paste("\nThe two first PCA axes explained", round(Total.variance,1),"% of the total variance"))
-    env.score.round <- round(test.env.pca$li,digit.val.env)
+    env.score.round <- round(env.pca$li,digit.val.env)
     # density_2d <- ks::kde(env.score.round,compute.cont=TRUE)
     # aa <- grDevices::contourLines(density_2d$eval.points[[1]], density_2d$eval.points[[2]], density_2d$estimate, level = 0.001)
     # bb <- lapply(aa, function(x){do.call(cbind,x)[,c(2:3)]})
     # cc <- terra::vect(bb,type = "polygons",crs="")
     # cc<-terra::aggregate(cc)
-    vide <- terra::rast(terra::ext(apply(env.score.round,2, range)), ncols = 100, nrows = 100,crs="") #vals = 1:(100*100)
+    grid.env <- terra::rast(terra::ext(apply(env.score.round,2, range)), ncols = 100, nrows = 100,crs="") #vals = 1:(100*100)
     # ee <- terra::mask(vide,cc)
-    ee <- vide
+
     env.score.round.filt <- unique(env.score.round)
 
-    cell.pos <- terra::cellFromXY(ee, env.score.round.filt)
+    cell.pos <- terra::cellFromXY(grid.env, env.score.round.filt)
     cell.env <- unique(cell.pos)
     if(n.points<length(cell.env)){
       cat("\nThere are more environmental classes than n.points. Thus,the number of background points will be equal to the number of classes")
@@ -150,8 +152,8 @@ ESM_Bp.Sampling <- function(env,
       pointVal <- which(cell.pos == cell.env[i])
       if(length(pointVal) < n.ObsPerClass){
         if(ToPrint){
-          cat("\nSome Classes have less observation than the number of observation per class. Thus, all the observations for these classes will be  sampled. 
-              Note that the number of background points sampled will be less than you asked.")
+          cat("\nSome Classes have less observation than the number of observation per class. Thus, all the observations for these classes will be sampled. 
+              Note that the number of background points sampled will be less than asked.")
         }
         ToPrint <- FALSE
         ToKeep <- c(ToKeep,pointVal)
@@ -166,11 +168,13 @@ ESM_Bp.Sampling <- function(env,
     }
   
     
-    test.bp <- test[rownames(env.score.round.filt)[ToKeep],]
+    bp <- env.dat[rownames(env.score.round.filt)[ToKeep],]
       
 
   }else if(method == "strat.geo"){
-    
+    if(aggr.fact.geo %%1 !=0 | aggr.fact.geo <= 1){
+      stop("aggr.fact.geo must be an integer greater than 1")
+    }
     coord.Env <- terra::crds(env)
     Checkboard <- terra::aggregate(terra::subset(env,1), fact = aggr.fact.geo, na.rm=T)
     Checkboard.pos <- terra::cellFromXY(Checkboard, coord.Env)
@@ -192,7 +196,7 @@ ESM_Bp.Sampling <- function(env,
       if(length(pointVal) < n.ObsPerClass){
         if(ToPrint){
           cat("Some Classes have less observation than the number of observation per class. Thus, all the observations for these classes will be  sampled. 
-              Note that the number of background points sampled will be less than you asked.")
+              Note that the number of background points sampled will be less than  asked.")
         }
         ToPrint <- FALSE
         ToKeep <- c(ToKeep,pointVal)
@@ -204,21 +208,21 @@ ESM_Bp.Sampling <- function(env,
       }
     }
     
-    test.bp <- terra::extract(env,coord.Env[ToKeep,])
+    bp <- terra::extract(env,coord.Env[ToKeep,])
     
-    test.bp <- cbind.data.frame(coord.Env[ToKeep,],
-                                test.bp, 
+    bp <- cbind.data.frame(coord.Env[ToKeep,],
+                                bp, 
                                 BigClass = Checkboard.pos[ToKeep])
     
   }else{
     
     ##Strat in the environment ----
     
-    test <- terra::as.data.frame(env, xy = T)
-    test <- stats::na.omit(test)
+    env.dat <- terra::as.data.frame(env, xy = T)
+    env.dat <- stats::na.omit(env.dat)
     
     ## Create classes per predictor
-    Test.class <- apply(as.data.frame(test[,-c(1:2)]), 2, 
+    env.class <- apply(as.data.frame(env.dat[,-c(1:2)]), 2, 
                         function(x,n.strat.env){
                           classes <- seq(min(x),max(x),
                                          length.out = n.strat.env+1)
@@ -228,7 +232,7 @@ ESM_Bp.Sampling <- function(env,
                           }, 
                         n.strat.env = n.strat.env)
     ## Generate the classes combining all the predictors
-    Class.Tot <- as.factor(apply(Test.class, 1, paste, collapse = "" ))
+    Class.Tot <- as.factor(apply(env.class, 1, paste, collapse = "" ))
       
     Cat.Class.Tot <- levels(Class.Tot)
     
@@ -260,14 +264,14 @@ ESM_Bp.Sampling <- function(env,
       }
     }
     
-    test.bp <- cbind.data.frame(test[ToKeep,],
+    bp <- cbind.data.frame(env.dat[ToKeep,],
                                 BigClass = Class.Tot[ToKeep])
     
     
   }
   if(To.plot){
     terra::plot(terra::subset(env,1), col= "grey80", legend = F)
-    terra::points(test.bp[,1:2], pch = 20)
+    terra::points(bp[,1:2], pch = 20)
     if(!is.null(xy.pres)){
       if(ncol(xy.pres) !=2){
         stop("\nxy.pres should only contain to columns")
@@ -275,5 +279,5 @@ ESM_Bp.Sampling <- function(env,
       terra::points(xy.pres, pch = 19, col = "aquamarine3")
     }
   }
-  return(test.bp)
+  return(bp)
 }
