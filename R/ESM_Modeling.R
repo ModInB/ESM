@@ -14,7 +14,7 @@
 #' @param prevalence \code{NULL} or a \code{numeric} comprised between 0-1. Prevalence value is used to build 
 #' 'weighted response weights'. The default is 0.5 (weighting presences equally to the absences). 
 #' If \code{NULL} each observation (presence or absence) has the same weight (independent of the number of presences and absences). 
-#' Note that it is not applicable for MAXNET and ANN.
+#' Note that it is not applicable for MAXNET.
 #' @param cv.method \code{character}. Either "split-sampling", "block" or "custom". "split-sampling" corresponds 
 #' to a repeated split-sampling cross-validations where a percentage of presences and absences, randomly selected 
 #' for each run, are used to train the model and the remaining to test it. "block" corresponds to a k-fold cross-validations 
@@ -501,6 +501,7 @@ ESM_Modeling <- function(resp,
                                    model.option=list(type="linear"))
         
         tryCatch(expr={mod <- nnet::nnet(formula,data = data.ann,
+                                         weights = w,
                                          size = models.options$ANN$size,
                                          decay = models.options$ANN$decay,
                                          rang = models.options$ANN$rang,
