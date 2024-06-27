@@ -14,7 +14,7 @@
 
 
 
-- **Development version** [![v](https://img.shields.io/badge/dev%20version-0.1-53AA93.svg)](https://github.com/FlavienCollart/ESMTest)
+- **Development version** [![v](https://img.shields.io/badge/dev%20version-0.1-53AA93.svg)](https://github.com/FlavienCollart/ESM)
 ```R
 library(devtools)
 devtools::install_github("FlavienCollart/ESMTest", dependencies = TRUE)
@@ -22,7 +22,7 @@ devtools::install_github("FlavienCollart/ESMTest", dependencies = TRUE)
 
 ### Information
 
-Functions to perform and evaluate Ensemble of small models, whiich is a method for rare species (alpha version).
+Functions to perform and evaluate Ensemble of small models (Beta version). These functions are made to model and predict rare species distributions.
 
 
 ### References
