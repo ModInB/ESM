@@ -481,7 +481,8 @@ ESM_Modeling <- function(resp,
                            env.var[x,])
   if(!is.null(prevalence)){
     ratio.Pres.Abs <- table(data$resp)/nrow(data)
-    ratio.Pres.Abs <- prevalence/ratio.Pres.Abs
+    ratio.Pres.Abs["1"] <- prevalence/ratio.Pres.Abs
+    ratio.Pres.Abs["0"] <- (1-prevalence)/ratio.Pres.Abs
     ratio.Pres.Abs <- round(ratio.Pres.Abs/min(ratio.Pres.Abs)) #so that the min weight is 1
     w <- data$resp
     w[data$resp==1] = ratio.Pres.Abs["1"]
