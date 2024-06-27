@@ -43,7 +43,7 @@
 #' 
 #' Collart, F., Hedenas, L., Broennimann, O., Guisan, A. and Vanderpoorten, A. 2021. Intraspecific differentiation: 
 #' Implications for niche and distribution modelling. \emph{Journal of Biogeography}. \bold{48}, 415-426. \doi{10.1111/jbi.14009}.
-#' 
+#' @seealso [ESM_Modeling], [ESM_Ensemble.Modeling],  [ESM_Projection], [ESM_Ensemble.Projection]
 #' @seealso \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Modeling}}
 #' @export
 
@@ -167,7 +167,7 @@ ESM_Pooling.Evaluation <- function (ESM.Mod,
 #' Verdon, V., Malard, L., Collart, F., Adde, A., Yashiro, E., Lara Pandi, E., Mod, H., Singer, D., Niculita-Hirzel, H., 
 #' Guex, N. and Guisan, A. 2024. Can we accurately predict the distribution of soil microorganism presence and relative abundance? 
 #' \emph{Ecography}. e07086. \doi{10.1111/ecog.07086}.
-#' 
+#' @seealso [ESM_Modeling], [ESM_Ensemble.Modeling],  [ESM_Projection], [ESM_Ensemble.Projection]
 #' @export
 ESM_Null.Models <- function(ESM.Mod,
                             ESM.ensembleMod,
@@ -292,13 +292,13 @@ ESM_Null.Models <- function(ESM.Mod,
 #' This function evaluates the full model which is used for projections and provides thresholds to produce binary maps.
 #' @param ESM.ensembleMod The object returned by \code{\link{ESM_Ensemble.Modeling}}.
 #' @details 
-#' This function provides evaluation scores of the full model (no split sampling) and thresholds which can be used to convert suitability 
+#' This function provides diverse thresholds which can be used to convert suitability 
 #' maps into binary maps. Various thresholds are provided: TSS (where sensitivity and specificity are maximised), MPA 1.0 (where all presences 
 #' are prdicted positive), MPA 0.95 (where 95\% of all presences are predicted positive), MPA 0.90 (where 90\% of all presences are predicted positive), 
 #' Boyce.th.min (the lowest suitability value where the predicted/expected ratio is >1) and Boyce.th.max (the highest suitability value where the 
 #' predicted/expected ratio is =1). 
 #' @return 
-#' A \code{data.frame} with evaluation scores of the fit and thresholds.
+#' A \code{data.frame} with diverse threshold values.
 #' @references 
 #' Hirzel, Alexandre H., et al. Evaluating the ability of habitat suitability models to predict species presences. 
 #' \emph{Ecological modelling}, \bold{199.2} (2006): 142-152.
@@ -308,8 +308,7 @@ ESM_Null.Models <- function(ESM.Mod,
 #' 
 #' Fielding, Alan H., and John F. Bell. A review of methods for the assessment of prediction errors in conservation presence/absence models. 
 #' \emph{Environmental conservation}, \bold{24.1} (1997): 38-49.
-#' 
-#' 
+#' @seealso [ESM_Projection], [ESM_Ensemble.Projection]
 #' @export
 ###############
 
@@ -331,25 +330,14 @@ ESM_Threshold <- function (ESM.ensembleMod){
   
   EVAL <- NULL
   for (i in 1:ncol(Full.models)) {
-    
-    DATA <- cbind(PlotID= 1:nrow(Full.models),
-                  resp.var = resp, 
-                  Full.models[, i])
-    AUC <- PresenceAbsence::auc(DATA, st.dev = FALSE,which.model = 1, na.rm = TRUE)
-    
+
     TSS <- ecospat::ecospat.max.tss(Pred = Full.models[, i],Sp.occ = resp)
     TSS.th <- TSS$max.threshold
     TSS <- TSS$max.TSS
-    meva <- ecospat::ecospat.meva.table(Pred = Full.models[, i],
-                               Sp.occ = resp,
-                               th = TSS.th)
-    EVAL1 <- t(as.data.frame(meva$EVALUATION_METRICS$Value[2:9]))
-    colnames(EVAL1) = meva$EVALUATION_METRICS$Metric[2:9]
     
-    SomersD <- AUC * 2 - 1
     boyce <- ecospat::ecospat.boyce(fit = Full.models[, i],
                            obs = Full.models[resp==1, i], PEplot = FALSE)
-    Boyce <- boyce$cor
+    
     MPA1.0 <- ecospat::ecospat.mpa(Full.models[resp==1, i], perc = 1)
     MPA0.95 <- ecospat::ecospat.mpa(Full.models[resp==1, i], perc = 0.95)
     MPA0.90 <- ecospat::ecospat.mpa(Full.models[resp==1, i], perc = 0.90)
@@ -367,7 +355,7 @@ ESM_Threshold <- function (ESM.ensembleMod){
     }
     
     EVAL1 <- cbind.data.frame(model = colnames(Full.models)[i], Boyce.th.min, Boyce.th.max,
-                              MPA1.0, MPA0.95, MPA0.90, TSS.th, AUC, Boyce, SomersD, TSS, EVAL1)
+                              MPA1.0, MPA0.95, MPA0.90, TSS.th)
     rownames(EVAL1) = NULL
     
     EVAL <- rbind(EVAL, EVAL1)
@@ -396,7 +384,7 @@ ESM_Threshold <- function (ESM.ensembleMod){
 #' 
 #' @return 
 #' a \code{dataframe} with contribution values (i.e. proportional contribution) by variable and model
-#' @seealso \code{\link{ESM_Modeling}}
+#' @seealso [ESM_Modeling], [ESM_Ensemble.Modeling],  [ESM_Projection], [ESM_Ensemble.Projection]
 #' @export
 ###############
 
@@ -452,6 +440,7 @@ ESM_Variable.Contributions <- function (ESM.Mod,
 #' responses from species distribution models. Ecological Modelling 186, 280-289.
 #' 
 #' @seealso \code{\link{ESM_Modeling}}
+#' @seealso [ESM_Modeling], [ESM_Ensemble.Modeling],  [ESM_Projection], [ESM_Ensemble.Projection]
 #' @export
 ###############
 

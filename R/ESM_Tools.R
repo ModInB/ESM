@@ -366,3 +366,51 @@ ESM_Range.Shift <- function(proj.curr,
   return(list(RangeShift = shift,
               RangeShift.table = results))
 }
+
+
+#' @name ESM_Binarize
+#' @author Flavien Collart \email{flaviencollart@hotmail.com}
+#' @title Binarize probability values using a threshold
+#' @description This function binarizes probability values based on a specific threshold
+#' 
+#' @param proj a \code{SpatRaster}, \code{data.frame}, \code{matrix}, or \code{numeric) containing the data to binarize 
+#' @param thr \code{numeric}. threshold to binarize the probabilities. \bold{must be a single value}. 
+#' 
+#' @details
+#' proj < thr will return 0 while proj >= thr will be equal to 1.
+#' 
+#' @return 
+#' An object of the same class as proj
+#' 
+#' @seealso [ESM_Projection], [ESM_Ensemble.Projection], [ESM_Threshold]
+#' @examples 
+#' ## Generate a vector to binarize
+#' proj <- seq(0,1000, by = 100)
+#' # Binraization of the vector
+#' ESM_Binarize(proj = proj, thr = 400)
+#' 
+#' @export
+
+ESM_Binarize <- function(proj,
+                         thr){
+  
+  if(length(thr)>1 | !is.numeric(thr)){
+    stop("thr must contain a signle numeric")
+  }
+  if(inherits(proj,"SpatRaster")){
+    
+    rclmat <- matrix(c(0, thr, 0,thr, Inf, 1),
+                     ncol=3, 
+                     byrow=TRUE)
+    
+    proj.bin <- terra::classify(proj, rclmat, include.lowest=TRUE, right = FALSE)
+    
+  }else if(is.data.frame(proj) | is.matrix(proj) | is.numeric(proj)){
+    
+    proj.bin <- sapply(proj, FUN = function(x,thr){as.integer(x>=thr)}, thr = thr)
+    
+  }else{
+    stop("proj must be either a SpatRaster, a data.frame, a matrix, or a numeric")
+  }
+  return(proj.bin)
+}

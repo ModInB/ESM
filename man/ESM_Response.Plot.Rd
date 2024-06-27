@@ -30,6 +30,8 @@ responses from species distribution models. Ecological Modelling 186, 280-289.
 }
 \seealso{
 \code{\link{ESM_Modeling}}
+
+[ESM_Modeling], [ESM_Ensemble.Modeling],  [ESM_Projection], [ESM_Ensemble.Projection]
 }
 \author{
 Flavien Collart \email{flaviencollart@hotmail.com} from the code of Frank Breiner.

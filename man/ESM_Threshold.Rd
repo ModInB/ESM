@@ -10,13 +10,13 @@ ESM_Threshold(ESM.ensembleMod)
 \item{ESM.ensembleMod}{The object returned by \code{\link{ESM_Ensemble.Modeling}}.}
 }
 \value{
-A \code{data.frame} with evaluation scores of the fit and thresholds.
+A \code{data.frame} with diverse threshold values.
 }
 \description{
 This function evaluates the full model which is used for projections and provides thresholds to produce binary maps.
 }
 \details{
-This function provides evaluation scores of the full model (no split sampling) and thresholds which can be used to convert suitability 
+This function provides diverse thresholds which can be used to convert suitability 
 maps into binary maps. Various thresholds are provided: TSS (where sensitivity and specificity are maximised), MPA 1.0 (where all presences 
 are prdicted positive), MPA 0.95 (where 95\% of all presences are predicted positive), MPA 0.90 (where 90\% of all presences are predicted positive), 
 Boyce.th.min (the lowest suitability value where the predicted/expected ratio is >1) and Boyce.th.max (the highest suitability value where the 
@@ -31,6 +31,9 @@ from occurrence and pseudo-absence data. \emph{Journal of applied ecology}, \bol
 
 Fielding, Alan H., and John F. Bell. A review of methods for the assessment of prediction errors in conservation presence/absence models. 
 \emph{Environmental conservation}, \bold{24.1} (1997): 38-49.
+}
+\seealso{
+[ESM_Projection], [ESM_Ensemble.Projection]
 }
 \author{
 Flavien Collart \email{flaviencollart@hotmail.com} based on the scripts of Frank Breiner.

@@ -26,7 +26,7 @@ In the case of multiple methods (e.g., GLM,...), the contributions are counted p
 are then weighted means (based on the weighting score as chosen in ecospat.ESM.EnsembleModeling of single methods.
 }
 \seealso{
-\code{\link{ESM_Modeling}}
+[ESM_Modeling], [ESM_Ensemble.Modeling],  [ESM_Projection], [ESM_Ensemble.Projection]
 }
 \author{
 Olivier Broennimann \email{Olivier.Broennimann@unil.ch} with contributions of Heidi Mod and Daniel Scherrer 

@@ -27,9 +27,9 @@ ESM_Models.Options(ANN = NULL, CTA = NULL, GLM = NULL, GBM = NULL)
 
 \item{GLM}{a \code{list}. with the objects:
 \itemize{
-\item{type}: \code{character}. Either "linear", "quadratic" or "polynomial". \emph{Default}: "quadratic".
-\item{myFormula}: \code{formula}. Custom formula. The response variable should be called resp. Example: as.formula("resp~predictor") \emph{Default}: \code{NULL}.
+\item{type}: \code{character}. Either "linear", "quadratic" or "cubic". \emph{Default}: "quadratic".
 \item{test}: \code{character}. Either "AIC" or "none". Perform or not a step AIC selection for the formula. \emph{Default}: "none".
+\item{family}: error distribution family. Only \code{stats}[binomial(link = 'logit')] was tested thus we discourage to change this parameter to another distribution family.
 }}
 
 \item{GBM}{a \code{list}. with the objects:
@@ -55,7 +55,14 @@ Generate a list of model parameters
 For the arguments of each modeling technique, please refer to the manual of \code{\link[nnet]{nnet}}, \code{\link[rpart]{rpart}}, \code{\link[stats]{glm}}, and \code{\link[gbm]{gbm}}.
 }
 \examples{
+## Perform a GLM with step AIC to select the best structure and allows linear, quadratic and cubic terms
 models.options = ESM_Models.Options(GLM=list(test="AIC",type="polynomial"))
+## Perform a GLM with linear and quadratic terms but does not perform a selection of the structure
+models.options = ESM_Models.Options(GLM=list(test="none",type="quadratic"))
+
+}
+\seealso{
+[ESM_Modeling], [ESM_Ensemble.Modeling],  [ESM_Projection], [ESM_Ensemble.Projection]
 }
 \author{
 Flavien Collart from the code of biomod2::BIOMOD_ModelingOptions

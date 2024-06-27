@@ -777,16 +777,16 @@ ESM_Modeling <- function(resp,
     return(predFin)
 }
 ## .makeGLMFormula ---- 
-# allows to generate the formula for GLM to allow linear, quadratic or polynomial terms (and for GBM)
+# allows to generate the formula for GLM to allow linear, quadratic or cubic terms (and for GBM)
 .makeGLMFormula <- function(env.var = env.var,model.option){
   
   formula <- paste0("resp~", paste0(colnames(env.var),collapse = "+"))
   
-  if(model.option$type == "quadratic" | model.option$type == "polynomial"){
+  if(model.option$type == "quadratic" | model.option$type == "cubic"){
     IsNum <- sapply(env.var,is.numeric)
     Topaste <- paste0("I(",colnames(env.var)[IsNum],"^2)",collapse="+")
     formula <- paste(formula,Topaste,sep = "+")
-    if(model.option$type == "polynomial"){
+    if(model.option$type == "cubic"){
       Topaste <- paste0("I(",colnames(env.var)[IsNum],"^3)",collapse="+")
       formula <- paste(formula,Topaste,sep = "+")
     }

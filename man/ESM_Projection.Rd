@@ -49,7 +49,7 @@ Breiner F.T., A. Guisan, A. Bergamini and M.P. Nobis. 2015. Overcoming limitatio
 Breiner F.T., Nobis M.P., Bergamini A., Guisan A. 2018. Optimizing ensembles of small models for predicting the distribution of species with few occurrences. \emph{Methods in Ecology and Evolution}. \doi{10.1111/2041-210X.12957}
 }
 \seealso{
-\code{\link{ESM_Modeling}} and  \code{\link{ESM_Ensemble.Projection}}
+[ESM_Modeling], [ESM_Ensemble.Modeling], [ESM_Ensemble.Projection]
 }
 \author{
 Flavien Collart \email{flaviencollart@hotmail.com} based on the previous code written by Frank Breiner 
