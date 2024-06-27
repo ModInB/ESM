@@ -1,5 +1,7 @@
-[![Github Version](https://img.shields.io/badge/dev%20version-0.1-53AA93.svg)](https://github.com/FlavienCollart/ESMTest)
-[![Last Commit](https://img.shields.io/badge/Last%20Commit-June-8E3145.svg)](https://github.com/FlavienCollart/ESMTest/commits/main)
+[![Github Version](https://img.shields.io/badge/dev%20version-0.1-53AA93.svg)](https://github.com/FlavienCollart/ESM)
+[![Last Commit](https://img.shields.io/github/last-commit/FlavienCollart/ESM.svg)](https://github.com/FlavienCollart/ESM/commits/main)
+
+
 <img src="inst/logo/ESM.png" align="right" height = 150/>
 <div align="center">
 <b>------------------------------------------------------------<br/>
@@ -17,12 +19,12 @@
 - **Development version** [![v](https://img.shields.io/badge/dev%20version-0.1-53AA93.svg)](https://github.com/FlavienCollart/ESM)
 ```R
 library(devtools)
-devtools::install_github("FlavienCollart/ESMTest", dependencies = TRUE)
+devtools::install_github("FlavienCollart/ESM", dependencies = TRUE)
 ```
 
 ### Information
 
-Functions to perform and evaluate Ensemble of small models (Beta version). These functions are made to model and predict rare species distributions.
+Functions to perform and evaluate Ensemble of small models (Alpha version). These functions are made to model and predict rare species distributions. Please note that it is an alpha version and thus the code is not yet stable. Please write in the issues if you find any or if you think about possible enhancements. Thanks for using the package
 
 
 ### References
