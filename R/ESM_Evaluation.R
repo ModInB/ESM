@@ -564,7 +564,7 @@ ESM_Response.Plot <- function (ESM.Mod,
         
         if(anyNA(biva[!(cv.split.table[,j]),ToDo])){
           if(j ==1){
-            eval <- matrix(0, ncol =4, nr = 1)
+            eval <- matrix(0, ncol =4, nrow = 1)
             eval[1,] = NA
             colnames(eval) = c("AUC","SomersD","Boyce", "MaxTSS")
           }else{

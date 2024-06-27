@@ -373,7 +373,7 @@ ESM_Range.Shift <- function(proj.curr,
 #' @title Binarize probability values using a threshold
 #' @description This function binarizes probability values based on a specific threshold
 #' 
-#' @param proj a \code{SpatRaster}, \code{data.frame}, \code{matrix}, or \code{numeric) containing the data to binarize 
+#' @param proj a \code{SpatRaster}, \code{data.frame}, \code{matrix}, or \code{numeric} containing the data to binarize. 
 #' @param thr \code{numeric}. threshold to binarize the probabilities. \bold{must be a single value}. 
 #' 
 #' @details
