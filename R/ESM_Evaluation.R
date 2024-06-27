@@ -421,7 +421,7 @@ ESM_Variable.Contributions <- function (ESM.Mod,
     }
   }
   if (length(models) > 1) {
-    EF <- apply(x = data.matrix(contrib[,models]),1,stats::weighted.mean, 
+    EF <- apply(contrib[,models],1,stats::weighted.mean, 
                 w =ESM.ensembleMod$EF$weights.EF , na.rm = TRUE)
     
     contrib <- cbind(contrib, EF)
