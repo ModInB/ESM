@@ -74,7 +74,7 @@
 #' Steen,B., Broennimann, O., Maiorano, L., Guisan, . 2024. How sensitive are species distribution models to different background point 
 #' selection strategies? A test with species at various equilibrium levels. 
 #' \emph{Ecological Modelling}. \bold{493}, 110754. \doi{10.1016/j.ecolmodel.2024.110754}.
-#' 
+#' @seealso \code{\link{ESM_Modeling}}
 #' @export
 
 ESM_Bp.Sampling <- function(env,
@@ -328,7 +328,7 @@ ESM_Bp.Sampling <- function(env,
 #' }
 #' }
 #' 
-#' @seealso [ESM_Modeling], [ESM_Ensemble.Modeling],  [ESM_Projection], [ESM_Ensemble.Projection], [ESM_Threshold]
+#' @seealso \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}, \code{\link{ESM_Threshold}}, \code{\link{ESM_Binarize}}
 #' @export
 
 ESM_Range.Shift <- function(proj.curr,
@@ -382,7 +382,7 @@ ESM_Range.Shift <- function(proj.curr,
 #' @return 
 #' An object of the same class as proj
 #' 
-#' @seealso [ESM_Projection], [ESM_Ensemble.Projection], [ESM_Threshold]
+#' @seealso \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}},\code{\link{ESM_Range.Shift}}
 #' @examples 
 #' ## Generate a vector to binarize
 #' proj <- seq(0,1000, by = 100)

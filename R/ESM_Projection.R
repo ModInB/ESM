@@ -20,7 +20,7 @@
 #' \item{name.env}: a \code{character} the value given to the argument name.env.
 #' \item{proj.type}: a \code{character} which is either "data.frame" or "SpatRaster" depending on the class of new.env
 #' }
-#' @seealso [ESM_Modeling], [ESM_Ensemble.Modeling], [ESM_Ensemble.Projection]
+#' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Ensemble.Projection}}
 #' @references Lomba, A., L. Pellissier, C.F. Randin, J. Vicente, F. Moreira, J. Honrado and A. Guisan. 2010. Overcoming the rare species 
 #' modelling paradox: A novel hierarchical framework applied to an Iberian endemic plant. \emph{Biological Conservation}, \bold{143},2647-2657.
 #' 

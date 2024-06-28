@@ -100,6 +100,9 @@ Steen,B., Broennimann, O., Maiorano, L., Guisan, . 2024. How sensitive are speci
 selection strategies? A test with species at various equilibrium levels. 
 \emph{Ecological Modelling}. \bold{493}, 110754. \doi{10.1016/j.ecolmodel.2024.110754}.
 }
+\seealso{
+\code{\link{ESM_Modeling}}
+}
 \author{
 Flavien Collart \email{flaviencollart@hotmail.com}
 }

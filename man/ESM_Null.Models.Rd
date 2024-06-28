@@ -68,7 +68,7 @@ Guex, N. and Guisan, A. 2024. Can we accurately predict the distribution of soil
 \emph{Ecography}. e07086. \doi{10.1111/ecog.07086}.
 }
 \seealso{
-[ESM_Modeling], [ESM_Ensemble.Modeling],  [ESM_Projection], [ESM_Ensemble.Projection]
+\code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}
 }
 \author{
 Flavien Collart \email{flaviencollart@hotmail.com}

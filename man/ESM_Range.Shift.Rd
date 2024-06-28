@@ -48,7 +48,7 @@ When it is 2, pixels considered as "presence" in proj.fut  but not in proj.curr 
 When it is 3, pixels are considered as "present" in both time periods \bold{(pixel Stable)}.
 }
 \seealso{
-[ESM_Modeling], [ESM_Ensemble.Modeling],  [ESM_Projection], [ESM_Ensemble.Projection], [ESM_Threshold]
+\code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}, \code{\link{ESM_Threshold}}, \code{\link{ESM_Binarize}}
 }
 \author{
 Flavien Collart \email{flaviencollart@hotmail.com}

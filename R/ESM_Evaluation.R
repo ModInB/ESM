@@ -43,8 +43,7 @@
 #' 
 #' Collart, F., Hedenas, L., Broennimann, O., Guisan, A. and Vanderpoorten, A. 2021. Intraspecific differentiation: 
 #' Implications for niche and distribution modelling. \emph{Journal of Biogeography}. \bold{48}, 415-426. \doi{10.1111/jbi.14009}.
-#' @seealso [ESM_Modeling], [ESM_Ensemble.Modeling],  [ESM_Projection], [ESM_Ensemble.Projection]
-#' @seealso \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Modeling}}
+#' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}
 #' @export
 
 ESM_Pooling.Evaluation <- function (ESM.Mod, 
@@ -167,7 +166,7 @@ ESM_Pooling.Evaluation <- function (ESM.Mod,
 #' Verdon, V., Malard, L., Collart, F., Adde, A., Yashiro, E., Lara Pandi, E., Mod, H., Singer, D., Niculita-Hirzel, H., 
 #' Guex, N. and Guisan, A. 2024. Can we accurately predict the distribution of soil microorganism presence and relative abundance? 
 #' \emph{Ecography}. e07086. \doi{10.1111/ecog.07086}.
-#' @seealso [ESM_Modeling], [ESM_Ensemble.Modeling],  [ESM_Projection], [ESM_Ensemble.Projection]
+#' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}
 #' @export
 ESM_Null.Models <- function(ESM.Mod,
                             ESM.ensembleMod,
@@ -308,7 +307,7 @@ ESM_Null.Models <- function(ESM.Mod,
 #' 
 #' Fielding, Alan H., and John F. Bell. A review of methods for the assessment of prediction errors in conservation presence/absence models. 
 #' \emph{Environmental conservation}, \bold{24.1} (1997): 38-49.
-#' @seealso [ESM_Projection], [ESM_Ensemble.Projection]
+#' @seealso \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}
 #' @export
 ###############
 
@@ -384,7 +383,7 @@ ESM_Threshold <- function (ESM.ensembleMod){
 #' 
 #' @return 
 #' a \code{dataframe} with contribution values (i.e. proportional contribution) by variable and model
-#' @seealso [ESM_Modeling], [ESM_Ensemble.Modeling],  [ESM_Projection], [ESM_Ensemble.Projection]
+#' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}
 #' @export
 ###############
 
@@ -440,7 +439,7 @@ ESM_Variable.Contributions <- function (ESM.Mod,
 #' responses from species distribution models. Ecological Modelling 186, 280-289.
 #' 
 #' @seealso \code{\link{ESM_Modeling}}
-#' @seealso [ESM_Modeling], [ESM_Ensemble.Modeling],  [ESM_Projection], [ESM_Ensemble.Projection]
+#' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}
 #' @export
 ###############
 

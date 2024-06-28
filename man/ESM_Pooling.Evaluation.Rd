@@ -46,9 +46,7 @@ Collart, F., Hedenas, L., Broennimann, O., Guisan, A. and Vanderpoorten, A. 2021
 Implications for niche and distribution modelling. \emph{Journal of Biogeography}. \bold{48}, 415-426. \doi{10.1111/jbi.14009}.
 }
 \seealso{
-[ESM_Modeling], [ESM_Ensemble.Modeling],  [ESM_Projection], [ESM_Ensemble.Projection]
-
-\code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Modeling}}
+\code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}
 }
 \author{
 Flavien Collart \email{flaviencollart@hotmail.com}

@@ -64,7 +64,7 @@ models.options = ESM_Models.Options(GLM=list(test="none",type="quadratic"))
 
 }
 \seealso{
-[ESM_Modeling], [ESM_Ensemble.Modeling],  [ESM_Projection], [ESM_Ensemble.Projection]
+\code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}
 }
 \author{
 Flavien Collart from the code of biomod2::BIOMOD_ModelingOptions

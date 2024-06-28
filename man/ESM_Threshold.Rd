@@ -33,7 +33,7 @@ Fielding, Alan H., and John F. Bell. A review of methods for the assessment of p
 \emph{Environmental conservation}, \bold{24.1} (1997): 38-49.
 }
 \seealso{
-[ESM_Projection], [ESM_Ensemble.Projection]
+\code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}
 }
 \author{
 Flavien Collart \email{flaviencollart@hotmail.com} based on the scripts of Frank Breiner.
