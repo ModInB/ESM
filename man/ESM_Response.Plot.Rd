@@ -29,9 +29,7 @@ Elith, J., Ferrier, S., Huettmann, FALSE. & Leathwick, J. R. 2005 The evaluation
 responses from species distribution models. Ecological Modelling 186, 280-289.
 }
 \seealso{
-\code{\link{ESM_Modeling}}
-
-\code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}
+\code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}
 }
 \author{
 Flavien Collart \email{flaviencollart@hotmail.com} from the code of Frank Breiner.

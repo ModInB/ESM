@@ -438,8 +438,7 @@ ESM_Variable.Contributions <- function (ESM.Mod,
 #' Elith, J., Ferrier, S., Huettmann, FALSE. & Leathwick, J. R. 2005 The evaluation strip: A new and robust method for plotting predicted 
 #' responses from species distribution models. Ecological Modelling 186, 280-289.
 #' 
-#' @seealso \code{\link{ESM_Modeling}}
-#' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}
+#' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}
 #' @export
 ###############
 
