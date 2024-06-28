@@ -1,6 +1,6 @@
 [![Github Version](https://img.shields.io/badge/dev%20version-0.1-53AA93.svg)](https://github.com/FlavienCollart/ESM)
 [![Last Commit](https://img.shields.io/github/last-commit/FlavienCollart/ESM.svg)](https://github.com/FlavienCollart/ESM/commits/main)
-
+[![R-CMD-check](https://github.com/FlavienCollart/ESM/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/FlavienCollart/ESM/actions/workflows/R-CMD-check.yaml)
 
 <img src="inst/logo/ESM.png" align="right" height = 150/>
 <div align="center">
