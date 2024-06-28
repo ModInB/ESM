@@ -12,7 +12,17 @@ Author: Flavien Collart [cre, aut, ctb],
 Maintainer: Flavien Collart <flaviencollart@hotmail.com>
 Encoding: UTF-8
 Depends: R (>= 4.0.0)
-Imports: ade4 (>= 1.7-22), gbm (>= 2.1.1), terra (>= 1.2-5), PresenceAbsence (>= 1.1.9), parallel, maxnet (>= 0.1.4), ecospat (>= 4.0.0), nnet (>= 7.3-19), rpart(>= 4.1.23), spsUtil (>= 0.2.2)
+Imports: 
+	ade4 (>= 1.7-22), 
+	gbm (>= 2.1.1), 
+	terra (>= 1.2-5), 
+	PresenceAbsence (>= 1.1.9), 
+	parallel, 
+	maxnet (>= 0.1.4), 
+	ecospat (>= 4.0.0), 
+	nnet (>= 7.3-19), 
+	rpart(>= 4.1.23), 
+	spsUtil (>= 0.2.2)
 Description: Tools to generate and evaluate ensemble of small models.
 License: GPL
 RoxygenNote: 7.3.1

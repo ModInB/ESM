@@ -43,9 +43,11 @@
 #' @details For the arguments of each modeling technique, please refer to the manual of \code{\link[nnet]{nnet}}, \code{\link[rpart]{rpart}}, \code{\link[stats]{glm}}, and \code{\link[gbm]{gbm}}.
 #' @return a \code{list} of parameters for ESM.
 #' @examples 
-#' ## Perform a GLM with step AIC to select the best structure and allows linear, quadratic and cubic terms
+#' ## Perform a GLM with step AIC to select the best structure 
+#' ## and allows linear, quadratic and cubic terms
 #' models.options = ESM_Models.Options(GLM=list(test="AIC",type="cubic"))
-#' ## Perform a GLM with linear and quadratic terms but does not perform a selection of the structure
+#' ## Perform a GLM with linear and quadratic terms 
+#' ## but does not perform a selection of the structure
 #' models.options = ESM_Models.Options(GLM=list(test="none",type="quadratic"))
 #' 
 #' @seealso [ESM_Modeling], [ESM_Ensemble.Modeling],  [ESM_Projection], [ESM_Ensemble.Projection]
