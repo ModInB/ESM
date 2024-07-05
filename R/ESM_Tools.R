@@ -342,13 +342,17 @@ ESM_Range.Shift <- function(proj.curr,
     stop("When proj.curr has more than one layer the number of layer in proj.fut must match terra::nlyr(proj.curr)")
   }
   shift <- proj.curr + 2 * proj.fut
+  if(length(names(proj.fut)) == length(unique(names(proj.fut)))){
+    names(shift) = names(proj.fut)
+    }
   results <- terra::freq(shift, wide=T)
   n.column <- ncol(results)
   while(ncol(results) < 5){
     
     results <- cbind(results,0)
+    colnames(results)[ncol(results)] = setdiff(c("layer",0:3), colnames(results))[1]
   } 
-  colnames(results)[(n.column+1):5] = setdiff(c("layer",0:3), colnames(results))
+  
   results <- results[,c(1,order(colnames(results)[2:5])+1)]
   colnames(results) <-c("layer","Pixel.Absence.Stable","Pixel.Presence.Current.only",
                         "Pixel.Presence.Future.Only","Pixel.Presence.Stable")
