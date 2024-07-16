@@ -347,8 +347,9 @@ ESM_Range.Shift <- function(proj.curr,
   while(ncol(results) < 5){
     
     results <- cbind(results,0)
+    colnames(results)[ncol(results)] = setdiff(c("layer",0:3), colnames(results))[1]
   } 
-  colnames(results)[(n.column+1):5] = setdiff(c("layer",0:3), colnames(results))
+  
   results <- results[,c(1,order(colnames(results)[2:5])+1)]
   colnames(results) <-c("layer","Pixel.Absence.Stable","Pixel.Presence.Current.only",
                         "Pixel.Presence.Future.Only","Pixel.Presence.Stable")
