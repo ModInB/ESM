@@ -29,7 +29,7 @@ Functions to perform and evaluate Ensemble of small models (Alpha version). Thes
 ### List of the functions in the package
 
 | Category      	| Function      	| Description                                  	|
-|-----------------|-------------------|:-----------------:|
+|:-----------------:|:-------------------:|:-----------------:|
 | Data preparation	| ESM_Bp.Sampling	| Samples background point using 4 different methods. The 4 methods are fully random or stratified in the geographic space (“rand.geo”, “strat.geo”) and in the environmental space (“rand.env”, “strat.env”).|
 |		| ESM_Models.Options	| Generates a list of model parameters|
 | Modeling	| ESM_Modeling	| Calibrates and evaluates bivariate models|
