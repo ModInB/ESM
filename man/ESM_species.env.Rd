@@ -7,7 +7,7 @@
 \format{
 A data.frame with 413 plots and 10 variables:
 \describe{
-\item{x}{X coordinate in the CRS EPSG:2056}
+\item{x}{x coordinate in the CRS EPSG:2056}
 \item{y}{y coordinate in the CRS EPSG:2056}
 \item{Tayloria_serrata}{Presence/Absence data of \emph{Tayloria serrata}}
 \item{Thuidium_assimile}{Presence/Absence data of \emph{Thuidium assimile}}
@@ -27,6 +27,11 @@ Contains sampling of 3 bryophytes in 413 plots in the Western Swiss Alps
 }
 \examples{
 data(ESM_species.env)
+}
+\references{
+Collart, F., Kiebacher, T., Quetsch, M., Broennimann, O., Guisan, A. & Vanderpoorte, A. 2024. To what extent can we predict 
+variation of bryophyte and tracheophyte community composition at fine spatial scale along an elevation gradient?
+\emph{STOTEN}, 926:171741. \doi{10.1016/j.scitotenv.2024.171741}.
 }
 \author{
 Flavien Collart

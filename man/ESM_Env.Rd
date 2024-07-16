@@ -18,12 +18,13 @@ A SpatRaster with 5 layers:
 ESM_Env
 }
 \description{
-Contains stacj of 5 predictors in the Western Swiss Alps
+Contains stack of 5 predictors in the Western Swiss Alps, extracted from the ecospat package
 }
 \examples{
 library(terra)
 data(ESM_Env)
 ESM_Env <- terra::unwrap(ESM_Env)
+
 }
 \author{
 Flavien Collart and Olivier Broennimann

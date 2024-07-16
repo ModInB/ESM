@@ -71,14 +71,15 @@
 #' @seealso \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Modeling}},   \code{\link{ESM_Ensemble.Projection}}, 
 #' \code{\link{ESM_Pooling.Evaluation}}
 #' 
-#' @examples \donttest{library(ecospat)
+#' @examples \donttest{
+#' library(terra)
 #' #Loading test data
-#' data(ecospat.testNiche.inv)
-#' inv <- ecospat.testNiche.inv
+#' data(ESM_species.env)
+#' data(ESM_Env)
 #' #species occurrences
-#' xy <- inv[,1:2]
-#' resp <- inv[,11]
-#' env <- inv[,3:5]
+#' xy <- ESM_species.env[,1:2]
+#' resp <- ESM_species.env[,3] #Tayloria_serrata
+#' env <- terra::unwrap(ESM_Env)
 #' ### Calibration of simple bivariate models
 #' my.ESM <- ESM_Modeling(resp = resp,
 #'                        xy=xy,

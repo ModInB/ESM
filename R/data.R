@@ -6,7 +6,7 @@
 #'
 #' @format A data.frame with 413 plots and 10 variables:
 #' \describe{
-#' \item{x}{X coordinate in the CRS EPSG:2056}
+#' \item{x}{x coordinate in the CRS EPSG:2056}
 #' \item{y}{y coordinate in the CRS EPSG:2056}
 #' \item{Tayloria_serrata}{Presence/Absence data of \emph{Tayloria serrata}}
 #' \item{Thuidium_assimile}{Presence/Absence data of \emph{Thuidium assimile}}
@@ -19,6 +19,10 @@
 #' }
 #' 
 #' @author Flavien Collart
+#' @references
+#' Collart, F., Kiebacher, T., Quetsch, M., Broennimann, O., Guisan, A. & Vanderpoorte, A. 2024. To what extent can we predict 
+#' variation of bryophyte and tracheophyte community composition at fine spatial scale along an elevation gradient?
+#' \emph{STOTEN}, 926:171741. \doi{10.1016/j.scitotenv.2024.171741}.
 #' @examples 
 #' data(ESM_species.env)
 "ESM_species.env"
@@ -26,7 +30,7 @@
 
 #' Environmental SpatRester to perform ESM with the ESM package
 #' 
-#' Contains stacj of 5 predictors in the Western Swiss Alps
+#' Contains stack of 5 predictors in the Western Swiss Alps, extracted from the ecospat package
 #'
 #' @format A SpatRaster with 5 layers:
 #' \describe{
@@ -41,4 +45,5 @@
 #' library(terra)
 #' data(ESM_Env)
 #' ESM_Env <- terra::unwrap(ESM_Env)
+#' 
 "ESM_Env"

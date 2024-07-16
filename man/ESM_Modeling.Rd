@@ -107,14 +107,15 @@ This allows to run different biva splits on different computers. However, it is 
 }
 }
 \examples{
-\donttest{library(ecospat)
+\donttest{
+library(terra)
 #Loading test data
-data(ecospat.testNiche.inv)
-inv <- ecospat.testNiche.inv
+data(ESM_species.env)
+data(ESM_Env)
 #species occurrences
-xy <- inv[,1:2]
-resp <- inv[,11]
-env <- inv[,3:5]
+xy <- ESM_species.env[,1:2]
+resp <- ESM_species.env[,3] #Tayloria_serrata
+env <- terra::unwrap(ESM_Env)
 ### Calibration of simple bivariate models
 my.ESM <- ESM_Modeling(resp = resp,
                        xy=xy,
