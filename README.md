@@ -26,6 +26,25 @@ devtools::install_github("FlavienCollart/ESM", dependencies = TRUE)
 
 Functions to perform and evaluate Ensemble of small models (Alpha version). These functions are made to model and predict rare species distributions. Please note that it is an alpha version and thus the code is not yet stable. Please write in the issues if you find any or if you think about possible enhancements. Thanks for using the package
 
+### List of the functions in the package
+
+| Category      	| Function      	| Description                                  	|
+|-----------------|-------------------|:-----------------:|
+| Data preparation	| ESM_Bp.Sampling	| Samples background point using 4 different methods. The 4 methods are fully random or stratified in the geographic space (“rand.geo”, “strat.geo”) and in the environmental space (“rand.env”, “strat.env”).|
+|		| ESM_Models.Options	| Generates a list of model parameters|
+| Modeling	| ESM_Modeling	| Calibrates and evaluates bivariate models|
+|		| ESM_Projection	| Projects each bivariate model into a geographical space |
+|		| ESM_Ensemble.Modeling	| Generates and evaluates an ensemble model (called “ESM”) |
+|		| ESM_Ensemble.Projection	| Generates the ESM in the geographical space |
+| Evaluation	| ESM_Pooling.Evaluation	| Evaluates each bivariate model and the ESM based on the pooling method |
+|		| ESM_Null.Models	| Tests the significativity of the evaluation metrics of the ESM based on null models and recalibrate the evaluation metrics |
+|		| ESM_Threshold	| Computes diverse threshold to binarize ESMs |
+|		| ESM_Variable.Contributions	| Computes the contribution of each variable in the ESM |
+|		| ESM_Response.Plot	| Generates species response curve for each variable |
+| Post Modeling	| ESM_Binarize	| Binarizes probability values |
+|		| ESM_Range.Shift	| Computes range changes between two projections  |
+
+
 ### Citation
 
 To cite this package, please use the following reference:
