@@ -91,7 +91,9 @@
 #'                        cv.method = "split-sampling",
 #'                        cv.rep = 2,
 #'                        cv.ratio = 0.7,
-#'                        parallel = FALSE)
+#'                        parallel = FALSE,
+#'                        save.models = FALSE,
+#'                        save.obj = FALSE)
 #'                        
 #' # Performances of each bivariate model
 #' my.ESM$biva.evaluations
@@ -99,7 +101,8 @@
 #' ### Ensemble models using a weighted mean based on maxTSS
 #' my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
 #'                                    weighting.score=c("MaxTSS"),
-#'                                    threshold=0)
+#'                                    threshold=0,
+#'                                    save.obj = FALSE)
 #'                                    
 #' ## Performances of the ensemble across the replicates
 #' ## The full model evaluation corresponds to the mean value across the replicates
@@ -118,13 +121,14 @@
 #' proj <- ESM_Projection(ESM.Mod = my.ESM,
 #'                        new.env = env,
 #'                        name.env = "current",
-#'                        parallel = FALSE)
+#'                        parallel = FALSE,
+#'                        save.obj = FALSE)
 #'
 #'
 #' ### Ensemble predictions
 #' Ens.proj <- ESM_Ensemble.Projection(ESM.proj = proj,
 #'                                    ESM.ensembleMod = my.ESM_EF,
-#'                                    save.obj = TRUE)
+#'                                    save.obj = FALSE)
 #'
 #' ### thresholds to produce binary maps
 #' my.ESM_thresholds <- ESM_Threshold(my.ESM_EF)
