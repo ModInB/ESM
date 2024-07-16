@@ -342,6 +342,9 @@ ESM_Range.Shift <- function(proj.curr,
     stop("When proj.curr has more than one layer the number of layer in proj.fut must match terra::nlyr(proj.curr)")
   }
   shift <- proj.curr + 2 * proj.fut
+  if(length(names(proj.fut)) == length(unique(names(proj.fut)))){
+    names(shift) = names(proj.fut)
+    }
   results <- terra::freq(shift, wide=T)
   n.column <- ncol(results)
   while(ncol(results) < 5){
