@@ -34,6 +34,7 @@
 #' @param save.models \code{logical}. Allows or not to save all the bivariate models. If \code{FALSE}, only the full models will be 
 #' saved to make the projections possible.
 #' @param save.obj \code{logical}. Allows or not to save the final output.
+#' @param verbose \code{logical}. Allows or not message.
 #' @details  
 #' \describe{
 #' The basic idea of ensemble of small models (ESMs) is to model a species distribution based on small, simple models, 
@@ -93,7 +94,8 @@
 #'                        cv.ratio = 0.7,
 #'                        parallel = FALSE,
 #'                        save.models = FALSE,
-#'                        save.obj = FALSE)
+#'                        save.obj = FALSE,
+#'                        verbose = FALSE)
 #'                        
 #' # Performances of each bivariate model
 #' my.ESM$biva.evaluations
@@ -169,7 +171,8 @@ ESM_Modeling <- function(resp,
                           modeling.id = as.character(format(Sys.time(), "%s")),
                           pathToSaveObject = getwd(),
                           save.models = TRUE,
-                          save.obj = TRUE){
+                          save.obj = TRUE,
+                          verbose = TRUE){
   
   ## Check resp, XY, sp.name and prevalence----
   if(length(resp) != nrow(xy)){
@@ -311,9 +314,10 @@ ESM_Modeling <- function(resp,
 
   
  
+  if(verbose){
+    cat("\n################### Start Modelling ###################")
+  }
   
-  cat("\n################### Start Modelling ###################")
-
   if(parallel){
     cl <- parallel::makeCluster(n.cores)
     biva.mods <-  parallel::parApply(cl, combinations, 2, 
@@ -321,14 +325,18 @@ ESM_Modeling <- function(resp,
                        env.var = env.var, models = models,
                        models.options = models.options,
                        cv.split.table = cv.split.table,
-                       prevalence = prevalence, save.obj = save.models)
+                       prevalence = prevalence, 
+                       save.obj = save.models, 
+                       verbose=verbose)
     parallel::stopCluster(cl)
   }else{
     biva.mods <- apply(combinations, 2, .bivaModeling,resp = resp,
                        env.var = env.var, models = models,
                        models.options = models.options,
                        cv.split.table = cv.split.table,
-                       prevalence = prevalence, save.obj = save.models,
+                       prevalence = prevalence, 
+                       save.obj = save.models,
+                       verbose = verbose,
                        simplify = FALSE)
   }
   
@@ -342,8 +350,10 @@ ESM_Modeling <- function(resp,
   
   names(biva.mods) = paste0(combinations[1,],".",combinations[2,])
   
+  if(verbose){
+    cat("\n##################### Done #####################")
+  }
   
-  cat("\n##################### Done #####################")
 
   failed.mods <- lapply(biva.mods,.checkFailedMods)
   biva.mods.filt <- lapply(1:length(biva.mods), .PutNAsFailed, 
@@ -351,7 +361,10 @@ ESM_Modeling <- function(resp,
   names(biva.mods.filt) = names(biva.mods)
   lapply(1:length(biva.mods), .PrintFailedMods, 
          biva.mods,failed.mods)
-  cat("\n############### Start evaluations ###############")
+  if(verbose){
+      cat("\n############### Start evaluations ###############")
+
+  }
   
   
   ## Evaluation----
@@ -387,7 +400,9 @@ ESM_Modeling <- function(resp,
   if(save.obj){
     save(obj,file=paste0("../ESM.Modeling.",modeling.id,".out"))
   }
-  cat("\n##################### Done #####################")
+  if(verbose){
+    cat("\n##################### Done #####################")
+  }
   
   return(obj)
 }
@@ -456,16 +471,22 @@ ESM_Modeling <- function(resp,
                           models.options,
                           cv.split.table,
                           prevalence,
-                          save.obj = TRUE){
+                          save.obj = TRUE,
+                          verbose = TRUE){
   
-  cat(c("\n\nCombinations", as.character(x)))
+  if(verbose){
+    cat(c("\n\nCombinations", as.character(x)))
+  }
+    
   envi <- env.var[,as.character(x)]
   cv.split.table <- rbind.data.frame(colnames(cv.split.table),cv.split.table)
   ## Model each run
   d <- apply(cv.split.table,2,.doModeling,resp = resp,
              env.var = envi, models = models,
              models.options = models.options,
-             prevalence = prevalence, save.obj = save.obj)
+             prevalence = prevalence, 
+             save.obj = save.obj, 
+             verbose =verbose)
   return(do.call(cbind,d))
 }
 
@@ -478,7 +499,8 @@ ESM_Modeling <- function(resp,
                         models,
                         models.options,
                         prevalence,
-                        save.obj = TRUE){
+                        save.obj = TRUE,
+                        verbose = TRUE){
   
   nameRun <- x[1]
   x <- as.logical(x[-1])
@@ -502,7 +524,9 @@ ESM_Modeling <- function(resp,
     for(j in 1: length(models)){
       err <- FALSE
       if(models[j] == "ANN"){
-        cat(paste("\nANN", nameRun,"\n"))
+        if(verbose){
+          cat(paste("\nANN", nameRun,"\n"))
+        }
         formula <- .makeGLMFormula(env.var,
                                    model.option=list(type="linear"))
         
@@ -544,7 +568,9 @@ ESM_Modeling <- function(resp,
       }
       if(models[j] == "CTA"){
         
-        cat(paste("\nCTA", nameRun,"\n"))
+        if(verbose){
+          cat(paste("\nCTA", nameRun,"\n"))
+        }
         formula <- .makeGLMFormula(env.var,
                                    model.option=list(type="linear"))
         
@@ -588,17 +614,19 @@ ESM_Modeling <- function(resp,
         
       }
       if(models[j] == "GLM"){
-        cat(paste("\nGLM", nameRun))
+        if(verbose){
+          cat(paste("\nGLM", nameRun))
+        }
         
         if(is.null(models.options$GLM$myFormula)){
           if(models.options$GLM$test == "none"){
             
             formula <- .makeGLMFormula(env.var,
                                        models.options$GLM)
-            tryCatch(expr={mod <- stats::glm(formula = formula,
+            tryCatch(expr={mod <-   spsUtil::quiet(stats::glm(formula = formula,
                        family = models.options$GLM$family,
                        weights = w,
-                       data = data)}, error=function(e){
+                       data = data))}, error=function(e){
                          cat(paste("\n model",models[j],nameRun,"failed"))
                          err <<-TRUE
                        })
@@ -627,16 +655,17 @@ ESM_Modeling <- function(resp,
           }else if(models.options$GLM$test == "AIC"){
             formula <- .makeGLMFormula(env.var,
                                        models.options$GLM)
-            mod.full<- stats::glm(formula = formula,
+            mod.full<-   spsUtil::quiet(stats::glm(formula = formula,
                            family = models.options$GLM$family,
                            weights = w,
-                           data = data)
+                           data = data))
             tryCatch(expr={
-              mod <- stats::step(mod.full,
+              mod <-   spsUtil::quiet(stats::step(mod.full,
                         scope = "resp~1",
                         direction = "both",
-                        trace=F)
-            cat(paste0("\n\tBest Formula:",deparse(mod$formula)))}, error=function(e){
+                        trace=F))
+            if(verbose){cat(paste0("\n\tBest Formula:",deparse(mod$formula)))}
+              }, error=function(e){
                           cat(paste("\n model",models[j],nameRun,"failed"))
                           err <<-TRUE
                         })
@@ -665,10 +694,10 @@ ESM_Modeling <- function(resp,
           } 
           
         }else{
-         tryCatch(expr={mod <- stats::glm(formula = models.options$GLM$myFormula,
+         tryCatch(expr={mod <-   spsUtil::quiet(stats::glm(formula = models.options$GLM$myFormula,
                      family = models.options$GLM$family,
                      weights = w,
-                     data = data)}, error=function(e){
+                     data = data))}, error=function(e){
                        cat(paste("\n model",models[j],nameRun,"failed"))
                        err <<-TRUE
                      })
@@ -698,7 +727,9 @@ ESM_Modeling <- function(resp,
       
       }
       if(models[j]=="GBM"){
-        cat(paste("\nGBM", nameRun,"\n"))
+        if(verbose){
+          cat(paste("\nGBM", nameRun,"\n"))
+        }
         formula <- .makeGLMFormula(env.var,
                                    model.option=list(type="linear"))
         tryCatch(expr = {mod <- gbm::gbm(formula = formula,
@@ -741,7 +772,7 @@ ESM_Modeling <- function(resp,
         }
       }
       if(models[j] == "MAXNET"){
-        cat(paste("\nMAXNET", nameRun,"\n"))
+        if(verbose){cat(paste("\nMAXNET", nameRun,"\n"))}
         tryCatch(expr={mod <- maxnet::maxnet(p = data.maxnet$resp,data = data.maxnet[,-1])}, error=function(e){
           cat(paste("\n model",models[j],nameRun,"failed"))
           err <<-TRUE

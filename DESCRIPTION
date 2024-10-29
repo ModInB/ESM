@@ -27,7 +27,7 @@ Imports:
 	spsUtil (>= 0.2.2)
 Description: Tools to generate and evaluate ensemble of small models.
 License: GPL
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Suggests: 
     knitr,
     rmarkdown

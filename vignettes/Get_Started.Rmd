@@ -69,7 +69,8 @@ my.ESM <- ESM_Modeling(resp = resp,
                        cv.ratio = 0.7,
                        parallel = FALSE,
                        save.models = FALSE,
-                       save.obj = FALSE)
+                       save.obj = FALSE,
+                       verbose = FALSE)
 
 my.ESM$biva.evaluations
 ```

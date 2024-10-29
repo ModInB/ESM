@@ -23,7 +23,8 @@ ESM_Modeling(
   modeling.id = as.character(format(Sys.time(), "\%s")),
   pathToSaveObject = getwd(),
   save.models = TRUE,
-  save.obj = TRUE
+  save.obj = TRUE,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -74,6 +75,8 @@ meaning that all the combinations will be made.}
 saved to make the projections possible.}
 
 \item{save.obj}{\code{logical}. Allows or not to save the final output.}
+
+\item{verbose}{\code{logical}. Allows or not message.}
 }
 \value{
 \itemize{
@@ -129,7 +132,8 @@ my.ESM <- ESM_Modeling(resp = resp,
                        cv.ratio = 0.7,
                        parallel = FALSE,
                        save.models = FALSE,
-                       save.obj = FALSE)
+                       save.obj = FALSE,
+                       verbose = FALSE)
                        
 # Performances of each bivariate model
 my.ESM$biva.evaluations
