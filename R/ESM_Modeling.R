@@ -1,7 +1,6 @@
 
 #' @name ESM_Modeling
-#' @author Flavien Collart \email{flaviencollart@hotmail.com} based on the previous code written by Frank Breiner 
-#' and Mirko Di Febbraro with the contributions of Olivier Broennimann and Flavien Collart
+#' @author Flavien Collart \email{flaviencollart@hotmail.com}
 #' @title Ensemble of Small Models: Calibration of Bivariate Models
 #' @description Model species distribution based on the method Ensemble of Small Models (ESM) Evaluate also each bivariate models.
 #' 

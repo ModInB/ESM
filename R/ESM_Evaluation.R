@@ -367,7 +367,7 @@ ESM_Threshold <- function (ESM.ensembleMod){
 #' @name ESM_Variable.Contributions
 #' @title Variable contribution in ESMs
 #' @author Olivier Broennimann \email{Olivier.Broennimann@unil.ch} with contributions of Heidi Mod and Daniel Scherrer 
-#' and the adaptations of Flavien Collart \email{flaviencollart@hotmail.com}
+#' for the ecospat package and adapted for this package by Flavien Collart \email{flaviencollart@hotmail.com}
 #' @description 
 #' This function evaluates the full model which is used for projections and provides thresholds to produce binary maps.
 #' 
