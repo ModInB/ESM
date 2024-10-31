@@ -52,6 +52,5 @@ Breiner F.T., Nobis M.P., Bergamini A., Guisan A. 2018. Optimizing ensembles of 
 \code{\link{ESM_Modeling}}, \code{\link{ESM_Projection}} and  \code{\link{ESM_Ensemble.Projection}}
 }
 \author{
-Flavien Collart \email{flaviencollart@hotmail.com} based on the previous code written by Frank Breiner 
-and Mirko Di Febbraro with the contributions of Olivier Broennimann and Flavien Collart
+Flavien Collart \email{flaviencollart@hotmail.com}
 }

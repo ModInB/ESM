@@ -218,7 +218,30 @@ get_chelsa_clim <- function(var.names,
   return("done")
 }
 
-
+#' @name get_topography
+#' @author Flavien Collart \email{flaviencollart@hotmail.com}
+#' @title Download topographic data
+#' @description
+#' Download and crop topographic variables from Amatulli et al (2017) using GMTED elevation data
+#' 
+#' @param var.names \code{character}. Vector containing the variable names to download. See details for more information.
+#' @param res \code{character}. Resolution of the data. Available: . \emph{Default: '1KM'}.
+#' @param aggr \code{character}. Aggregating factor. Available. \emph{Default: 'md'}.
+#' @param path \code{character}.The path to store the climatic grids.
+#' @param extent The extent to which you want to crop your climatic datasets. extent must be either a 'SpatRaster', 'SpatVector', or'SpatExtent'.
+#' @param mask \code{logical}. Do you want to mask your maps? \emph{Note that when TRUE, extent must be a 'SpatRaster' or a 'SpatVector'. }
+#' @param compress \code{logical}. When extent is provided, do you want to compress the climatic grids. if TRUE, the compression
+#' will be "COMPRESS=DEFLATE", "PREDICTOR=2" and "ZLEVEL=6". \emph{Default: TRUE}.
+#' @param timeout \code{integer}. The maximum downloading time allowed for each map in seconds. \emph{Default: 300L}.
+#' #' @details  
+#' \describe{}
+#' @return 
+#' "done" when finished
+#' @references
+#' Amatulli 
+#' @examples  \donttest{
+#' }
+#' @export 
 #### Get Topography
 
 get_topography <- function(var.names,
@@ -230,7 +253,7 @@ get_topography <- function(var.names,
                            compress = TRUE,
                            timeout = 300L
                            ){
-  res.Amatu <- c("md","mn","mi","ma","sd")
+  aggr.Amatu <- c("md","mn","mi","ma","sd")
   var.full <- c("elevation","slope","aspectcosine","aspectsine","eastness","northness",
                 "roughness","tpi","tri","vrm","dx","dxx","dy","dyy","pcurv","tcurv")
   
@@ -262,7 +285,7 @@ get_topography <- function(var.names,
       }
     }
   }
-  
+  return("done")
 }
 
 
