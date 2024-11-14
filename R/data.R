@@ -20,7 +20,7 @@
 #' 
 #' @author Flavien Collart
 #' @references
-#' Collart, F., Kiebacher, T., Quetsch, M., Broennimann, O., Guisan, A. & Vanderpoorte, A. 2024. To what extent can we predict 
+#' Collart, F., Kiebacher, T., Quetsch, M., Broennimann, O., Guisan, A. & Vanderpoorten, A. 2024. To what extent can we predict 
 #' variation of bryophyte and tracheophyte community composition at fine spatial scale along an elevation gradient?
 #' \emph{STOTEN}, 926:171741. \doi{10.1016/j.scitotenv.2024.171741}.
 #' @examples 
@@ -28,7 +28,7 @@
 "ESM_species.env"
 
 
-#' Environmental SpatRester to perform ESM with the ESM package
+#' Environmental SpatRaster to perform ESM with the ESM package
 #' 
 #' Contains stack of 5 predictors in the Western Swiss Alps, extracted from the ecospat package
 #'

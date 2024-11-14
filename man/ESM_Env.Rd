@@ -3,7 +3,7 @@
 \docType{data}
 \name{ESM_Env}
 \alias{ESM_Env}
-\title{Environmental SpatRester to perform ESM with the ESM package}
+\title{Environmental SpatRaster to perform ESM with the ESM package}
 \format{
 A SpatRaster with 5 layers:
 \describe{

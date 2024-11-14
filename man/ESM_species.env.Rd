@@ -29,7 +29,7 @@ Contains sampling of 3 bryophytes in 413 plots in the Western Swiss Alps
 data(ESM_species.env)
 }
 \references{
-Collart, F., Kiebacher, T., Quetsch, M., Broennimann, O., Guisan, A. & Vanderpoorte, A. 2024. To what extent can we predict 
+Collart, F., Kiebacher, T., Quetsch, M., Broennimann, O., Guisan, A. & Vanderpoorten, A. 2024. To what extent can we predict 
 variation of bryophyte and tracheophyte community composition at fine spatial scale along an elevation gradient?
 \emph{STOTEN}, 926:171741. \doi{10.1016/j.scitotenv.2024.171741}.
 }
