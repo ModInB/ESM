@@ -14,17 +14,21 @@
 #' Only needed when future time periods are provided. Must be: '126', '370' and/or '585'.\emph{Default: NULL}.
 #' @param path \code{character}.The path to store the climatic grids.
 #' @param extent The extent to which you want to crop your climatic datasets. extent must be either a 'SpatRaster', 'SpatVector', or'SpatExtent'.
-#' @param mask \code{logical}. Do you want to mask your maps? \emph{Note that when TRUE, extent must be a 'SpatRaster' or a 'SpatVector'. }
-#' @param compress \code{logical}. When extent is provided, do you want to compress the climatic grids. if TRUE, the compression
-#' will be "COMPRESS=DEFLATE", "PREDICTOR=2" and "ZLEVEL=6". \emph{Default: TRUE}.
+#' @param mask \code{logical}. Do you want to mask your maps? \emph{Note that when TRUE, extent must be a 'SpatRaster' or a 'SpatVector'.}
+#' @param compress \code{logical}. When extent is provided, do you want to compress the climatic grids? if TRUE, the compression
+#' will be: "COMPRESS=DEFLATE", "PREDICTOR=2" and "ZLEVEL=6". \emph{Default: TRUE}.
 #' @param timeout \code{integer}. The maximum downloading time allowed for each map in seconds. \emph{Default: 300L}.
 #' #' @details  
 #' \describe{}
 #' @return 
-#' "done" when finished
+#' \code{character}. A vector containing the path to the downloaded files.
 #' @references
-#' Karger
+#' Karger, D.N., Conrad, O., Böhner, J., Kawohl, T., Kreft, H., Soria-Auza, R.W., Zimmermann, N.E., Linder, P., Kessler, M. (2017). Climatologies at high resolution for the Earth land surface areas. \emph{Scientific Data}. \bold{4}, 170122. \doi{10.1038/sdata.2017.122}.
+#' 
+#' Karger D.N., Conrad, O., Böhner, J., Kawohl, T., Kreft, H., Soria-Auza, R.W., Zimmermann, N.E, Linder, H.P., Kessler, M. (2018): Data from: Climatologies at high resolution for the earth’s land surface areas. \emph{EnviDat}. \doi{10.16904/envidat.228.v2.1}.
+#' 
 #' @examples  \donttest{
+#' # get_chelsa_clim("bio1")
 #' }
 #' @export 
 
@@ -69,7 +73,7 @@ get_chelsa_clim <- function(var.names,
   gcm.chelsa <- c("gfdl-esm4","ipsl-cm6a-lr",
                   "mpi-esm1-2-hr","mri-esm2-0",
                   "ukesm1-0-ll")
-  
+  FilePath <- c() #File path to return at the end
   #### Check time and scenarios ####
   
   if(!all(time %in% c("1981-2010","2011-2040","2041-2070","2071-2100") )){
@@ -104,17 +108,17 @@ get_chelsa_clim <- function(var.names,
       var.down = var.full
     }else{
       if(length(time)>1){
-        if(any(var.names %in% var.pres)){
-          stop("When time contains a future period, var.names should be a group of variables available for future time period.")
+        if(any(var.names %in% var.pres) | !all(var.names %in% var.full)){
+          stop("When time contains a future period, var.names must be a group of variables available for future time period.")
         }
       }else{
         if(time == "1981-2010"){
           if(!all(var.names %in% c(var.full,var.pres))){
-            stop("all elements in var.names must be present in ex bioclimate or must be either all, all_future ,or bioclim.")
+            stop("all elements in var.names must be present in extended bioclimate or must be either all, all_future ,or bioclim.")
           }
         }else{
           if(any(var.names %in% var.pres)){
-            stop("When time contains a future period, var.names should be a group of variables available for future time period.")
+            stop("When time contains a future period, var.names must be a group of variables available for future time period.")
           }
         }
 
@@ -182,7 +186,8 @@ get_chelsa_clim <- function(var.names,
                                paste0(path,"/",var.down[i],"_CHELSA_1981-2010_V.2.1.tif"), 
                                overwrite = TRUE)
             }
-          }
+        }
+        FilePath <- c(FilePath, paste0(path,"/",var.down[i],"_CHELSA_1981-2010_V.2.1.tif")) 
         }else{
           for(h in 1:length(gcm)){
             for(g in 1:length(ssp)){
@@ -207,6 +212,8 @@ get_chelsa_clim <- function(var.names,
                 gc()
                 
               }
+              FilePath <- c(FilePath, paste0(path,"/CHELSA_",var.down[i],"_",time[j],"_",gcm[h],"_ssp",ssp[g],"_V.2.1.tif")) 
+              
               }
         }
       }
@@ -215,7 +222,7 @@ get_chelsa_clim <- function(var.names,
         gc()
     }
   }
-  return("done")
+  return(FilePath)
 }
 
 #' @name get_topography
@@ -224,9 +231,11 @@ get_chelsa_clim <- function(var.names,
 #' @description
 #' Download and crop topographic variables from Amatulli et al (2017) using GMTED elevation data
 #' 
-#' @param var.names \code{character}. Vector containing the variable names to download. See details for more information.
-#' @param res \code{character}. Resolution of the data. Available: . \emph{Default: '1KM'}.
-#' @param aggr \code{character}. Aggregating factor. Available. \emph{Default: 'md'}.
+#' @param var.names \code{character}. Vector containing the variable name(s) to download. Can be either 'all' to download all variables or a subset of the variables  
+#' avaible in Amatulli et al (2017). See details for more information.
+#' @param res \code{character}. Resolution of the data. One element from: '1KM','5KM','10KM','50KM','100KM'. \emph{Default: '1KM'}.
+#' @param aggr \code{character}. Vector containing the aggregating factor(s). Can be either 'all' to download all the aggregating factors or a subset 
+#' of c('md','mn','mi','ma','sd'). \emph{Default: 'md'}. See details for more information.
 #' @param path \code{character}.The path to store the climatic grids.
 #' @param extent The extent to which you want to crop your climatic datasets. extent must be either a 'SpatRaster', 'SpatVector', or'SpatExtent'.
 #' @param mask \code{logical}. Do you want to mask your maps? \emph{Note that when TRUE, extent must be a 'SpatRaster' or a 'SpatVector'. }
@@ -238,8 +247,10 @@ get_chelsa_clim <- function(var.names,
 #' @return 
 #' "done" when finished
 #' @references
-#' Amatulli 
+#' Amatulli, G., Domisch, S., Tuanmu, M.-N., Parmentier, B., Ranipeta, A., Malczyk, J., and Jetz, W. (2018) A suite of global, cross-scale topographic variables for environmental and biodiversity modeling. \emph{Scientific Data}. \bold{5}, 180040. \doi{10.1038/sdata.2018.40}. 
+#' 
 #' @examples  \donttest{
+#' # get_topography("elevation")
 #' }
 #' @export 
 #### Get Topography
@@ -253,11 +264,71 @@ get_topography <- function(var.names,
                            compress = TRUE,
                            timeout = 300L
                            ){
-  aggr.Amatu <- c("md","mn","mi","ma","sd")
+  aggr.full <- c("md","mn","mi","ma","sd")
   var.full <- c("elevation","slope","aspectcosine","aspectsine","eastness","northness",
                 "roughness","tpi","tri","vrm","dx","dxx","dy","dyy","pcurv","tcurv")
+  res.full <- c('1KM','5KM','10KM','50KM','100KM')
+  ## Check variable names ####
   
-  #### Perform downloading and map cropping ####
+  if(length(var.names)==1){
+    if(var.names=="all"){
+      var.down = var.full
+    }else{
+      if(any(var.names %in% var.full)){
+        stop("var.names must be 'all' or a subset of : c('elevation','slope','aspectcosine','aspectsine','eastness','northness',
+                'roughness','tpi','tri','vrm','dx','dxx','dy','dyy','pcurv','tcurv').")
+      }
+      var.down = var.names
+    }
+  }else{
+    if(any(var.names %in% var.full)){
+      stop("var.names must be 'all' or a subset of : c('elevation','slope','aspectcosine','aspectsine','eastness','northness',
+                'roughness','tpi','tri','vrm','dx','dxx','dy','dyy','pcurv','tcurv').")
+    }
+    var.down = var.names 
+  }
+  
+  ## Check aggregation names ####
+  
+  if(length(aggr)==1){
+    if(aggr=="all"){
+      aggr.down = aggr.full
+    }else{
+      if(any(aggr %in% aggr.full)){
+        stop("aggr must be 'all' or a subset of : c('md','mn','mi','ma','sd').")
+      }
+      aggr.down = aggr
+    }
+  }else{
+    if(any(aggr %in% aggr.full)){
+      stop("aggr must be 'all' or a subset of : c('md','mn','mi','ma','sd').")
+    }
+    aggr.down = aggr 
+  }
+  
+  ## Check resolution ####
+  
+  if(length(res)>1){
+    stop("res must be composed of only one element")
+  }else{
+    if(any(aggr %in% aggr.full))
+  }
+  
+  ## Check map transformation objects ####
+  
+  if(!is.null(extent)){
+    if(!(inherits(extent,c("SpatRaster", "SpatVector","SpatExtent") ))){
+      stop("extent must be either a 'SpatRaster', 'SpatVector', or'SpatExtent'.")
+      if(mask & inherits(extent,c("SpatExtent") )){
+        stop("when mask=TRUE, extent must be a 'SpatRaster' or a 'SpatVector'.")
+      }
+    }
+    if(!is.logical(compress)){
+      stop("compress must be a logical")
+    }
+  }
+  
+  ## Perform downloading and map cropping ####
   if(!is.integer(timeout)){
     stop("timeout must be an integer.")
   }
