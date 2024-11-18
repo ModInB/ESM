@@ -17,31 +17,70 @@ get_topography(
 }
 \arguments{
 \item{var.names}{\code{character}. Vector containing the variable name(s) to download. Can be either 'all' to download all variables or a subset of the variables
-avaible in Amatulli et al (2017). See details for more information.}
+avaible in Amatulli et al (2018). See details for more information.}
 
 \item{res}{\code{character}. Resolution of the data. One element from: '1KM','5KM','10KM','50KM','100KM'. \emph{Default: '1KM'}.}
 
 \item{aggr}{\code{character}. Vector containing the aggregating factor(s). Can be either 'all' to download all the aggregating factors or a subset 
 of c('md','mn','mi','ma','sd'). \emph{Default: 'md'}. See details for more information.}
 
-\item{path}{\code{character}.The path to store the climatic grids.}
+\item{path}{\code{character}.The path to store the topographic grids.}
 
-\item{extent}{The extent to which you want to crop your climatic datasets. extent must be either a 'SpatRaster', 'SpatVector', or'SpatExtent'.}
+\item{extent}{The extent to which you want to crop your topographic datasets. Extent must be either a 'SpatRaster', 'SpatVector', or'SpatExtent'.}
 
 \item{mask}{\code{logical}. Do you want to mask your maps? \emph{Note that when TRUE, extent must be a 'SpatRaster' or a 'SpatVector'. }}
 
-\item{compress}{\code{logical}. When extent is provided, do you want to compress the climatic grids. if TRUE, the compression
+\item{compress}{\code{logical}. When extent is provided, do you want to compress the topographic grids? If TRUE, the compression
 will be "COMPRESS=DEFLATE", "PREDICTOR=2" and "ZLEVEL=6". \emph{Default: TRUE}.}
 
-\item{timeout}{\code{integer}. The maximum downloading time allowed for each map in seconds. \emph{Default: 300L}.
-#' @details  
-\describe{}}
+\item{timeout}{\code{integer}. The maximum downloading time allowed for each map in seconds. \emph{Default: 300L}.}
 }
 \value{
 \code{character}. A vector containing the path to the downloaded files.
 }
 \description{
-Download and crop topographic variables from Amatulli et al (2017) using GMTED elevation data
+Download and crop topographic variables from Amatulli et al (2018) using GMTED elevation data
+}
+\details{
+\describe{
+get_topography download and crop topographic variables from Amatulli et al (2018) using GMTED elevation data.
+
+The description of each following variables comes from Amatulli et al (2018) : 
+\itemize{ 
+\item{elevation} : the elevation across the terrain (expressed in meters).
+\item{slope} : the rate of change of elevation in the direction of the water flow line (expressed in degrees).
+\item{aspectcosine} : cosine of the aspect (angular direction that a slope faces).
+\item{aspectsine} : sine of the aspect (angular direction that a slope faces).
+\item{eastness} : sine of the slope multiplied by the sine of the aspect.
+\item{northness} : sine of the slope multiplied by the cosine of the aspect.
+\item{roughness} : the largest inter-cell absolute difference of a focal cell and its 8 surrounding cells.
+\item{tpi} : the topographic position index is the difference between the elevation of a focal cell and the mean of its 8 surrounding cells.
+\item{tri} : the terrain ruggedness index  is a mean of the absolute differences in elevation between a focal cell and its 8 surrounding cells.
+\item{vrm} : the vector ruggedness measure quantifies terrain ruggedness by measuring the variation by means of sine and cosine of the slope in the three-dimensional orientation of grid cells, within a moving window.
+\item{dx} : the first order partial derivative (E-W slope)  the slope in an East-West direction.
+\item{dxx} : the second order partial derivative (E-W slope) is the derivative of a slope in a East-West direction.
+\item{dy} : the first order partial derivative (N-S slope) is the slope in a North-South direction.
+\item{dyy} : the second order partial derivative (N-S slope) is the derivative of the slope in a North-South direction.
+\item{pcurv} : the profile curvature measures the rate of change of a slope along a flow line, and affects the acceleration of water flow along a surface.
+\item{tcurv} : the tangential curvature measures the rate of change perpendicular to the slope gradient and is related to the convergence and divergence of flow across a surface.
+}
+
+The aggregative factors correspond to the statistics computed from the variables.
+Amatulli et al. use the 250m GMTED as a data source with a resolution of 250m.
+GMTED is available in different forms derived from the different high resolution DEMs and 
+corresponding to different statistics 
+namely minimum (mi), maximum (ma), mean (mn), median (md) and standard devition (sd).
+For the elevation variable, the mi, ma, mn, md and sd elevation were obtained from the
+source layers 250m GMTEDmi, 250m GMTEDma, 250m GMTEDmn, 250m GMTEDmd and 250m GMTEDsd respectively
+(note that the downloaded files finished by "md" but still correspond to the different source layers).
+The rest of the variables were obtained from the 250m GMTEDmd and the others aggregative factors layers were calculated after.
+
+To crop a map to a different size than the original one, it is possible to add an extent or a mask parameter.
+
+If the extent of the map is significant, you may want to compress it and 
+modified the timeout parameter to a greater period of time.
+
+}
 }
 \examples{
  \donttest{

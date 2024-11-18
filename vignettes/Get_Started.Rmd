@@ -25,9 +25,9 @@ library(terra)
 
 ### Data preparation
 
-Here we first need to load our data. To realize an ESM, we first gather some informations: the coordinates of the observations (called xy); a response vector (resp) attributing 1 if the species was present or 0 if absent; the name of the species (sp.name) and; environmental predictors (env), which can be a SpatRaster from terra package or a data.frame.
+Here we first need to load our data. To realize an ESM, we first gather some information: the coordinates of the observations (called xy); a response vector (resp) attributing 1 if the species was present or 0 if absent; the name of the species (sp.name) and; environmental predictors (env), which can be a SpatRaster from terra package or a data.frame.
 
-Let's focus here to model the distribution of *Tayloria serrata*, which were only found 15 times out of 413 plots, in the Western Swiss Alps. Here, we will use 5 predictors, obtained from the ecospat package and projected into the same CRS as our observations. 
+Let's focus here to model the distribution of *Tayloria serrata*, which were only found 15 times out of 413 plots, in the Western Swiss Alps. Here, we will use 5 predictors, obtained from the ecospat package and projected into the same CRS as our observations.
 
 ```{r}
 ## species information with environmental values

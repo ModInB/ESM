@@ -39,15 +39,22 @@ Only needed when future time periods are provided. Must be: '126', '370' and/or 
 \item{compress}{\code{logical}. When extent is provided, do you want to compress the climatic grids? if TRUE, the compression
 will be: "COMPRESS=DEFLATE", "PREDICTOR=2" and "ZLEVEL=6". \emph{Default: TRUE}.}
 
-\item{timeout}{\code{integer}. The maximum downloading time allowed for each map in seconds. \emph{Default: 300L}.
-#' @details  
-\describe{}}
+\item{timeout}{\code{integer}. The maximum downloading time allowed for each map in seconds. \emph{Default: 300L}.}
 }
 \value{
 \code{character}. A vector containing the path to the downloaded files.
 }
 \description{
 Download and crop climatic variables at different time period from CHELSA v.2.1.
+}
+\details{
+\describe{
+get_chesla download and crop climatic variables at different time periode from CHELSA v.2.1.
+Some variables are only available at the present time (var.pres) while other are also available in the futur (var.full).
+The full variables are to be combined with a future scenario by choosing a global circular model (gcm.chelsa) and a shared-socioeconomic pathway (ssp.chelsa)
+The description of the different variables is available at the point 7 (p.11) of the following link :
+\link{https://chelsa-climate.org/wp-admin/download-page/CHELSA_tech_specification_V2.pdf}
+}
 }
 \examples{
  \donttest{

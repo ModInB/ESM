@@ -18,13 +18,13 @@
 #' @param compress \code{logical}. When extent is provided, do you want to compress the climatic grids? if TRUE, the compression
 #' will be: "COMPRESS=DEFLATE", "PREDICTOR=2" and "ZLEVEL=6". \emph{Default: TRUE}.
 #' @param timeout \code{integer}. The maximum downloading time allowed for each map in seconds. \emph{Default: 300L}.
-#' #' @details  
+#' @details  
 #' \describe{
 #' get_chesla download and crop climatic variables at different time periode from CHELSA v.2.1.
 #' Some variables are only available at the present time (var.pres) while other are also available in the futur (var.full).
 #' The full variables are to be combined with a future scenario by choosing a global circular model (gcm.chelsa) and a shared-socioeconomic pathway (ssp.chelsa)
 #' The description of the different variables is available at the point 7 (p.11) of the following link :
-#' https://chelsa-climate.org/wp-admin/download-page/CHELSA_tech_specification_V2.pdf
+#' \link{https://chelsa-climate.org/wp-admin/download-page/CHELSA_tech_specification_V2.pdf}
 #' }
 #' @return 
 #' \code{character}. A vector containing the path to the downloaded files.
@@ -256,34 +256,41 @@ get_chelsa_clim <- function(var.names,
 #' @param compress \code{logical}. When extent is provided, do you want to compress the topographic grids? If TRUE, the compression
 #' will be "COMPRESS=DEFLATE", "PREDICTOR=2" and "ZLEVEL=6". \emph{Default: TRUE}.
 #' @param timeout \code{integer}. The maximum downloading time allowed for each map in seconds. \emph{Default: 300L}.
-#' #' @details  
+#' @details  
 #' \describe{
 #' get_topography download and crop topographic variables from Amatulli et al (2018) using GMTED elevation data.
 #' 
-#' The description of each following variables comes from Amatulli et al (2020) : 
-#' \itemize { 
-#' \item {elevation} :
-#' \item {slope} :  the rate of change of elevation in the direction of the water flow line (expressed in degrees or percentages).
-#' \item {aspectcosine} : cosine of the aspect (angular direction that a slope faces) (expressed in degrees).
-#' \item {aspectsine} : sine of the aspect (angular direction that a slope faces) (expressed in degrees).
-#' \item {eastness} : sine of the slope multiplied by the sine of the aspect.
-#' \item {northness} : sine of the slope multiplied by the cosine of the aspect.
-#' \item {roughness} : the largest inter-cell absolute difference of a focal cell and its 8 surrounding cells.
-#' \item {tpi} : the topographic position index is the difference between the elevation of a focal cell and the mean of its 8 surrounding cells.
-#' \item {tri} : the terrain ruggedness index  is a mean of the absolute differences in elevation between a focal cell and its 8 surrounding cells.
-#' \item {vrm} : the vector ruggedness measure quantifies terrain ruggedness by measuring the variation by means of sine and cosine of the slope in the three-dimensional orientation of grid cells, within a moving window.
-#' \item {dx} : the first order partial derivative (E-W slope)  the slope in an East-West direction.
-#' \item {dxx} : the second order partial derivative (E-W slope) is the derivative of a slope in a East-West direction.
-#' \item {dy} : the first order partial derivative (N-S slope) is the slope in a North-South direction.
-#' \item {dyy} : the second order partial derivative (N-S slope) is the derivative of the slope in a North-South direction.
-#' \item {pcurv} : the profile curvature measures the rate of change of a slope along a flow line, and affects the acceleration of water flow along a surface.
-#' \item {tcurv} : the tangential curvature measures the rate of change perpendicular to the slope gradient and is related to the convergence and divergence of flow across a surface.
+#' The description of each following variables comes from Amatulli et al (2018) : 
+#' \itemize{ 
+#' \item{elevation} : the elevation across the terrain (expressed in meters).
+#' \item{slope} : the rate of change of elevation in the direction of the water flow line (expressed in degrees).
+#' \item{aspectcosine} : cosine of the aspect (angular direction that a slope faces).
+#' \item{aspectsine} : sine of the aspect (angular direction that a slope faces).
+#' \item{eastness} : sine of the slope multiplied by the sine of the aspect.
+#' \item{northness} : sine of the slope multiplied by the cosine of the aspect.
+#' \item{roughness} : the largest inter-cell absolute difference of a focal cell and its 8 surrounding cells.
+#' \item{tpi} : the topographic position index is the difference between the elevation of a focal cell and the mean of its 8 surrounding cells.
+#' \item{tri} : the terrain ruggedness index  is a mean of the absolute differences in elevation between a focal cell and its 8 surrounding cells.
+#' \item{vrm} : the vector ruggedness measure quantifies terrain ruggedness by measuring the variation by means of sine and cosine of the slope in the three-dimensional orientation of grid cells, within a moving window.
+#' \item{dx} : the first order partial derivative (E-W slope)  the slope in an East-West direction.
+#' \item{dxx} : the second order partial derivative (E-W slope) is the derivative of a slope in a East-West direction.
+#' \item{dy} : the first order partial derivative (N-S slope) is the slope in a North-South direction.
+#' \item{dyy} : the second order partial derivative (N-S slope) is the derivative of the slope in a North-South direction.
+#' \item{pcurv} : the profile curvature measures the rate of change of a slope along a flow line, and affects the acceleration of water flow along a surface.
+#' \item{tcurv} : the tangential curvature measures the rate of change perpendicular to the slope gradient and is related to the convergence and divergence of flow across a surface.
 #' }
 #' 
-#' The aggregative factors used by the function are minimum (mn), maximum (mx), 
-#' mean (mn), median (md) and standard deviation (sd). The median is the factor selected by default.
-#' 
-#' To crop a map to a different size than the original one, it is possible to add an extent or a mask parameter
+#' The aggregative factors correspond to the statistics computed from the variables.
+#' Amatulli et al. use the 250m GMTED as a data source with a resolution of 250m.
+#' GMTED is available in different forms derived from the different high resolution DEMs and 
+#' corresponding to different statistics 
+#' namely minimum (mi), maximum (ma), mean (mn), median (md) and standard devition (sd).
+#' For the elevation variable, the mi, ma, mn, md and sd elevation were obtained from the
+#' source layers 250m GMTEDmi, 250m GMTEDma, 250m GMTEDmn, 250m GMTEDmd and 250m GMTEDsd respectively
+#' (note that the downloaded files finished by "md" but still correspond to the different source layers).
+#' The rest of the variables were obtained from the 250m GMTEDmd and the others aggregative factors layers were calculated after.
+#'
+#' To crop a map to a different size than the original one, it is possible to add an extent or a mask parameter.
 #' 
 #' If the extent of the map is significant, you may want to compress it and 
 #' modified the timeout parameter to a greater period of time.
@@ -294,7 +301,7 @@ get_chelsa_clim <- function(var.names,
 #' \code{character}. A vector containing the path to the downloaded files.
 #' @references
 #' Amatulli, G., Domisch, S., Tuanmu, M.-N., Parmentier, B., Ranipeta, A., Malczyk, J., and Jetz, W. (2018) A suite of global, cross-scale topographic variables for environmental and biodiversity modeling. \emph{Scientific Data}. \bold{5}, 180040. \doi{10.1038/sdata.2018.40}. 
-#' Amatulli, G., McInerney, D., Sethi, T. et al. (2020) Geomorpho90m, empirical evaluation and accuracy assessment of global high-resolution geomorphometric layers. \emph{Scientific Data}. \bold{7}, 162. \doi{10.1038/s41597-020-0479-6}.
+#' 
 #' @examples  \donttest{
 #' # get_topography("elevation")
 #' }
