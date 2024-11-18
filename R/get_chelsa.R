@@ -128,7 +128,7 @@ get_chelsa_clim <- function(var.names,
     }
   }else{
     if(length(time)>1){
-      if(any(var.names %in% var.pres)){
+      if(any(var.names %in% var.pres) | !all(var.names %in% var.full)){
         stop("When time contains a future period, var.names should be a group of variables available for future time period.")
       }
     }else{
@@ -169,31 +169,39 @@ get_chelsa_clim <- function(var.names,
   for(j in 1:length(time)){
     for(i in 1:length(var.down)){
       if(time[j] =="1981-2010"){
+        if(file.exists(paste0(path,"/CHELSA_",var.down[i],"_1981-2010_V.2.1.tif"))){
+          warning(paste("File 'CHELSA_",var.down[i],"_1981-2010_V.2.1.tif' is already present in the location."))
+          next
+        }
         download.file(url=paste0("https://os.zhdk.cloud.switch.ch/chelsav2/GLOBAL/climatologies/1981-2010/bio/CHELSA_",
                                  var.down[i],"_1981-2010_V.2.1.tif"),
-                      destfile=paste0(path,"/",var.down[i],"_CHELSA_1981-2010_V.2.1.tif"),
+                      destfile=paste0(path,"/CHELSA_",var.down[i],"_1981-2010_V.2.1.tif"),
                       mode="wb")
         if(!is.null(extent)){
-          map <- terra::rast(paste0(path,"/",var.down[i],"_CHELSA_1981-2010_V.2.1.tif"))
+          map <- terra::rast(paste0(path,"/CHELSA_",var.down[i],"_1981-2010_V.2.1.tif"))
           map <- terra::crop(map,extent,mask=mask)
           if(compress){
             terra::writeRaster(map, 
-                               paste0(path,"/",var.down[i],"_CHELSA_1981-2010_V.2.1.tif"), 
+                               paste0(path,"/CHELSA_",var.down[i],"_1981-2010_V.2.1.tif"), 
                                overwrite = TRUE,
                                gdal = c("COMPRESS=DEFLATE", "PREDICTOR=2", "ZLEVEL=6"))
           }else{
             terra::writeRaster(map, 
-                               paste0(path,"/",var.down[i],"_CHELSA_1981-2010_V.2.1.tif"), 
+                               paste0(path,"/CHELSA_",var.down[i],"_1981-2010_V.2.1.tif"), 
                                overwrite = TRUE)
             }
         }
-        FilePath <- c(FilePath, paste0(path,"/",var.down[i],"_CHELSA_1981-2010_V.2.1.tif")) 
+        FilePath <- c(FilePath, paste0(path,"/CHELSA_",var.down[i],"_1981-2010_V.2.1.tif")) 
         }else{
           for(h in 1:length(gcm)){
             for(g in 1:length(ssp)){
+              if(file.exists(paste0(path,"/CHELSA_",var.down[i],"_",time[j],"_",gcm[h],"_ssp",ssp[g],"_V.2.1.tif"))){
+                warning(paste("File 'CHELSA_",var.down[i],"_",time[j],"_",gcm[h],"_ssp",ssp[g],"_V.2.1.tif' is already present in the location."))
+                next
+              }
               download.file(url=paste0("https://os.zhdk.cloud.switch.ch/chelsav2/GLOBAL/climatologies/",
                                      time[j],"/",toupper(gcm[h]),"/ssp",ssp[g],
-                                     "/CHELSA_",var.down[i],"_",time[j],"_",gcm[h],"_ssp",ssp[g],"_V.2.1.tif"),
+                                     "/bio/CHELSA_",var.down[i],"_",time[j],"_",gcm[h],"_ssp",ssp[g],"_V.2.1.tif"),
                           destfile=paste0(path,"/CHELSA_",var.down[i],"_",time[j],"_",gcm[h],"_ssp",ssp[g],"_V.2.1.tif"),
                           mode="wb")
               if(!is.null(extent)){
@@ -245,7 +253,7 @@ get_chelsa_clim <- function(var.names,
 #' #' @details  
 #' \describe{}
 #' @return 
-#' "done" when finished
+#' \code{character}. A vector containing the path to the downloaded files.
 #' @references
 #' Amatulli, G., Domisch, S., Tuanmu, M.-N., Parmentier, B., Ranipeta, A., Malczyk, J., and Jetz, W. (2018) A suite of global, cross-scale topographic variables for environmental and biodiversity modeling. \emph{Scientific Data}. \bold{5}, 180040. \doi{10.1038/sdata.2018.40}. 
 #' 
@@ -268,20 +276,22 @@ get_topography <- function(var.names,
   var.full <- c("elevation","slope","aspectcosine","aspectsine","eastness","northness",
                 "roughness","tpi","tri","vrm","dx","dxx","dy","dyy","pcurv","tcurv")
   res.full <- c('1KM','5KM','10KM','50KM','100KM')
+  FilePath <- c() #File path to return at the end
+  
   ## Check variable names ####
   
   if(length(var.names)==1){
     if(var.names=="all"){
       var.down = var.full
     }else{
-      if(any(var.names %in% var.full)){
+      if(any(!(var.names %in% var.full))){
         stop("var.names must be 'all' or a subset of : c('elevation','slope','aspectcosine','aspectsine','eastness','northness',
                 'roughness','tpi','tri','vrm','dx','dxx','dy','dyy','pcurv','tcurv').")
       }
       var.down = var.names
     }
   }else{
-    if(any(var.names %in% var.full)){
+    if(any(!(var.names %in% var.full))){
       stop("var.names must be 'all' or a subset of : c('elevation','slope','aspectcosine','aspectsine','eastness','northness',
                 'roughness','tpi','tri','vrm','dx','dxx','dy','dyy','pcurv','tcurv').")
     }
@@ -294,13 +304,13 @@ get_topography <- function(var.names,
     if(aggr=="all"){
       aggr.down = aggr.full
     }else{
-      if(any(aggr %in% aggr.full)){
+      if(any(!(aggr %in% aggr.full))){
         stop("aggr must be 'all' or a subset of : c('md','mn','mi','ma','sd').")
       }
       aggr.down = aggr
     }
   }else{
-    if(any(aggr %in% aggr.full)){
+    if(any(!(aggr %in% aggr.full))){
       stop("aggr must be 'all' or a subset of : c('md','mn','mi','ma','sd').")
     }
     aggr.down = aggr 
@@ -311,7 +321,9 @@ get_topography <- function(var.names,
   if(length(res)>1){
     stop("res must be composed of only one element")
   }else{
-    if(any(aggr %in% aggr.full))
+    if(!all(toupper(res) %in% res.full)){
+      stop("res must be one element of c('1KM','5KM','10KM','50KM','100KM')")
+    }
   }
   
   ## Check map transformation objects ####
@@ -334,29 +346,43 @@ get_topography <- function(var.names,
   }
   options(timeout = max(timeout, getOption("timeout")))
   
-  for(j in 1:length(aggr)){
-    for(i in 1:length(var.names)){
-      download.file(paste0("https://data.earthenv.org/topography/",
-                           var.names[i],"_",toupper(res),aggr[j],"_GMTED",aggr[j],".tif"),
-                    destfile=paste0(path,"/",var.names[i],"_",toupper(res),aggr[j],"_GMTED",aggr[j],".tif"),
-                    mode="wb")
+  for(j in 1:length(aggr.down)){
+    for(i in 1:length(var.down)){
+      if(file.exists(paste0(path,"/",var.down[i],"_",toupper(res),aggr[j],"_GMTEDmd.tif"))){
+        warning(paste("File '",var.down[i],"_",toupper(res),aggr[j],"_GMTEDmd.tif' is already present in the location."))
+        next
+      }
+      ## elevation is the only variable that is not written in the same way as the others
+      if(var.down[i] == "elevation"){
+        download.file(paste0("https://data.earthenv.org/topography/",
+                             var.down[i],"_",toupper(res),aggr[j],"_GMTED",aggr[j],".tif"),
+                      destfile=paste0(path,"/",var.down[i],"_",toupper(res),aggr[j],"_GMTEDmd.tif"),
+                      mode="wb")
+      }else{
+        download.file(paste0("https://data.earthenv.org/topography/",
+                             var.down[i],"_",toupper(res),aggr[j],"_GMTEDmd.tif"),
+                      destfile=paste0(path,"/",var.down[i],"_",toupper(res),aggr[j],"_GMTEDmd.tif"),
+                      mode="wb")
+      }
+      
       if(!is.null(extent)){
-        map <- terra::rast(paste0(path,"/",var.names[i],"_",toupper(res),aggr[j],"_GMTED",aggr[j],".tif"))
+        map <- terra::rast(paste0(path,"/",var.down[i],"_",toupper(res),aggr[j],"_GMTEDmd.tif"))
         map <- terra::crop(map,extent,mask=mask)
         if(compress){
           terra::writeRaster(map, 
-                             paste0(path,"/",var.names[i],"_",toupper(res),aggr[j],"_GMTED",aggr[j],".tif"), 
+                             paste0(path,"/",var.down[i],"_",toupper(res),aggr[j],"_GMTEDmd.tif"), 
                              overwrite = TRUE,
                              gdal = c("COMPRESS=DEFLATE", "PREDICTOR=2", "ZLEVEL=6"))
         }else{
           terra::writeRaster(map, 
-                             paste0(path,"/",var.names[i],"_",toupper(res),aggr[j],"_GMTED",aggr[j],".tif"), 
+                             paste0(path,"/",var.down[i],"_",toupper(res),aggr[j],"_GMTEDmd.tif"), 
                              overwrite = TRUE)
         }
       }
+      FilePath <- c(FilePath,paste0(path,"/",var.down[i],"_",toupper(res),aggr[j],"_GMTEDmd.tif")) 
     }
   }
-  return("done")
+  return(FilePath)
 }
 
 

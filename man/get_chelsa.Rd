@@ -34,27 +34,30 @@ Only needed when future time periods are provided. Must be: '126', '370' and/or 
 
 \item{extent}{The extent to which you want to crop your climatic datasets. extent must be either a 'SpatRaster', 'SpatVector', or'SpatExtent'.}
 
-\item{mask}{\code{logical}. Do you want to mask your maps? \emph{Note that when TRUE, extent must be a 'SpatRaster' or a 'SpatVector'. }}
+\item{mask}{\code{logical}. Do you want to mask your maps? \emph{Note that when TRUE, extent must be a 'SpatRaster' or a 'SpatVector'.}}
 
-\item{compress}{\code{logical}. When extent is provided, do you want to compress the climatic grids. if TRUE, the compression
-will be "COMPRESS=DEFLATE", "PREDICTOR=2" and "ZLEVEL=6". \emph{Default: TRUE}.}
+\item{compress}{\code{logical}. When extent is provided, do you want to compress the climatic grids? if TRUE, the compression
+will be: "COMPRESS=DEFLATE", "PREDICTOR=2" and "ZLEVEL=6". \emph{Default: TRUE}.}
 
 \item{timeout}{\code{integer}. The maximum downloading time allowed for each map in seconds. \emph{Default: 300L}.
 #' @details  
 \describe{}}
 }
 \value{
-"done" when finished
+\code{character}. A vector containing the path to the downloaded files.
 }
 \description{
 Download and crop climatic variables at different time period from CHELSA v.2.1.
 }
 \examples{
  \donttest{
+# get_chelsa_clim("bio1")
 }
 }
 \references{
-Karger
+Karger, D.N., Conrad, O., Böhner, J., Kawohl, T., Kreft, H., Soria-Auza, R.W., Zimmermann, N.E., Linder, P., Kessler, M. (2017). Climatologies at high resolution for the Earth land surface areas. \emph{Scientific Data}. \bold{4}, 170122. \doi{10.1038/sdata.2017.122}.
+
+Karger D.N., Conrad, O., Böhner, J., Kawohl, T., Kreft, H., Soria-Auza, R.W., Zimmermann, N.E, Linder, H.P., Kessler, M. (2018): Data from: Climatologies at high resolution for the earth’s land surface areas. \emph{EnviDat}. \doi{10.16904/envidat.228.v2.1}.
 }
 \author{
 Flavien Collart \email{flaviencollart@hotmail.com}

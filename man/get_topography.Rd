@@ -16,11 +16,13 @@ get_topography(
 )
 }
 \arguments{
-\item{var.names}{\code{character}. Vector containing the variable names to download. See details for more information.}
+\item{var.names}{\code{character}. Vector containing the variable name(s) to download. Can be either 'all' to download all variables or a subset of the variables
+avaible in Amatulli et al (2017). See details for more information.}
 
-\item{res}{\code{character}. Resolution of the data. Available: . \emph{Default: '1KM'}.}
+\item{res}{\code{character}. Resolution of the data. One element from: '1KM','5KM','10KM','50KM','100KM'. \emph{Default: '1KM'}.}
 
-\item{aggr}{\code{character}. Aggregating factor. Available. \emph{Default: 'md'}.}
+\item{aggr}{\code{character}. Vector containing the aggregating factor(s). Can be either 'all' to download all the aggregating factors or a subset 
+of c('md','mn','mi','ma','sd'). \emph{Default: 'md'}. See details for more information.}
 
 \item{path}{\code{character}.The path to store the climatic grids.}
 
@@ -36,17 +38,18 @@ will be "COMPRESS=DEFLATE", "PREDICTOR=2" and "ZLEVEL=6". \emph{Default: TRUE}.}
 \describe{}}
 }
 \value{
-"done" when finished
+\code{character}. A vector containing the path to the downloaded files.
 }
 \description{
 Download and crop topographic variables from Amatulli et al (2017) using GMTED elevation data
 }
 \examples{
  \donttest{
+# get_topography("elevation")
 }
 }
 \references{
-Amatulli
+Amatulli, G., Domisch, S., Tuanmu, M.-N., Parmentier, B., Ranipeta, A., Malczyk, J., and Jetz, W. (2018) A suite of global, cross-scale topographic variables for environmental and biodiversity modeling. \emph{Scientific Data}. \bold{5}, 180040. \doi{10.1038/sdata.2018.40}.
 }
 \author{
 Flavien Collart \email{flaviencollart@hotmail.com}
