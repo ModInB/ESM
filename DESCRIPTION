@@ -17,7 +17,8 @@ Depends: R (>= 4.0.0)
 Imports: 
 	ade4 (>= 1.7-22), 
 	gbm (>= 2.1.1), 
-	terra (>= 1.2-5), 
+	terra (>= 1.2-5),
+	mgcv (>= 1.9-1),
 	PresenceAbsence (>= 1.1.9), 
 	parallel, 
 	maxnet (>= 0.1.4), 
