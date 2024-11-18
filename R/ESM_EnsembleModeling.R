@@ -4,7 +4,7 @@
 #' @title Ensemble of Small Models: Average Bivariate Models into an ESM
 #' @description This function averages simple bivariate models by weighted means to Ensemble Small Models.
 #' @param ESM.Mod The object returned by \code{ESM_Modeling}.
-#' @param weighting.score \code{character}. An evaluation score used to weight single models to build ensembles:"AUC","MaxTSS","Boyce" or,"SomersD".
+#' @param weighting.score \code{character}. An evaluation score used to weight single models to build ensembles:"AUC","MaxTSS","SBI" or,"SomersD".
 #' @param threshold \code{numeric} or \code{NULL}. Threshold value of an evaluation score to select the bivariate model(s) included for building 
 #' the ensemble. \emph{Default}: 0.5 for AUC and 0 for the other metrics.
 #' @param save.obj \code{logical}. Allows or not to save the outputs from this function.
@@ -15,7 +15,8 @@
 #' \item{model.info}: a \code{list} of the models used, their options, the combination of bivariate models (which.biva), the modeling ID, 
 #' the path to the folder where are the stored the models (biva.path), and the failed models
 #' \item{cv.split.table}: a \code{matrix} used to train and test models. See explanation of the argument cv.split.table
-#' \item{evaluations}: a \code{matrix} The evaluation of the ensemble. 
+#' \item{evaluations}: a \code{matrix} The evaluation of the ensemble based on 4 metrics: the AUC, the Somer's D (=2*AUC-1),
+#' maxTSS and the smooth Boyce Index (SBI).
 #' \item{EF.algo}: a \code{list} containing \code{pred.EF.algo} which is a \code{matrix} of ensemble predictions for each run 
 #' and modeling techniques; and \code{weights.algo} a \code{matrix} of weights used to generate the ensemble at the level of the algorithm.
 #' \item{EF}: a \code{list} containing \code{pred.EF} which is a \code{matrix} of ESMs predictions for each run; 
@@ -39,9 +40,9 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
                                  save.obj = TRUE){
   
   ## Check some arguments----
-  if(!weighting.score %in% c("AUC", "MaxTSS", "Boyce", 
+  if(!weighting.score %in% c("AUC", "MaxTSS", "SBI", 
                               "SomersD")) {
-    stop("weighting score not supported! Choose one of the following: AUC, MaxTSS, Boyce, or SomersD")
+    stop("weighting score not supported! Choose one of the following: AUC, MaxTSS, SBI, or SomersD")
   }
   if(is.null(threshold)){
     if(weighting.score == "AUC"){

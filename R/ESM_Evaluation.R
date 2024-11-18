@@ -3,7 +3,6 @@
 ## models and/or check model outputs
 ###########################################################
  
-#############
 ## ESM.Pooling.Evaluation
 ## Perform the pooling evaluation
 #' @name ESM_Pooling.Evaluation
@@ -124,7 +123,7 @@ ESM_Pooling.Evaluation <- function (ESM.Mod,
   return(output)
 }
 
-###############
+
 
 #' @name ESM_Null.Models
 #' @author Flavien Collart \email{flaviencollart@hotmail.com}
@@ -168,6 +167,7 @@ ESM_Pooling.Evaluation <- function (ESM.Mod,
 #' \emph{Ecography}. e07086. \doi{10.1111/ecog.07086}.
 #' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}
 #' @export
+
 ESM_Null.Models <- function(ESM.Mod,
                             ESM.ensembleMod,
                             n.rep = 99,
@@ -283,7 +283,7 @@ ESM_Null.Models <- function(ESM.Mod,
   return(obj)
 }
 
-#############
+
 #' @name ESM_Threshold
 #' @title Thresholds for Ensemble of Small Models
 #' @author Flavien Collart \email{flaviencollart@hotmail.com} based on the scripts of Frank Breiner.
@@ -309,7 +309,7 @@ ESM_Null.Models <- function(ESM.Mod,
 #' \emph{Environmental conservation}, \bold{24.1} (1997): 38-49.
 #' @seealso \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}
 #' @export
-###############
+
 
 ESM_Threshold <- function (ESM.ensembleMod){
   
@@ -363,7 +363,6 @@ ESM_Threshold <- function (ESM.ensembleMod){
 }
 
 
-#############
 #' @name ESM_Variable.Contributions
 #' @title Variable contribution in ESMs
 #' @author Olivier Broennimann \email{Olivier.Broennimann@unil.ch} with contributions of Heidi Mod and Daniel Scherrer 
@@ -385,7 +384,7 @@ ESM_Threshold <- function (ESM.ensembleMod){
 #' a \code{dataframe} with contribution values (i.e. proportional contribution) by variable and model
 #' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}
 #' @export
-###############
+
 
 ESM_Variable.Contributions <- function (ESM.Mod, 
                                         ESM.ensembleMod){
@@ -416,7 +415,7 @@ ESM_Variable.Contributions <- function (ESM.Mod,
   return(contrib)
 }
 
-#############
+
 #' @name ESM_Response.Plot
 #' @title Produce response plots for ESMs
 #' @author Flavien Collart \email{flaviencollart@hotmail.com} from the code of Frank Breiner.
@@ -440,7 +439,7 @@ ESM_Variable.Contributions <- function (ESM.Mod,
 #' 
 #' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}
 #' @export
-###############
+
 
 ESM_Response.Plot <- function (ESM.Mod, 
                                ESM.ensembleMod, 
@@ -518,6 +517,144 @@ ESM_Response.Plot <- function (ESM.Mod,
   return(proj.fixed.list = proj.fixed.list)
 }
 
+#' @name smooth.CBI
+#' @title Compute the Smooth continuous Boyce Index (SBI) of Liu et al (2024)
+#' @author Flavien Collart \email{flaviencollart@hotmail.com} from the code available in Liu et al (2024).
+#' @description 
+#' This function computes the Smooth continuous Boyce Index of Liu et al (2024) using 5 smoothing techniques and make an ensemble.
+#' 
+#' @param pres \code{numeric}. Predictions from sites where species is present.
+#' @param abs \code{numeric}. Predictions from random sites (e.g., background points, pseudo-absences).
+#' @param ktry \code{integer}. Basis dimension for smoothers. Generally, the default value 10 is ok.
+#' @param method \code{character}. Either 'all' to compute all methods or vector containing a subset of the 5 available smoothing 
+#' methods to compute the SBI. Available methods:'tp','cr','bs','ps','ad'. \emph{Default: 'all'} See details for more information.
+#' @param mean.CBI \code{logical}. Should the ensemble model be perform to compute the SBI?
+#' @param cor.method \code{character}. The method used to compute the correlation. Should be either 'pearson','spearman','kendall'. 
+#' \emph{Default: 'spearman}
+#' @details 
+#' The Boyce index (BI) is usually computed by comparing relative frequencies between probabilities from presence and background sites 
+#' within a series of bins. However, this method is problematic, particularly for rare species, to obtain accurate estimates of the BI.
+#' 
+#' To correct this issue, Liu et al (2024) proposed the Smooth Boyce Index (SBI), which was shown to be better than regular BI. 
+#' To do so, regression splines, with a binomial family and using mgcv::gam function, are fitted by using the predicted suitability 
+#' from SDMs as the independent variable and species observation (1 = presence, 0 = random points) as the dependent variable. 
+#' The fitted values are then predicted and a correlation between the observed prediction values and the fitted one is realized.
+#' An ensemble of these models (called 'm') can be realized by applying a mean across the predicted prediction values from the different 
+#' techniques. A correlation is then performed between these values and the observed ones. This ensemble can be realized with the argument
+#' mean.CBI = TRUE.
+#' 
+#' 5 smoothing techniques have been tested in Liu et al (2024) and are implemented here:
+#' \itemize{
+#' \item{tp}. Thin plate regression splines. 
+#' \item{cr}. Cubic regression splines.
+#' \item{bs}. B-splines.
+#' \item{ps}. P-splines.
+#' \item{ad}. Adaptive smoothers. 
+#' }
+#' 
+#' @return 
+#' a \code{list} containing:
+#' \itemize{
+#' \item{SBI}. \code{matrix} containing the computed SBI. SBI.m is the value from the ensemble model.
+#' \item{pred.CBI}. \code{matrix}. Predicted values resulted from the smoothing method used to compute the CBI. 
+#' The first column corresponds to the observed predictions.
+#' }
+#' @references 
+#' Liu, C., Newell, G., White, M. and Machunter, J. (2024), Improving the estimation of the Boyce index using statistical smoothing methods for evaluating species distribution models with presence-only data. \emph{Ecography}, e07218. \doi{10.1111/ecog.07218}
+#' 
+#' @examples 
+#' library(ecospat)
+#' data <- ecospat::ecospat.testData 
+#' SBI <- smooth.CBI(
+#' pres = data$glm_Saxifraga_oppositifolia[which(data$Saxifraga_oppositifolia==1)],
+#' abs = data$glm_Saxifraga_oppositifolia[which(data$Saxifraga_oppositifolia==0)],
+#' ktry = 10,
+#' method = 'all',
+#' mean.CBI = TRUE,
+#' cor.method = 'spearman'
+#' )
+#' SBI$SBI
+#' 
+#' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Null.Models}, \code{\link{ESM_pooling}}}
+#' @export
+
+smooth.CBI <- function(pres, 
+                       abs, 
+                       ktry=10,
+                       method = "all",
+                       mean.CBI = TRUE,
+                       cor.method = "spearman") {
+  if(any(pres < 0 | pres >1)){
+    stop("values in pres must be comprised between 0 and 1")
+  }
+  if(any(abs < 0 | abs >1)){
+    stop("values in abs must be comprised between 0 and 1")
+  }
+  if(!is.numeric(ktry)){
+    stop("ktry must be a numeric")
+  }
+  p <- c(pres, abs)
+  n1 <- length(pres)
+  n0 <- length(abs)
+  prd <- seq(min(p), max(p), length=n0)
+  oc <- c(rep(1, n1), rep(0, n0))
+  
+  
+  method.full <- c('tp','cr','bs','ps','ad')
+  cor.method.full <- c('pearson','spearman','kendall')
+  ## Check method argument ####
+  
+  if(length(method)==1){
+    if(method=="all"){
+      method = method.full
+    }else{
+      if(any(!(method %in% method.full))){
+        stop("method must be 'all' or a subset of: c('tp','cr','bs','ps','ad').")
+      }
+    }
+  }else{
+    if(any(!(method %in% method.full))){
+      stop("aggr must be 'all' or a subset of: c('tp','cr','bs','ps','ad').")
+    }
+  }
+  ## Check cor.method argument ####
+  if(length(cor.method)>1){
+    stop("length(cor.method) must be equal to 1.")
+    }else{
+      if(any(!(cor.method %in% cor.method.full))){
+        stop("cor.method must be either 'pearson','spearman' or'kendall'.")
+      }
+    }
+
+  ## Check mean.CBI ####
+  if(!is.logical(mean.CBI)){
+    stop("mean.CBI must be logical")
+  }
+  
+  S.BI <- list()
+  pred.CBI <- list()
+  for(i in 1:length(method)){
+    mod <- mgcv::gam(oc ~ s(p,bs=method[i],k=min(ktry,length(unique(p)))), family=binomial)
+    pred = predict(mod,newdata=data.frame(p=prd),type='response')
+    pred.CBI[[i]] = pred
+    SBI <- cor(prd,pred,method=cor.method)
+    S.BI[[i]] = SBI
+    names(pred.CBI)[i] = paste0("Pred.",method[i])
+    names(S.BI)[i] = paste0("SBI.",method[i])
+    
+  }
+  pred.CBI <- do.call(cbind,pred.CBI)
+  S.BI <- do.call(cbind,S.BI)
+  if(mean.CBI){
+    prd_m = apply(pred.CBI,1,mean)
+    pred.CBI <- cbind(pred.CBI,Pred.m = prd_m)
+    SBI_m <- cor(prd,prd_m,method="spearman")
+    S.BI <- cbind(S.BI,SBI.m = SBI_m)
+  }
+  
+  return(list(SBI = S.BI,
+              pred.CBI = cbind(prd,pred.CBI)))
+}
 
 
 ########################################################################
@@ -533,13 +670,13 @@ ESM_Response.Plot <- function (ESM.Mod,
                                               Pred), 
                                    st.dev = FALSE,which.model = 1, 
                                    na.rm = TRUE)
-  boyce.test <- ecospat::ecospat.boyce(c(pred.esmPres, pred.esmAbs), 
-                              pred.esmPres, PEplot = F)$cor
+  boyce.test <- smooth.CBI(pres = pred.esmPres, 
+                           abs = pred.esmAbs)$SBI[,"SBI.m"]
   tss.test <- ecospat::ecospat.max.tss(Pred = Pred, Sp.occ = resp)[[2]]
   return(cbind(AUC = auc.test, 
                SomersD = (2 * auc.test - 
                             1),
-               Boyce = boyce.test, 
+               SBI = boyce.test, 
                MaxTSS = tss.test))
   
 }
@@ -564,7 +701,7 @@ ESM_Response.Plot <- function (ESM.Mod,
           if(j ==1){
             eval <- matrix(0, ncol =4, nrow = 1)
             eval[1,] = NA
-            colnames(eval) = c("AUC","SomersD","Boyce", "MaxTSS")
+            colnames(eval) = c("AUC","SomersD","SBI", "MaxTSS")
           }else{
             scores <- NA
             eval <- rbind(eval,scores)
@@ -583,7 +720,7 @@ ESM_Response.Plot <- function (ESM.Mod,
         full = NA
       }else{
         eval2 <- eval
-        eval2[is.na(eval2[,"Boyce"]),"Boyce"] <- 0
+        eval2[is.na(eval2[,"SBI"]),"SBI"] <- 0
         full = apply(eval2,2,mean,na.rm=T)
       }
       

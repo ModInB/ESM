@@ -32,6 +32,8 @@ Functions to perform and evaluate Ensemble of small models (Alpha version). Thes
 |:-----------------:|:-------------------:|:-----------------:|
 | Data preparation	| ESM_Bp.Sampling	| Samples background point using 4 different methods. The 4 methods are fully random or stratified in the geographic space (“rand.geo”, “strat.geo”) and in the environmental space (“rand.env”, “strat.env”).|
 |		| ESM_Models.Options	| Generates a list of model parameters|
+|		| get_chesla.clim	| Download climatic map from CHELSA v 2.1|
+|		| get_topography	| Download topographic map from Amatulli et al (2017)|
 | Modeling	| ESM_Modeling	| Calibrates and evaluates bivariate models|
 |		| ESM_Projection	| Projects each bivariate model into a geographical space |
 |		| ESM_Ensemble.Modeling	| Generates and evaluates an ensemble model (called “ESM”) |
