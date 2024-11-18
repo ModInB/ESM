@@ -88,8 +88,9 @@ the failed models (failed.mod), the modeling ID (modeling.id), the prevalence ar
 \item{cv.split.table}: a \code{matrix} used to train and test models. See explanation of the argument cv.split.table.
 \item{cv.method }: a \code{character} corresponding to the used cross-validation method.
 \item{biva.predictions}: a \code{list} of the predictions of all the runs for each bivariate models.
-\item{biva.evaluations}: a \code{list} of the evaluation of each bivariate model runs. The evaluation of the full model correspond 
-to the mean of all the runs. Note that if one of the run has a Boyce = NA, we will consider this has a 0 when averaging.
+\item{biva.evaluations}: a \code{list} of the evaluation of each bivariate model runs. The evaluation of the full model corresponds 
+to the mean of all the runs. The evaluation metrics are AUC, Somers'D (2*AUC-1), maxTSS, and the smooth Boyce Index (SBI).
+\emph{Note that if one of the run has a SBI = NA, we will consider this has a 0 when averaging.}
 \item{biva.calibration}: a \code{list} of the calibration power of each bivariate model runs including the full model.
 }
 }

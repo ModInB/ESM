@@ -670,13 +670,13 @@ smooth.CBI <- function(pres,
                                               Pred), 
                                    st.dev = FALSE,which.model = 1, 
                                    na.rm = TRUE)
-  boyce.test <- ecospat::ecospat.boyce(c(pred.esmPres, pred.esmAbs), 
-                              pred.esmPres, PEplot = F)$cor
+  boyce.test <- smooth.CBI(pres = pred.esmPres, 
+                           abs = pred.esmAbs)$SBI[,"SBI.m"]
   tss.test <- ecospat::ecospat.max.tss(Pred = Pred, Sp.occ = resp)[[2]]
   return(cbind(AUC = auc.test, 
                SomersD = (2 * auc.test - 
                             1),
-               Boyce = boyce.test, 
+               SBI_m = boyce.test, 
                MaxTSS = tss.test))
   
 }
@@ -701,7 +701,7 @@ smooth.CBI <- function(pres,
           if(j ==1){
             eval <- matrix(0, ncol =4, nrow = 1)
             eval[1,] = NA
-            colnames(eval) = c("AUC","SomersD","Boyce", "MaxTSS")
+            colnames(eval) = c("AUC","SomersD","SBI", "MaxTSS")
           }else{
             scores <- NA
             eval <- rbind(eval,scores)
@@ -720,7 +720,7 @@ smooth.CBI <- function(pres,
         full = NA
       }else{
         eval2 <- eval
-        eval2[is.na(eval2[,"Boyce"]),"Boyce"] <- 0
+        eval2[is.na(eval2[,"SBI"]),"SBI"] <- 0
         full = apply(eval2,2,mean,na.rm=T)
       }
       
