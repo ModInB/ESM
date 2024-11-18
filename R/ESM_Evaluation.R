@@ -676,7 +676,7 @@ smooth.CBI <- function(pres,
   return(cbind(AUC = auc.test, 
                SomersD = (2 * auc.test - 
                             1),
-               SBI_m = boyce.test, 
+               SBI = boyce.test, 
                MaxTSS = tss.test))
   
 }
