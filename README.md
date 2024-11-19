@@ -16,7 +16,7 @@
 
 
 
-- **Development version** [![v](https://img.shields.io/badge/dev%20version-0.2-53AA93.svg)](https://github.com/ModInB/ESM)
+- **Development version** [![v](https://img.shields.io/badge/dev%20version-0.3-53AA93.svg)](https://github.com/ModInB/ESM)
 ```R
 library(devtools)
 devtools::install_github("ModInB/ESM", dependencies = TRUE)
