@@ -1,6 +1,6 @@
 Package: ESM
 Version: 0.3
-Date: 2024-07-16
+Date: 2024-11-19
 Title: Ensemble of Small Models
 Authors@R: c(
 	person("Flavien", "Collart", role = c("cre","aut","ctb"), email = "flaviencollart@hotmail.com"),
