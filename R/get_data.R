@@ -25,31 +25,31 @@
 #' The following list contains the different variables associated with their time period : 
 #' \itemize{
 #' 
-#' \item{Present} : pet_perman_max, pet_perman_mean, pet_perman_min, pet_perman_range,
+#' \item{Present}: pet_perman_max, pet_perman_mean, pet_perman_min, pet_perman_range,
 #' sfcWind_max, sfcWind_mean, sfcWind_min","sfcWind_range, vpd_max, vpd_mean, vpd_min, vpd_range,
 #' hurs_max, hurs_mean, hurs_min, hurs_range, clt_max, clt_mean, clt_min, clt_range, cmi_max, cmi_mean,
 #' cmi_min, cmi_range, rsds_1981-2010_mean, rsds_1981-2010_min, rsds_1981-2010_max, rsds_1981-2010_range.
 #' 
-#' \item{Present and Future} : the 19 bioclim variables (e.g. "bio1"), ai, fcf, fgd, gdd0, gdd10,
+#' \item{Present and Future}: the 19 bioclim variables (e.g. "bio1"), ai, fcf, fgd, gdd0, gdd10,
 #' gddd5, gddlgd0, gddlgd5, gddlgd10, gdgfgd0, gdgfgd10, gdgfgd5, gsl, gsp, gst,
 #' kg from 0 to 5 (e.g. "kg0"), lgd, ngd0, ngd10, ngd5, npp, scd, swd, swe.
 #' }
 #' The description of the different variables is available at the point 7 (p.11) of the following link :
-#' \link{https://chelsa-climate.org/wp-admin/download-page/CHELSA_tech_specification_V2.pdf}
+#' \href{https://chelsa-climate.org/wp-admin/download-page/CHELSA_tech_specification_V2.pdf}{CHELSA_tech_specification_V2.pdf}
 #' 
 #' The parameter "var.names" allows you to select the variables taken into account :
 #' \itemize{
 #' 
-#' \item{all} : only the future variables are selected.
-#' \item{bioclim} : only the 19 bioclim variables are selected.
-#' \item{all_fut} : only the variables available in present AND future time are selected.
+#' \item{all}: only the future variables are selected.
+#' \item{bioclim}: only the 19 bioclim variables are selected.
+#' \item{all_fut}: only the variables available in present AND future time are selected.
 #' }
 #' The variables available in the future are to be combined with a future scenario by choosing a global circular model (gcm.chelsa) and a shared-socioeconomic pathway (ssp.chelsa) :
 #' \itemize{
 #' 
-#' \item{ssp126} : ssp1 (Sustainability - Taking the green road) combined with a radiative forcing of 2.6 W/m².
-#' \item{ssp370} : ssp3 (Regional rivalry - A rocky road) combined with a radiative forcing of 7 W/m².
-#' \item{ssp585} : ssp5 (Fossil-fueled development - Taking the highway) with a radiative forcing of 8.5 W/m². 
+#' \item{ssp126}: ssp1 (Sustainability - Taking the green road) combined with a radiative forcing of 2.6 W/m².
+#' \item{ssp370}: ssp3 (Regional rivalry - A rocky road) combined with a radiative forcing of 7 W/m².
+#' \item{ssp585}: ssp5 (Fossil-fueled development - Taking the highway) with a radiative forcing of 8.5 W/m². 
 #' }
 #' The complete description of the ssp is available in O'Neill et al. 2017.
 #' 
@@ -73,6 +73,7 @@
 #' @examples  \donttest{
 #' # get_Chelsa.Clim("bio1")
 #' }
+#' @importFrom utils download.file
 #' @export 
 
 get_Chelsa.Clim <- function(var.names,
@@ -299,22 +300,22 @@ get_Chelsa.Clim <- function(var.names,
 #' 
 #' The description of each following variables comes from Amatulli et al (2018) : 
 #' \itemize{ 
-#' \item{elevation} : the elevation across the terrain (expressed in meters).
-#' \item{slope} : the rate of change of elevation in the direction of the water flow line (expressed in degrees).
-#' \item{aspectcosine} : cosine of the aspect (angular direction that a slope faces).
-#' \item{aspectsine} : sine of the aspect (angular direction that a slope faces).
-#' \item{eastness} : sine of the slope multiplied by the sine of the aspect.
-#' \item{northness} : sine of the slope multiplied by the cosine of the aspect.
-#' \item{roughness} : the largest inter-cell absolute difference of a focal cell and its 8 surrounding cells.
-#' \item{tpi} : the topographic position index is the difference between the elevation of a focal cell and the mean of its 8 surrounding cells.
-#' \item{tri} : the terrain ruggedness index  is a mean of the absolute differences in elevation between a focal cell and its 8 surrounding cells.
-#' \item{vrm} : the vector ruggedness measure quantifies terrain ruggedness by measuring the variation by means of sine and cosine of the slope in the three-dimensional orientation of grid cells, within a moving window.
-#' \item{dx} : the first order partial derivative (E-W slope)  the slope in an East-West direction.
-#' \item{dxx} : the second order partial derivative (E-W slope) is the derivative of a slope in a East-West direction.
-#' \item{dy} : the first order partial derivative (N-S slope) is the slope in a North-South direction.
-#' \item{dyy} : the second order partial derivative (N-S slope) is the derivative of the slope in a North-South direction.
-#' \item{pcurv} : the profile curvature measures the rate of change of a slope along a flow line, and affects the acceleration of water flow along a surface.
-#' \item{tcurv} : the tangential curvature measures the rate of change perpendicular to the slope gradient and is related to the convergence and divergence of flow across a surface.
+#' \item{elevation}: the elevation across the terrain (expressed in meters).
+#' \item{slope}: the rate of change of elevation in the direction of the water flow line (expressed in degrees).
+#' \item{aspectcosine}: cosine of the aspect (angular direction that a slope faces).
+#' \item{aspectsine}: sine of the aspect (angular direction that a slope faces).
+#' \item{eastness}: sine of the slope multiplied by the sine of the aspect.
+#' \item{northness}: sine of the slope multiplied by the cosine of the aspect.
+#' \item{roughness}: the largest inter-cell absolute difference of a focal cell and its 8 surrounding cells.
+#' \item{tpi}: the topographic position index is the difference between the elevation of a focal cell and the mean of its 8 surrounding cells.
+#' \item{tri}: the terrain ruggedness index  is a mean of the absolute differences in elevation between a focal cell and its 8 surrounding cells.
+#' \item{vrm}: the vector ruggedness measure quantifies terrain ruggedness by measuring the variation by means of sine and cosine of the slope in the three-dimensional orientation of grid cells, within a moving window.
+#' \item{dx}: the first order partial derivative (E-W slope)  the slope in an East-West direction.
+#' \item{dxx}: the second order partial derivative (E-W slope) is the derivative of a slope in a East-West direction.
+#' \item{dy}: the first order partial derivative (N-S slope) is the slope in a North-South direction.
+#' \item{dyy}: the second order partial derivative (N-S slope) is the derivative of the slope in a North-South direction.
+#' \item{pcurv}: the profile curvature measures the rate of change of a slope along a flow line, and affects the acceleration of water flow along a surface.
+#' \item{tcurv}: the tangential curvature measures the rate of change perpendicular to the slope gradient and is related to the convergence and divergence of flow across a surface.
 #' }
 #' 
 #' The aggregating factors correspond to the statistics computed from the variables.
@@ -337,6 +338,7 @@ get_Chelsa.Clim <- function(var.names,
 #' 
 #' @return 
 #' \code{character}. A vector containing the path to the downloaded files.
+#' 
 #' @references
 #' Amatulli, G., Domisch, S., Tuanmu, M.-N., Parmentier, B., Ranipeta, A., Malczyk, J., and Jetz, W. (2018) A suite of global, cross-scale topographic variables for environmental and biodiversity modeling. \emph{Scientific Data}. \bold{5}, 180040. \doi{10.1038/sdata.2018.40}. 
 #' 

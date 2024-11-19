@@ -47,22 +47,22 @@ get_topography downloads and crops topographic variables from Amatulli et al (20
 
 The description of each following variables comes from Amatulli et al (2018) : 
 \itemize{ 
-\item{elevation} : the elevation across the terrain (expressed in meters).
-\item{slope} : the rate of change of elevation in the direction of the water flow line (expressed in degrees).
-\item{aspectcosine} : cosine of the aspect (angular direction that a slope faces).
-\item{aspectsine} : sine of the aspect (angular direction that a slope faces).
-\item{eastness} : sine of the slope multiplied by the sine of the aspect.
-\item{northness} : sine of the slope multiplied by the cosine of the aspect.
-\item{roughness} : the largest inter-cell absolute difference of a focal cell and its 8 surrounding cells.
-\item{tpi} : the topographic position index is the difference between the elevation of a focal cell and the mean of its 8 surrounding cells.
-\item{tri} : the terrain ruggedness index  is a mean of the absolute differences in elevation between a focal cell and its 8 surrounding cells.
-\item{vrm} : the vector ruggedness measure quantifies terrain ruggedness by measuring the variation by means of sine and cosine of the slope in the three-dimensional orientation of grid cells, within a moving window.
-\item{dx} : the first order partial derivative (E-W slope)  the slope in an East-West direction.
-\item{dxx} : the second order partial derivative (E-W slope) is the derivative of a slope in a East-West direction.
-\item{dy} : the first order partial derivative (N-S slope) is the slope in a North-South direction.
-\item{dyy} : the second order partial derivative (N-S slope) is the derivative of the slope in a North-South direction.
-\item{pcurv} : the profile curvature measures the rate of change of a slope along a flow line, and affects the acceleration of water flow along a surface.
-\item{tcurv} : the tangential curvature measures the rate of change perpendicular to the slope gradient and is related to the convergence and divergence of flow across a surface.
+\item{elevation}: the elevation across the terrain (expressed in meters).
+\item{slope}: the rate of change of elevation in the direction of the water flow line (expressed in degrees).
+\item{aspectcosine}: cosine of the aspect (angular direction that a slope faces).
+\item{aspectsine}: sine of the aspect (angular direction that a slope faces).
+\item{eastness}: sine of the slope multiplied by the sine of the aspect.
+\item{northness}: sine of the slope multiplied by the cosine of the aspect.
+\item{roughness}: the largest inter-cell absolute difference of a focal cell and its 8 surrounding cells.
+\item{tpi}: the topographic position index is the difference between the elevation of a focal cell and the mean of its 8 surrounding cells.
+\item{tri}: the terrain ruggedness index  is a mean of the absolute differences in elevation between a focal cell and its 8 surrounding cells.
+\item{vrm}: the vector ruggedness measure quantifies terrain ruggedness by measuring the variation by means of sine and cosine of the slope in the three-dimensional orientation of grid cells, within a moving window.
+\item{dx}: the first order partial derivative (E-W slope)  the slope in an East-West direction.
+\item{dxx}: the second order partial derivative (E-W slope) is the derivative of a slope in a East-West direction.
+\item{dy}: the first order partial derivative (N-S slope) is the slope in a North-South direction.
+\item{dyy}: the second order partial derivative (N-S slope) is the derivative of the slope in a North-South direction.
+\item{pcurv}: the profile curvature measures the rate of change of a slope along a flow line, and affects the acceleration of water flow along a surface.
+\item{tcurv}: the tangential curvature measures the rate of change perpendicular to the slope gradient and is related to the convergence and divergence of flow across a surface.
 }
 
 The aggregating factors correspond to the statistics computed from the variables.
