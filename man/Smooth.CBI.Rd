@@ -78,7 +78,7 @@ SBI$SBI
 Liu, C., Newell, G., White, M. and Machunter, J. (2024), Improving the estimation of the Boyce index using statistical smoothing methods for evaluating species distribution models with presence-only data. \emph{Ecography}, e07218. \doi{10.1111/ecog.07218}
 }
 \seealso{
-\code{\link{ESM_Modeling}}, \code{\link{ESM_Null.Models}, \code{\link{ESM_pooling}}}
+\code{\link{ESM_Modeling}}, \code{\link{ESM_Null.Models}, \code{\link{ESM_Pooling.Evaluation}}}
 }
 \author{
 Flavien Collart \email{flaviencollart@hotmail.com} from the code available in Liu et al (2024).

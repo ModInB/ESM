@@ -26,14 +26,14 @@
 #' @return 
 #' a \code{list} containing:
 #' \itemize{
-#' \item{ESM.evaluations}{a \code{matrix} with the evaluation scores for the ESMs based on the different modelling algorithms and 
-#' based on the consensus across the modelling algorithms (called here "ensemble").}
-#' \item{ESM.fit}{a \code{matrix} of predicted values resulting from the pooling procedure and used to compute the evaluation scores. 
-#' The column \emph{resp} is where the species occurs or not.}
-#' \item{ESM.evaluations.bivariate.models}{a \code{list} containing a matrix of evaluation scores for each bivariate models 
-#' (generated only if EachSmallModels = T).}
-#' \item{ESM.fit.bivariate.models}{a \code{list} containing a matrix of of predicted values resulting from the pooling procedure 
-#' for each bivariate models (generated only if EachSmallModels = T).}
+#' \item{ESM.evaluations}: a \code{matrix} with the evaluation scores for the ESMs based on the different modelling algorithms and 
+#' based on the consensus across the modelling algorithms (called here "ensemble").
+#' \item{ESM.fit}: a \code{matrix} of predicted values resulting from the pooling procedure and used to compute the evaluation scores. 
+#' The column \emph{resp} is where the species occurs or not.
+#' \item{ESM.evaluations.bivariate.models}: a \code{list} containing a matrix of evaluation scores for each bivariate models 
+#' (generated only if EachSmallModels = T).
+#' \item{ESM.fit.bivariate.models}: a \code{list} containing a matrix of of predicted values resulting from the pooling procedure 
+#' for each bivariate models (generated only if EachSmallModels = T).
 #' }
 #' 
 #' @references 
@@ -583,7 +583,8 @@ ESM_Response.Plot <- function (ESM.Mod,
 #' )
 #' SBI$SBI
 #' 
-#' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Null.Models}, \code{\link{ESM_pooling}}}
+#' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Null.Models}, \code{\link{ESM_Pooling.Evaluation}}}
+#' @importFrom stats binomial cor
 #' @export
 
 Smooth.CBI <- function(pres, 
