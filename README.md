@@ -1,6 +1,6 @@
-[![Github Version](https://img.shields.io/badge/dev%20version-0.2-53AA93.svg)](https://github.com/FlavienCollart/ESM)
-[![Last Commit](https://img.shields.io/github/last-commit/FlavienCollart/ESM.svg)](https://github.com/FlavienCollart/ESM/commits/main)
-[![R-CMD-check](https://github.com/FlavienCollart/ESM/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/FlavienCollart/ESM/actions/workflows/R-CMD-check.yaml)
+[![Github Version](https://img.shields.io/badge/dev%20version-0.2-53AA93.svg)](https://github.com/ModInB/ESM)
+[![Last Commit](https://img.shields.io/github/last-commit/FlavienCollart/ESM.svg)](https://github.com/ModInB/ESM/commits/main)
+[![R-CMD-check](https://github.com/FlavienCollart/ESM/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ModInB/ESM/actions/workflows/R-CMD-check.yaml)
 
 <img src="inst/logo/ESM.png" align="right" height = 150/>
 <div align="center">
@@ -16,10 +16,10 @@
 
 
 
-- **Development version** [![v](https://img.shields.io/badge/dev%20version-0.2-53AA93.svg)](https://github.com/FlavienCollart/ESM)
+- **Development version** [![v](https://img.shields.io/badge/dev%20version-0.2-53AA93.svg)](https://github.com/ModInB/ESM)
 ```R
 library(devtools)
-devtools::install_github("FlavienCollart/ESM", dependencies = TRUE)
+devtools::install_github("ModInB/ESM", dependencies = TRUE)
 ```
 
 ### Information
@@ -30,10 +30,10 @@ Functions to perform and evaluate Ensemble of small models (Alpha version). Thes
 
 | Category      	| Function      	| Description                                  	|
 |:-----------------:|:-------------------:|:-----------------:|
-| Data preparation	| ESM_Bp.Sampling	| Samples background point using 4 different methods. The 4 methods are fully random or stratified in the geographic space (“rand.geo”, “strat.geo”) and in the environmental space (“rand.env”, “strat.env”).|
+| Data preparation	| Bp_Sampling	| Samples background point using 4 different methods. The 4 methods are fully random or stratified in the geographic space (“rand.geo”, “strat.geo”) and in the environmental space (“rand.env”, “strat.env”).|
 |		| ESM_Models.Options	| Generates a list of model parameters|
-|		| get_chesla.clim	| Download climatic map from CHELSA v 2.1|
-|		| get_topography	| Download topographic map from Amatulli et al (2017)|
+|		| get_Chesla.Clim	| Download climatic grids from CHELSA v 2.1|
+|		| get_Topography	| Download topographic grids from Amatulli et al (2017)|
 | Modeling	| ESM_Modeling	| Calibrates and evaluates bivariate models|
 |		| ESM_Projection	| Projects each bivariate model into a geographical space |
 |		| ESM_Ensemble.Modeling	| Generates and evaluates an ensemble model (called “ESM”) |

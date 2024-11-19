@@ -1,5 +1,5 @@
-#' @name get_chelsa.clim
-#' @author Flavien Collart \email{flaviencollart@hotmail.com}
+#' @name get_Chelsa.Clim
+#' @author Flavien Collart \email{flaviencollart@hotmail.com} with contributions of Adèle Hotermans
 #' @title Download chelsa data
 #' @description
 #' Download and crop climatic variables at different time period from CHELSA v.2.1.
@@ -34,11 +34,11 @@
 #' Karger D.N., Conrad, O., Böhner, J., Kawohl, T., Kreft, H., Soria-Auza, R.W., Zimmermann, N.E, Linder, H.P., Kessler, M. (2018): Data from: Climatologies at high resolution for the earth’s land surface areas. \emph{EnviDat}. \doi{10.16904/envidat.228.v2.1}.
 #' 
 #' @examples  \donttest{
-#' # get_chelsa.clim("bio1")
+#' # get_Chelsa.Clim("bio1")
 #' }
 #' @export 
 
-get_chelsa.clim <- function(var.names,
+get_Chelsa.Clim <- function(var.names,
                             time = "1981-2010",
                             gcm = NULL,
                             ssp = NULL,
@@ -239,8 +239,8 @@ get_chelsa.clim <- function(var.names,
   return(FilePath)
 }
 
-#' @name get_topography
-#' @author Flavien Collart \email{flaviencollart@hotmail.com}
+#' @name get_Topography
+#' @author Flavien Collart \email{flaviencollart@hotmail.com} with contributions of Adèle Hotermans
 #' @title Download topographic data
 #' @description
 #' Download and crop topographic variables from Amatulli et al (2018) using GMTED elevation data
@@ -303,12 +303,11 @@ get_chelsa.clim <- function(var.names,
 #' Amatulli, G., Domisch, S., Tuanmu, M.-N., Parmentier, B., Ranipeta, A., Malczyk, J., and Jetz, W. (2018) A suite of global, cross-scale topographic variables for environmental and biodiversity modeling. \emph{Scientific Data}. \bold{5}, 180040. \doi{10.1038/sdata.2018.40}. 
 #' 
 #' @examples  \donttest{
-#' # get_topography("elevation")
+#' # get_Topography("elevation")
 #' }
 #' @export 
-#### Get Topography
 
-get_topography <- function(var.names,
+get_Topography <- function(var.names,
                            res = "1KM",
                            aggr = "md",
                            path = getwd(),

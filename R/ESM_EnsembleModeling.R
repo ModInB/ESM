@@ -4,7 +4,8 @@
 #' @title Ensemble of Small Models: Average Bivariate Models into an ESM
 #' @description This function averages simple bivariate models by weighted means to Ensemble Small Models.
 #' @param ESM.Mod The object returned by \code{ESM_Modeling}.
-#' @param weighting.score \code{character}. An evaluation score used to weight single models to build ensembles:"AUC","MaxTSS","SBI" or,"SomersD".
+#' @param weighting.score \code{character}. An evaluation score used to weight single models to build ensembles:'AUC','MaxTSS', 'SomersD', or '
+#' SBI' (if SBI = TRUE in ESM_Modeling) or 'Boyce' (if FALSE).
 #' @param threshold \code{numeric} or \code{NULL}. Threshold value of an evaluation score to select the bivariate model(s) included for building 
 #' the ensemble. \emph{Default}: 0.5 for AUC and 0 for the other metrics.
 #' @param save.obj \code{logical}. Allows or not to save the outputs from this function.
@@ -16,7 +17,7 @@
 #' the path to the folder where are the stored the models (biva.path), and the failed models
 #' \item{cv.split.table}: a \code{matrix} used to train and test models. See explanation of the argument cv.split.table
 #' \item{evaluations}: a \code{matrix} The evaluation of the ensemble based on 4 metrics: the AUC, the Somer's D (=2*AUC-1),
-#' maxTSS and the smooth Boyce Index (SBI).
+#' maxTSS, and the smooth Boyce Index (SBI, if SBI = TRUE in ESM_Modeling) or the regular Boyce Index (if SBI = FALSE).
 #' \item{EF.algo}: a \code{list} containing \code{pred.EF.algo} which is a \code{matrix} of ensemble predictions for each run 
 #' and modeling techniques; and \code{weights.algo} a \code{matrix} of weights used to generate the ensemble at the level of the algorithm.
 #' \item{EF}: a \code{list} containing \code{pred.EF} which is a \code{matrix} of ESMs predictions for each run; 
@@ -40,10 +41,19 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
                                  save.obj = TRUE){
   
   ## Check some arguments----
-  if(!weighting.score %in% c("AUC", "MaxTSS", "SBI", 
-                              "SomersD")) {
-    stop("weighting score not supported! Choose one of the following: AUC, MaxTSS, SBI, or SomersD")
+  SBI <- ESM.Mod$data$SBI
+  if(SBI){
+    if(!weighting.score %in% c("AUC", "MaxTSS", "SBI", 
+                               "SomersD")) {
+      stop("weighting score not supported. Choose one of the following: AUC, MaxTSS, SBI, or SomersD")
+    }
+  }else{
+    if(!weighting.score %in% c("AUC", "MaxTSS", "Boyce", 
+                               "SomersD")) {
+      stop("weighting score not supported. Choose one of the following: AUC, MaxTSS, Boyce, or SomersD")
+    }
   }
+  
   if(is.null(threshold)){
     if(weighting.score == "AUC"){
       threshold = 0.5
@@ -97,7 +107,8 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
   ## Evaluate the ensembles per Run + extract w.scores----
   EF.algo.eval <- .bivaEvaluation(biva = pred.EF,
                                   resp=resp, models=models,
-                                  cv.split.table=cv.split.table)
+                                  cv.split.table=cv.split.table,
+                                  SBI = SBI)
   rownames(EF.algo.eval) = paste0(rownames(EF.algo.eval),".EF")
 
   ### Make the ensemble across the modeling techniques----
@@ -112,8 +123,9 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
     
     ##Evaluate the model for each run----
     EF.eval <- .bivaEvaluation(biva = EF,
-                                    resp=resp, models="EF",
-                                    cv.split.table=cv.split.table)
+                               resp=resp, models="EF",
+                               cv.split.table=cv.split.table,
+                               SBI = SBI)
     EF.eval <- rbind(EF.algo.eval,EF.eval)
     
   }else{

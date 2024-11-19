@@ -14,7 +14,8 @@ ESM_Ensemble.Modeling(
 \arguments{
 \item{ESM.Mod}{The object returned by \code{ESM_Modeling}.}
 
-\item{weighting.score}{\code{character}. An evaluation score used to weight single models to build ensembles:"AUC","MaxTSS","SBI" or,"SomersD".}
+\item{weighting.score}{\code{character}. An evaluation score used to weight single models to build ensembles:'AUC','MaxTSS', 'SomersD', or '
+SBI' (if SBI = TRUE in ESM_Modeling) or 'Boyce' (if FALSE).}
 
 \item{threshold}{\code{numeric} or \code{NULL}. Threshold value of an evaluation score to select the bivariate model(s) included for building 
 the ensemble. \emph{Default}: 0.5 for AUC and 0 for the other metrics.}
@@ -30,7 +31,7 @@ If env, was a SpatRaster, it corrsponds to the extracted values of these rasters
 the path to the folder where are the stored the models (biva.path), and the failed models
 \item{cv.split.table}: a \code{matrix} used to train and test models. See explanation of the argument cv.split.table
 \item{evaluations}: a \code{matrix} The evaluation of the ensemble based on 4 metrics: the AUC, the Somer's D (=2*AUC-1),
-maxTSS and the smooth Boyce Index (SBI).
+maxTSS, and the smooth Boyce Index (SBI, if SBI = TRUE in ESM_Modeling) or the regular Boyce Index (if SBI = FALSE).
 \item{EF.algo}: a \code{list} containing \code{pred.EF.algo} which is a \code{matrix} of ensemble predictions for each run 
 and modeling techniques; and \code{weights.algo} a \code{matrix} of weights used to generate the ensemble at the level of the algorithm.
 \item{EF}: a \code{list} containing \code{pred.EF} which is a \code{matrix} of ESMs predictions for each run; 

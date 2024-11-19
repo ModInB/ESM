@@ -17,6 +17,7 @@ ESM_Modeling(
   cv.ratio = 0.7,
   cv.n.blocks = NULL,
   cv.split.table = NULL,
+  SBI = TRUE,
   which.biva = NULL,
   parallel = FALSE,
   n.cores = 1,
@@ -60,6 +61,10 @@ but where the presences (and absences) are equally split into the k blocks. If "
 and for models validation (FALSE). Each column corresponds to a 'RUN' and should be named "RUNX" where X correspond to the number of the run. 
 The last column should be filled with only TRUE and named "Full" to make a full model used for the future projection. Only applicable when cv.method="custom".}
 
+\item{SBI}{\code{logical}. Should the model evaluated with the Smooth Boyce Index (SBI=TRUE) or the regular Boyce Index (SBI=FALSE)? If TRUE, the SBI will be
+computed with the function \code{\link{smooth.CBI}} and resulted from the ensemble of 5 smoothing techniques. \emph{Default: TRUE. Note that
+computing SBI instead of teh regular Boyce Index usually increases computation time.}}
+
 \item{which.biva}{\code{numeric}. which bivariate combinations should be used for modeling. \emph{Default}: \code{NULL}, 
 meaning that all the combinations will be made.}
 
@@ -89,14 +94,14 @@ the failed models (failed.mod), the modeling ID (modeling.id), the prevalence ar
 \item{cv.method }: a \code{character} corresponding to the used cross-validation method.
 \item{biva.predictions}: a \code{list} of the predictions of all the runs for each bivariate models.
 \item{biva.evaluations}: a \code{list} of the evaluation of each bivariate model runs. The evaluation of the full model corresponds 
-to the mean of all the runs. The evaluation metrics are AUC, Somers'D (2*AUC-1), maxTSS, and the smooth Boyce Index (SBI), obtained by
-the ensemble of 5 smoothing techniques (see smooth.CBI function).
+to the mean of all the runs. The evaluation metrics are AUC, Somers'D (2*AUC-1), maxTSS, and the smooth Boyce Index (SBI) if SBI = TRUE or the regular 
+Boyce index if SBI = FALSE.
 \emph{Note that if one of the run has a SBI = NA, we will consider this has a 0 when averaging.}
 \item{biva.calibration}: a \code{list} of the calibration power of each bivariate model runs including the full model.
 }
 }
 \description{
-Model species distribution based on the method Ensemble of Small Models (ESM) Evaluate also each bivariate models.
+Model and evaluate species distribution based on the method Ensemble of Small Models (ESM).
 }
 \details{
 \describe{
