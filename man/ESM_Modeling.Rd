@@ -17,13 +17,15 @@ ESM_Modeling(
   cv.ratio = 0.7,
   cv.n.blocks = NULL,
   cv.split.table = NULL,
+  SBI = TRUE,
   which.biva = NULL,
   parallel = FALSE,
   n.cores = 1,
   modeling.id = as.character(format(Sys.time(), "\%s")),
   pathToSaveObject = getwd(),
   save.models = TRUE,
-  save.obj = TRUE
+  save.obj = TRUE,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -59,6 +61,10 @@ but where the presences (and absences) are equally split into the k blocks. If "
 and for models validation (FALSE). Each column corresponds to a 'RUN' and should be named "RUNX" where X correspond to the number of the run. 
 The last column should be filled with only TRUE and named "Full" to make a full model used for the future projection. Only applicable when cv.method="custom".}
 
+\item{SBI}{\code{logical}. Should the model evaluated with the Smooth Boyce Index (SBI=TRUE) or the regular Boyce Index (SBI=FALSE)? If TRUE, the SBI will be
+computed with the function \code{\link{smooth.CBI}} and resulted from the ensemble of 5 smoothing techniques. \emph{Default: TRUE. Note that
+computing SBI instead of teh regular Boyce Index usually increases computation time.}}
+
 \item{which.biva}{\code{numeric}. which bivariate combinations should be used for modeling. \emph{Default}: \code{NULL}, 
 meaning that all the combinations will be made.}
 
@@ -74,6 +80,8 @@ meaning that all the combinations will be made.}
 saved to make the projections possible.}
 
 \item{save.obj}{\code{logical}. Allows or not to save the final output.}
+
+\item{verbose}{\code{logical}. Allows or not message.}
 }
 \value{
 \itemize{
@@ -85,13 +93,15 @@ the failed models (failed.mod), the modeling ID (modeling.id), the prevalence ar
 \item{cv.split.table}: a \code{matrix} used to train and test models. See explanation of the argument cv.split.table.
 \item{cv.method }: a \code{character} corresponding to the used cross-validation method.
 \item{biva.predictions}: a \code{list} of the predictions of all the runs for each bivariate models.
-\item{biva.evaluations}: a \code{list} of the evaluation of each bivariate model runs. The evaluation of the full model correspond 
-to the mean of all the runs. Note that if one of the run has a Boyce = NA, we will consider this has a 0 when averaging.
+\item{biva.evaluations}: a \code{list} of the evaluation of each bivariate model runs. The evaluation of the full model corresponds 
+to the mean of all the runs. The evaluation metrics are AUC, Somers'D (2*AUC-1), maxTSS, and the smooth Boyce Index (SBI) if SBI = TRUE or the regular 
+Boyce index if SBI = FALSE.
+\emph{Note that if one of the run has a SBI = NA, we will consider this has a 0 when averaging.}
 \item{biva.calibration}: a \code{list} of the calibration power of each bivariate model runs including the full model.
 }
 }
 \description{
-Model species distribution based on the method Ensemble of Small Models (ESM) Evaluate also each bivariate models.
+Model and evaluate species distribution based on the method Ensemble of Small Models (ESM).
 }
 \details{
 \describe{
@@ -107,14 +117,15 @@ This allows to run different biva splits on different computers. However, it is 
 }
 }
 \examples{
-\donttest{library(ecospat)
+\donttest{
+library(terra)
 #Loading test data
-data(ecospat.testNiche.inv)
-inv <- ecospat.testNiche.inv
+data(ESM_species.env)
+data(ESM_Env)
 #species occurrences
-xy <- inv[,1:2]
-resp <- inv[,11]
-env <- inv[,3:5]
+xy <- ESM_species.env[,1:2]
+resp <- ESM_species.env[,3] #Tayloria_serrata
+env <- terra::unwrap(ESM_Env)
 ### Calibration of simple bivariate models
 my.ESM <- ESM_Modeling(resp = resp,
                        xy=xy,
@@ -126,7 +137,10 @@ my.ESM <- ESM_Modeling(resp = resp,
                        cv.method = "split-sampling",
                        cv.rep = 2,
                        cv.ratio = 0.7,
-                       parallel = FALSE)
+                       parallel = FALSE,
+                       save.models = FALSE,
+                       save.obj = FALSE,
+                       verbose = FALSE)
                        
 # Performances of each bivariate model
 my.ESM$biva.evaluations
@@ -134,7 +148,8 @@ my.ESM$biva.evaluations
 ### Ensemble models using a weighted mean based on maxTSS
 my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
                                    weighting.score=c("MaxTSS"),
-                                   threshold=0)
+                                   threshold=0,
+                                   save.obj = FALSE)
                                    
 ## Performances of the ensemble across the replicates
 ## The full model evaluation corresponds to the mean value across the replicates
@@ -153,13 +168,14 @@ eval$ESM.evaluations
 proj <- ESM_Projection(ESM.Mod = my.ESM,
                        new.env = env,
                        name.env = "current",
-                       parallel = FALSE)
+                       parallel = FALSE,
+                       save.obj = FALSE)
 
 
 ### Ensemble predictions
 Ens.proj <- ESM_Ensemble.Projection(ESM.proj = proj,
                                    ESM.ensembleMod = my.ESM_EF,
-                                   save.obj = TRUE)
+                                   save.obj = FALSE)
 
 ### thresholds to produce binary maps
 my.ESM_thresholds <- ESM_Threshold(my.ESM_EF)
@@ -194,6 +210,5 @@ Breiner F.T., Nobis M.P., Bergamini A., Guisan A. 2018. Optimizing ensembles of 
 \code{\link{ESM_Pooling.Evaluation}}
 }
 \author{
-Flavien Collart \email{flaviencollart@hotmail.com} based on the previous code written by Frank Breiner 
-and Mirko Di Febbraro with the contributions of Olivier Broennimann and Flavien Collart
+Flavien Collart \email{flaviencollart@hotmail.com}
 }

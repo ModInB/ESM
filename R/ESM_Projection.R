@@ -1,7 +1,6 @@
 
 #' @name ESM_Projection
-#' @author Flavien Collart \email{flaviencollart@hotmail.com} based on the previous code written by Frank Breiner 
-#' and Mirko Di Febbraro with the contributions of Olivier Broennimann and Flavien Collart
+#' @author Flavien Collart \email{flaviencollart@hotmail.com} 
 #' @title Ensemble of Small Models: Projections of Bivariate Models
 #' @description Project bivariate models 
 #' @param ESM.Mod The object returned by \code{\link{ESM_Modeling}}.

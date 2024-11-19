@@ -30,5 +30,5 @@ are then weighted means (based on the weighting score as chosen in ecospat.ESM.E
 }
 \author{
 Olivier Broennimann \email{Olivier.Broennimann@unil.ch} with contributions of Heidi Mod and Daniel Scherrer 
-and the adaptations of Flavien Collart \email{flaviencollart@hotmail.com}
+for the ecospat package and adapted for this package by Flavien Collart \email{flaviencollart@hotmail.com}
 }

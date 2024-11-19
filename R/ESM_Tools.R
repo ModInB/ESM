@@ -1,4 +1,4 @@
-#' @name ESM_Bp.Sampling
+#' @name Bp_Sampling
 #' @author Flavien Collart \email{flaviencollart@hotmail.com}
 #' @title Ensemble of Small Models: Sampling background points using 4 different methods.
 #' @description This function generates background following the 4 different methods described by Steen et al (2024).
@@ -42,34 +42,33 @@
 #'  
 #' @examples 
 #' library(terra)
-#' library(ecospat)
-#' env <- terra::rast(system.file("extdata","ecospat.testEnv.tif",package="ecospat"))
+#' env <- terra::unwrap(ESM_Env)
 #' # Selection full random in the geographic space
-#' Bp <- ESM_Bp.Sampling(env = env,
-#'                       n.points = 1000,
-#'                       method = "rand.geo",
-#'                       To.plot = FALSE)
+#' Bp <- Bp_Sampling(env = env,
+#'                   n.points = 1000,
+#'                   method = "rand.geo",
+#'                   To.plot = FALSE)
 #'                        
 #' # Selection stratified  in the geographic space                     
-#' Bp <- ESM_Bp.Sampling(env = env,
-#'                       n.points = 1000,
-#'                       method = "strat.geo",
-#'                       aggr.fact.geo = 2,
-#'                       To.plot = FALSE)
+#' Bp <- Bp_Sampling(env = env,
+#'                   n.points = 1000,
+#'                   method = "strat.geo",
+#'                   aggr.fact.geo = 2,
+#'                   To.plot = FALSE)
 #'                        
 #' # Selection full random in the environmental space                     
-#' Bp <- ESM_Bp.Sampling(env = env,
-#'                       n.points = 1000,
-#'                       method = "rand.env",
-#'                       digit.val.env = 2,
-#'                       To.plot = FALSE)       
+#' Bp <- Bp_Sampling(env = env,
+#'                   n.points = 1000,
+#'                   method = "rand.env",
+#'                   digit.val.env = 2,
+#'                   To.plot = FALSE)       
 #'                                         
 #' # Selection stratified in the environmental space                     
-#' Bp <- ESM_Bp.Sampling(env = env,
-#'                       n.points = 1000,
-#'                       method = "strat.env",
-#'                       n.strat.env = 3,
-#'                       To.plot = FALSE)                          
+#' Bp <- Bp_Sampling(env = env,
+#'                   n.points = 1000,
+#'                   method = "strat.env",
+#'                   n.strat.env = 3,
+#'                   To.plot = FALSE)                          
 #' @references 
 #' Steen,B., Broennimann, O., Maiorano, L., Guisan, . 2024. How sensitive are species distribution models to different background point 
 #' selection strategies? A test with species at various equilibrium levels. 
@@ -77,14 +76,14 @@
 #' @seealso \code{\link{ESM_Modeling}}
 #' @export
 
-ESM_Bp.Sampling <- function(env,
-                            n.points = 10000,
-                            method = "rand.geo",
-                            digit.val.env = 1,
-                            aggr.fact.geo = 5,
-                            n.strat.env = 3,
-                            To.plot = FALSE,
-                            xy.pres = NULL){
+Bp_Sampling <- function(env,
+                        n.points = 10000,
+                        method = "rand.geo",
+                        digit.val.env = 1,
+                        aggr.fact.geo = 5,
+                        n.strat.env = 3,
+                        To.plot = FALSE,
+                        xy.pres = NULL){
   
   if(!inherits(env,"SpatRaster")){
     stop("env must be a SpatRaster from terra package.")

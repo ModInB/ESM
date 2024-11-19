@@ -1,0 +1,82 @@
+---
+title: "Get Started with ESM Package"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Get_Started}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Loading the needed packages
+
+```{r setup}
+library(ESM)
+library(terra)
+```
+
+## Case 1: Modeling with presence and absence data
+
+### Data preparation
+
+Here we first need to load our data. To realize an ESM, we first gather some information: the coordinates of the observations (called xy); a response vector (resp) attributing 1 if the species was present or 0 if absent; the name of the species (sp.name) and; environmental predictors (env), which can be a SpatRaster from terra package or a data.frame.
+
+Let's focus here to model the distribution of *Tayloria serrata*, which were only found 15 times out of 413 plots, in the Western Swiss Alps. Here, we will use 5 predictors, obtained from the ecospat package and projected into the same CRS as our observations.
+
+```{r}
+## species information with environmental values
+data("ESM_species.env") 
+## SpatRaster with 5 environmental predictors
+data("ESM_Env")
+
+xy <- ESM_species.env[,1:2]
+resp <- ESM_species.env[,3]
+sp.name <- "Tayloria_serrata"
+env  <- terra::unwrap(ESM_Env)
+```
+
+Plot of the observations across the study area
+
+```{r}
+terra::plot(terra::subset(env, 1), col = "grey85", 
+            legend = FALSE, box = FALSE, axes = FALSE)
+terra::points(xy[resp ==0,], pch = 13, col = "firebrick")
+terra::points(xy[resp ==1,], pch = 16, col = "black")
+```
+
+With the package ESM, we can modify the parameters of each of the 5 modelling techniques available, with the function *ESM_Models.Options*. For this example, we will perform GLM with a binomial family, allowing linear and quadratic terms and performing a step AIC to select the best structure.
+
+```{r}
+mod.options <- ESM_Models.Options(GLM = list(type = "quadratic",
+                                            test = "AIC")
+                                 )
+```
+
+### Modeling Core
+
+The first step to model species distribution is to use teh function *ESM_Modeling*, which will generate bivariate models, allowing by default all the possible pairs of predictors.
+
+```{r}
+my.ESM <- ESM_Modeling(resp = resp,
+                       xy=xy,
+                       env=env,
+                       sp.name = sp.name,
+                       models = c("GLM"),
+                       models.options = mod.options,
+                       prevalence = 0.5,
+                       cv.method = "split-sampling",
+                       cv.rep = 10,
+                       cv.ratio = 0.7,
+                       parallel = FALSE,
+                       save.models = FALSE,
+                       save.obj = FALSE,
+                       verbose = FALSE)
+
+my.ESM$biva.evaluations
+```
