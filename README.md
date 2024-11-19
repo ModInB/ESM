@@ -1,6 +1,6 @@
 [![Github Version](https://img.shields.io/badge/dev%20version-0.3-53AA93.svg)](https://github.com/ModInB/ESM)
 [![Last Commit](https://img.shields.io/github/last-commit/ModInB/ESM.svg)](https://github.com/ModInB/ESM/commits/main)
-[![R-CMD-check](https://github.com/FlavienCollart/ESM/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ModInB/ESM/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/ModInB/ESM/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ModInB/ESM/actions/workflows/R-CMD-check.yaml)
 
 <img src="inst/logo/ESM.png" align="right" height = 150/>
 <div align="center">

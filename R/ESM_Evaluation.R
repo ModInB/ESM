@@ -583,7 +583,7 @@ ESM_Response.Plot <- function (ESM.Mod,
 #' )
 #' SBI$SBI
 #' 
-#' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Null.Models}, \code{\link{ESM_Pooling.Evaluation}}}
+#' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Null.Models}}, \code{\link{ESM_Pooling.Evaluation}}
 #' @importFrom stats binomial cor
 #' @export
 
