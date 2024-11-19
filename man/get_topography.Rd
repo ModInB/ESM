@@ -39,11 +39,11 @@ will be "COMPRESS=DEFLATE", "PREDICTOR=2" and "ZLEVEL=6". \emph{Default: TRUE}.}
 \code{character}. A vector containing the path to the downloaded files.
 }
 \description{
-Download and crop topographic variables from Amatulli et al (2018) using GMTED elevation data
+Download and crop topographic variables from Amatulli et al (2018) using GMTED elevation data.
 }
 \details{
 \describe{
-get_topography download and crop topographic variables from Amatulli et al (2018) using GMTED elevation data.
+get_topography downloads and crops topographic variables from Amatulli et al (2018) using GMTED elevation data.
 
 The description of each following variables comes from Amatulli et al (2018) : 
 \itemize{ 
@@ -65,20 +65,21 @@ The description of each following variables comes from Amatulli et al (2018) :
 \item{tcurv} : the tangential curvature measures the rate of change perpendicular to the slope gradient and is related to the convergence and divergence of flow across a surface.
 }
 
-The aggregative factors correspond to the statistics computed from the variables.
-Amatulli et al. use the 250m GMTED as a data source with a resolution of 250m.
+The aggregating factors correspond to the statistics computed from the variables.
+Amatulli et al. used the 250m GMTED as a data source with a resolution of 250m.
 GMTED is available in different forms derived from the different high resolution DEMs and 
 corresponding to different statistics 
-namely minimum (mi), maximum (ma), mean (mn), median (md) and standard devition (sd).
-For the elevation variable, the mi, ma, mn, md and sd elevation were obtained from the
+namely minimum (mi), maximum (ma), mean (mn), median (md) and standard deviation (sd).
+For the elevation variable, the mi, ma, mn, md and sd elevations were obtained from the
 source layers 250m GMTEDmi, 250m GMTEDma, 250m GMTEDmn, 250m GMTEDmd and 250m GMTEDsd respectively
 (note that the downloaded files finished by "md" but still correspond to the different source layers).
-The rest of the variables were obtained from the 250m GMTEDmd and the others aggregative factors layers were calculated after.
+The rest of the variables were obtained from the 250m GMTEDmd and the others aggregating factors layers were calculated after.
 
-To crop a map to a different size than the original one, it is possible to add an extent or a mask parameter.
+If the files are to heavy and/or your connection is to slow, you may want to modified the timeout parameter to a greater period of time.
+Note that you always have to end your number with "L" to make sure your time is an integer (e.g. "100L", "200L", "300L").
 
-If the extent of the map is significant, you may want to compress it and 
-modified the timeout parameter to a greater period of time.
+To crop a map to a different size than the original one, it is possible to add an extent and a mask parameter. If the extent of 
+the map is significant, you may want to compress it.
 
 }
 }
