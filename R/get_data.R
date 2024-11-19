@@ -2,7 +2,7 @@
 #' @author Flavien Collart \email{flaviencollart@hotmail.com} with contributions of Adèle Hotermans
 #' @title Download chelsa data
 #' @description
-#' Download and crop climatic variables at different time period from CHELSA v.2.1.
+#' Download and crop climatic variables at different time periods from CHELSA v.2.1.
 #' 
 #' @param var.names \code{character}. Vector containing the variable names to download. See details for more information.
 #' @param time \code{character}. The time period(s) wanted. Must be: '1981-2010','2011-2040','2041-2070', and/or'2071-2100'.
@@ -13,19 +13,53 @@
 #' @param ssp \code{character}. A vector containing the Shared Socio-economic Pathways for which you want to download the datasets. 
 #' Only needed when future time periods are provided. Must be: '126', '370' and/or '585'.\emph{Default: NULL}.
 #' @param path \code{character}.The path to store the climatic grids.
-#' @param extent The extent to which you want to crop your climatic datasets. extent must be either a 'SpatRaster', 'SpatVector', or'SpatExtent'.
+#' @param extent The extent to which you want to crop your climatic datasets. Extent must be either a 'SpatRaster', 'SpatVector', or'SpatExtent'.
 #' @param mask \code{logical}. Do you want to mask your maps? \emph{Note that when TRUE, extent must be a 'SpatRaster' or a 'SpatVector'.}
-#' @param compress \code{logical}. When extent is provided, do you want to compress the climatic grids? if TRUE, the compression
+#' @param compress \code{logical}. When extent is provided, do you want to compress the climatic grids? If TRUE, the compression
 #' will be: "COMPRESS=DEFLATE", "PREDICTOR=2" and "ZLEVEL=6". \emph{Default: TRUE}.
 #' @param timeout \code{integer}. The maximum downloading time allowed for each map in seconds. \emph{Default: 300L}.
 #' @details  
 #' \describe{
-#' get_chesla download and crop climatic variables at different time periode from CHELSA v.2.1.
-#' Some variables are only available at the present time (var.pres) while other are also available in the futur (var.full).
-#' The full variables are to be combined with a future scenario by choosing a global circular model (gcm.chelsa) and a shared-socioeconomic pathway (ssp.chelsa)
+#' get_chesla downloads and crops climatic variables at different time periods from CHELSA v.2.1.
+#' 
+#' The following list contains the different variables associated with their time period : 
+#' \itemize{
+#' 
+#' \item{Present} : pet_perman_max, pet_perman_mean, pet_perman_min, pet_perman_range,
+#' sfcWind_max, sfcWind_mean, sfcWind_min","sfcWind_range, vpd_max, vpd_mean, vpd_min, vpd_range,
+#' hurs_max, hurs_mean, hurs_min, hurs_range, clt_max, clt_mean, clt_min, clt_range, cmi_max, cmi_mean,
+#' cmi_min, cmi_range, rsds_1981-2010_mean, rsds_1981-2010_min, rsds_1981-2010_max, rsds_1981-2010_range.
+#' 
+#' \item{Present and Future} : the 19 bioclim variables (e.g. "bio1"), ai, fcf, fgd, gdd0, gdd10,
+#' gddd5, gddlgd0, gddlgd5, gddlgd10, gdgfgd0, gdgfgd10, gdgfgd5, gsl, gsp, gst,
+#' kg from 0 to 5 (e.g. "kg0"), lgd, ngd0, ngd10, ngd5, npp, scd, swd, swe.
+#' }
 #' The description of the different variables is available at the point 7 (p.11) of the following link :
 #' \link{https://chelsa-climate.org/wp-admin/download-page/CHELSA_tech_specification_V2.pdf}
+#' 
+#' The parameter "var.names" allows you to select the variables taken into account :
+#' \itemize{
+#' 
+#' \item{all} : only the future variables are selected.
+#' \item{bioclim} : only the 19 bioclim variables are selected.
+#' \item{all_fut} : only the variables available in present AND future time are selected.
 #' }
+#' The variables available in the future are to be combined with a future scenario by choosing a global circular model (gcm.chelsa) and a shared-socioeconomic pathway (ssp.chelsa) :
+#' \itemize{
+#' 
+#' \item{ssp126} : ssp1 (Sustainability - Taking the green road) combined with a radiative forcing of 2.6 W/m².
+#' \item{ssp370} : ssp3 (Regional rivalry - A rocky road) combined with a radiative forcing of 7 W/m².
+#' \item{ssp585} : ssp5 (Fossil-fueled development - Taking the highway) with a radiative forcing of 8.5 W/m². 
+#' }
+#' The complete description of the ssp is available in O'Neill et al. 2017.
+#' 
+#' If the files are to heavy and/or your connection is to slow, you may want to modified the timeout parameter to a greater period of time.
+#' Note that you always have to end your number with "L" to make sure your time is an integer (e.g. "100L", "200L", "300L").
+#' 
+#' To crop a map to a different size than the original one, it is possible to add an extent and a mask parameter. If the extent of 
+#' the map is significant, you may want to compress it.
+#' }
+#' 
 #' @return 
 #' \code{character}. A vector containing the path to the downloaded files.
 #' @references
@@ -33,6 +67,9 @@
 #' 
 #' Karger D.N., Conrad, O., Böhner, J., Kawohl, T., Kreft, H., Soria-Auza, R.W., Zimmermann, N.E, Linder, H.P., Kessler, M. (2018): Data from: Climatologies at high resolution for the earth’s land surface areas. \emph{EnviDat}. \doi{10.16904/envidat.228.v2.1}.
 #' 
+#' B. C. O’Neill, E. Kriegler, K. L. Ebi, E. Kemp-Benedict, K. Riahi, D. S. Rothman, B. J. van Ruijven, D. P. van Vuuren, J. Birkmann, K. Kok, M. Levy, W. Solecki. (2017). The roads ahead: Narratives for shared socioeconomic pathways describing world futures in the 21st century.
+#' \emph{Global Environmental Change}. \bold{42} 169-180. \doi{10.1016/j.gloenvcha.2015.01.004}
+#'
 #' @examples  \donttest{
 #' # get_Chelsa.Clim("bio1")
 #' }
@@ -106,7 +143,7 @@ get_Chelsa.Clim <- function(var.names,
     if(var.names=="all"){
       var.down = c(var.full, var.pres)
       if(length(time)>1 | time != "1981-2010"){
-        stop("When var.names = 'all', time must be only '1981-2010'. Please try var.names='all_future' instead.")
+        stop("When var.names = 'all', time must be only '1981-2010'. Please try var.names='all_fut' instead.")
       }
     }else if(var.names == "bioclim"){
       var.down = paste0("bio",1:19)
@@ -120,7 +157,7 @@ get_Chelsa.Clim <- function(var.names,
       }else{
         if(time == "1981-2010"){
           if(!all(var.names %in% c(var.full,var.pres))){
-            stop("all elements in var.names must be present in extended bioclimate or must be either all, all_future ,or bioclim.")
+            stop("All elements in var.names must be present in extended bioclimate or must be either all, all_fut ,or bioclim.")
           }
         }else{
           if(any(var.names %in% var.pres)){
@@ -140,7 +177,7 @@ get_Chelsa.Clim <- function(var.names,
     }else{
       if(time == "1981-2010"){
         if(!all(var.names %in% c(var.full,var.pres))){
-          stop("all elements in var.names must be present in ex bioclimate or must be either all, all_future ,or bioclim.")
+          stop("All elements in var.names must be present in extended bioclimate or must be either all, all_fut ,or bioclim.")
         }
       }else{
         if(any(var.names %in% var.pres)){
@@ -159,11 +196,11 @@ get_Chelsa.Clim <- function(var.names,
     if(!(inherits(extent,c("SpatRaster", "SpatVector","SpatExtent") ))){
       stop("extent must be either a 'SpatRaster', 'SpatVector', or'SpatExtent'.")
       if(mask & inherits(extent,c("SpatExtent") )){
-        stop("when mask=TRUE, extent must be a 'SpatRaster' or a 'SpatVector'.")
+        stop("When mask=TRUE, extent must be a 'SpatRaster' or a 'SpatVector'.")
       }
     }
     if(!is.logical(compress)){
-      stop("compress must be a logical")
+      stop("compress must be a logical.")
     }
   }
   
@@ -243,7 +280,7 @@ get_Chelsa.Clim <- function(var.names,
 #' @author Flavien Collart \email{flaviencollart@hotmail.com} with contributions of Adèle Hotermans
 #' @title Download topographic data
 #' @description
-#' Download and crop topographic variables from Amatulli et al (2018) using GMTED elevation data
+#' Download and crop topographic variables from Amatulli et al (2018) using GMTED elevation data.
 #' 
 #' @param var.names \code{character}. Vector containing the variable name(s) to download. Can be either 'all' to download all variables or a subset of the variables  
 #' avaible in Amatulli et al (2018). See details for more information.
@@ -258,7 +295,7 @@ get_Chelsa.Clim <- function(var.names,
 #' @param timeout \code{integer}. The maximum downloading time allowed for each map in seconds. \emph{Default: 300L}.
 #' @details  
 #' \describe{
-#' get_topography download and crop topographic variables from Amatulli et al (2018) using GMTED elevation data.
+#' get_topography downloads and crops topographic variables from Amatulli et al (2018) using GMTED elevation data.
 #' 
 #' The description of each following variables comes from Amatulli et al (2018) : 
 #' \itemize{ 
@@ -280,20 +317,21 @@ get_Chelsa.Clim <- function(var.names,
 #' \item{tcurv} : the tangential curvature measures the rate of change perpendicular to the slope gradient and is related to the convergence and divergence of flow across a surface.
 #' }
 #' 
-#' The aggregative factors correspond to the statistics computed from the variables.
-#' Amatulli et al. use the 250m GMTED as a data source with a resolution of 250m.
+#' The aggregating factors correspond to the statistics computed from the variables.
+#' Amatulli et al. used the 250m GMTED as a data source with a resolution of 250m.
 #' GMTED is available in different forms derived from the different high resolution DEMs and 
 #' corresponding to different statistics 
-#' namely minimum (mi), maximum (ma), mean (mn), median (md) and standard devition (sd).
-#' For the elevation variable, the mi, ma, mn, md and sd elevation were obtained from the
+#' namely minimum (mi), maximum (ma), mean (mn), median (md) and standard deviation (sd).
+#' For the elevation variable, the mi, ma, mn, md and sd elevations were obtained from the
 #' source layers 250m GMTEDmi, 250m GMTEDma, 250m GMTEDmn, 250m GMTEDmd and 250m GMTEDsd respectively
 #' (note that the downloaded files finished by "md" but still correspond to the different source layers).
-#' The rest of the variables were obtained from the 250m GMTEDmd and the others aggregative factors layers were calculated after.
+#' The rest of the variables were obtained from the 250m GMTEDmd and the others aggregating factors layers were calculated after.
 #'
-#' To crop a map to a different size than the original one, it is possible to add an extent or a mask parameter.
+#' If the files are to heavy and/or your connection is to slow, you may want to modified the timeout parameter to a greater period of time.
+#' Note that you always have to end your number with "L" to make sure your time is an integer (e.g. "100L", "200L", "300L").
 #' 
-#' If the extent of the map is significant, you may want to compress it and 
-#' modified the timeout parameter to a greater period of time.
+#' To crop a map to a different size than the original one, it is possible to add an extent and a mask parameter. If the extent of 
+#' the map is significant, you may want to compress it.
 #' 
 #' }
 #' 
@@ -363,10 +401,10 @@ get_Topography <- function(var.names,
   ## Check resolution ####
   
   if(length(res)>1){
-    stop("res must be composed of only one element")
+    stop("res must be composed of only one element.")
   }else{
     if(!all(toupper(res) %in% res.full)){
-      stop("res must be one element of c('1KM','5KM','10KM','50KM','100KM')")
+      stop("res must be one element of c('1KM','5KM','10KM','50KM','100KM').")
     }
   }
   
@@ -376,11 +414,11 @@ get_Topography <- function(var.names,
     if(!(inherits(extent,c("SpatRaster", "SpatVector","SpatExtent") ))){
       stop("extent must be either a 'SpatRaster', 'SpatVector', or'SpatExtent'.")
       if(mask & inherits(extent,c("SpatExtent") )){
-        stop("when mask=TRUE, extent must be a 'SpatRaster' or a 'SpatVector'.")
+        stop("When mask=TRUE, extent must be a 'SpatRaster' or a 'SpatVector'.")
       }
     }
     if(!is.logical(compress)){
-      stop("compress must be a logical")
+      stop("compress must be a logical.")
     }
   }
   
