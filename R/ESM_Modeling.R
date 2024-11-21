@@ -96,6 +96,7 @@
 #'                        cv.method = "split-sampling",
 #'                        cv.rep = 2,
 #'                        cv.ratio = 0.7,
+#'                        SBI = FALSE,
 #'                        parallel = FALSE,
 #'                        save.models = FALSE,
 #'                        save.obj = FALSE,

@@ -40,6 +40,12 @@ the modeling ID, the path to the folder where are the stored the models (biva.pa
 \description{
 Project bivariate models
 }
+\details{
+\describe{
+Each bivariate models are geographically projected into the new.env area. Note that the projected maps are multiplied 
+by 1000 and rounded to reduce storage space. 
+}
+}
 \references{
 Lomba, A., L. Pellissier, C.F. Randin, J. Vicente, F. Moreira, J. Honrado and A. Guisan. 2010. Overcoming the rare species 
 modelling paradox: A novel hierarchical framework applied to an Iberian endemic plant. \emph{Biological Conservation}, \bold{143},2647-2657.

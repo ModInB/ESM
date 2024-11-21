@@ -4,8 +4,10 @@
 #' @description
 #' Download and crop climatic variables at different time periods from CHELSA v.2.1.
 #' 
-#' @param var.names \code{character}. Vector containing the variable names to download. See details for more information.
-#' @param time \code{character}. The time period(s) wanted. Must be: '1981-2010','2011-2040','2041-2070', and/or'2071-2100'.
+#' @param var.names \code{character}. Vector containing either 'all' to download all the variables (works only at present time), 'all_fut'
+#' for all variables that are also available for future time periods, 'bioclim' to download the 19 bioclimatic variables,
+#' or the variable names to download. See details for more information.
+#' @param time \code{character}. The time period(s) wanted. Must be: '1981-2010','2011-2040','2041-2070',and/or '2071-2100'.
 #' \emph{Default: '1981-2010'}
 #' @param gcm \code{character}. A vector containing the Global Circulation Models for which you want to download the datasets. 
 #' Only needed when future time periods are provided. Must be: 'gfdl-esm4','ipsl-cm6a-lr','mpi-esm1-2-hr','mri-esm2-0' and/or,'ukesm1-0-ll'.
@@ -40,24 +42,25 @@
 #' The parameter "var.names" allows you to select the variables taken into account :
 #' \itemize{
 #' 
-#' \item{all}: only the future variables are selected.
-#' \item{bioclim}: only the 19 bioclim variables are selected.
-#' \item{all_fut}: only the variables available in present AND future time are selected.
+#' \item{all}: All available variables are selected. \emph{Note: Only works for present time}
+#' \item{all_fut}: All the variables available in present AND future time are selected.
+#' \item{bioclim}: the 19 bioclimatic variables are selected.
 #' }
-#' The variables available in the future are to be combined with a future scenario by choosing a global circular model (gcm.chelsa) and a shared-socioeconomic pathway (ssp.chelsa) :
+#' The variables available in the future are to be combined with a future scenario by choosing a global circular model (gcm) and a shared-socioeconomic pathway (ssp) :
 #' \itemize{
 #' 
 #' \item{ssp126}: ssp1 (Sustainability - Taking the green road) combined with a radiative forcing of 2.6 W/m².
 #' \item{ssp370}: ssp3 (Regional rivalry - A rocky road) combined with a radiative forcing of 7 W/m².
 #' \item{ssp585}: ssp5 (Fossil-fueled development - Taking the highway) with a radiative forcing of 8.5 W/m². 
 #' }
-#' The complete description of the ssp is available in O'Neill et al. 2017.
+#' The complete description of the ssp is available in O'Neill et al. 2017. These ssp are combined with
+#' Global circulation Models (GCM) to assess future climate.
 #' 
 #' If the files are to heavy and/or your connection is to slow, you may want to modified the timeout parameter to a greater period of time.
-#' Note that you always have to end your number with "L" to make sure your time is an integer (e.g. "100L", "200L", "300L").
+#' Note that you always have to end your number with "L" to make sure your time is an integer (e.g. 300L, 500L).
 #' 
 #' To crop a map to a different size than the original one, it is possible to add an extent and a mask parameter. If the extent of 
-#' the map is significant, you may want to compress it.
+#' the map is large, you may want to compress it, reducing storage space without significantly increase the reading time in R.
 #' }
 #' 
 #' @return 
@@ -324,15 +327,15 @@ get_Chelsa.Clim <- function(var.names,
 #' corresponding to different statistics 
 #' namely minimum (mi), maximum (ma), mean (mn), median (md) and standard deviation (sd).
 #' For the elevation variable, the mi, ma, mn, md and sd elevations were obtained from the
-#' source layers 250m GMTEDmi, 250m GMTEDma, 250m GMTEDmn, 250m GMTEDmd and 250m GMTEDsd respectively
+#' source layers 250m GMTEDmi, 250 m GMTEDma, 250m GMTEDmn, 250m GMTEDmd and 250m GMTEDsd respectively
 #' (note that the downloaded files finished by "md" but still correspond to the different source layers).
 #' The rest of the variables were obtained from the 250m GMTEDmd and the others aggregating factors layers were calculated after.
 #'
 #' If the files are to heavy and/or your connection is to slow, you may want to modified the timeout parameter to a greater period of time.
-#' Note that you always have to end your number with "L" to make sure your time is an integer (e.g. "100L", "200L", "300L").
+#' Note that you always have to end your number with "L" to make sure your time is an integer (e.g. 300L, 500L).
 #' 
 #' To crop a map to a different size than the original one, it is possible to add an extent and a mask parameter. If the extent of 
-#' the map is significant, you may want to compress it.
+#' the map is large, you may want to compress it, reducing storage space without significantly increase the reading time in R.
 #' 
 #' }
 #' 

@@ -19,6 +19,11 @@
 #' \item{name.env}: a \code{character} the value given to the argument name.env.
 #' \item{proj.type}: a \code{character} which is either "data.frame" or "SpatRaster" depending on the class of new.env
 #' }
+#' @details  
+#' \describe{
+#' Each bivariate models are geographically projected into the new.env area. Note that the projected maps are multiplied 
+#' by 1000 and rounded to reduce storage space. 
+#' }
 #' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Ensemble.Projection}}
 #' @references Lomba, A., L. Pellissier, C.F. Randin, J. Vicente, F. Moreira, J. Honrado and A. Guisan. 2010. Overcoming the rare species 
 #' modelling paradox: A novel hierarchical framework applied to an Iberian endemic plant. \emph{Biological Conservation}, \bold{143},2647-2657.

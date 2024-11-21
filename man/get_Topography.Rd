@@ -71,15 +71,15 @@ GMTED is available in different forms derived from the different high resolution
 corresponding to different statistics 
 namely minimum (mi), maximum (ma), mean (mn), median (md) and standard deviation (sd).
 For the elevation variable, the mi, ma, mn, md and sd elevations were obtained from the
-source layers 250m GMTEDmi, 250m GMTEDma, 250m GMTEDmn, 250m GMTEDmd and 250m GMTEDsd respectively
+source layers 250m GMTEDmi, 250 m GMTEDma, 250m GMTEDmn, 250m GMTEDmd and 250m GMTEDsd respectively
 (note that the downloaded files finished by "md" but still correspond to the different source layers).
 The rest of the variables were obtained from the 250m GMTEDmd and the others aggregating factors layers were calculated after.
 
 If the files are to heavy and/or your connection is to slow, you may want to modified the timeout parameter to a greater period of time.
-Note that you always have to end your number with "L" to make sure your time is an integer (e.g. "100L", "200L", "300L").
+Note that you always have to end your number with "L" to make sure your time is an integer (e.g. 300L, 500L).
 
 To crop a map to a different size than the original one, it is possible to add an extent and a mask parameter. If the extent of 
-the map is significant, you may want to compress it.
+the map is large, you may want to compress it, reducing storage space without significantly increase the reading time in R.
 
 }
 }
