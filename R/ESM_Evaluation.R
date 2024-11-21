@@ -381,15 +381,18 @@ ESM_Threshold <- function (ESM.ensembleMod){
 #' @param ESM.Mod The object returned by \code{\link{ESM_Modeling}}.
 #' @param ESM.ensembleMod The object returned by \code{\link{ESM_Ensemble.Modeling}}.
 #' 
-#' @details Calculates the ratio between sum of weights of bivariate models where a focal variable was used and sum of weights of bivariate 
-#' models where the focal variable was not used. The ratio is corrected for the number of models with or without the focal variable. 
+#' @details Calculates the ratio between sum of weights (e.g., AUC, TSS,..) of bivariate models where the variable of interest was used 
+#' and the sum of weights of bivariate models where the variable of interest was not used. The ratio is corrected for the number of models 
+#' with or without the variable of interest. 
+#' 
 #' This ratio gives an indication on the proportional contribution of the variable in the final ensemble model. A value of higher than 1 
 #' indicate that the focal variable has a higher contribution than average.
+#' 
 #' In the case of multiple methods (e.g., GLM,...), the contributions are counted per method. For ensemble model, the contributions 
-#' are then weighted means (based on the weighting score as chosen in ecospat.ESM.EnsembleModeling of single methods.
+#' are then weighted means (based on the weighting score as chosen in \code{\link{ESM_Ensemble.Modeling}} of single methods.
 #' 
 #' @return 
-#' a \code{dataframe} with contribution values (i.e. proportional contribution) by variable and model
+#' a \code{dataframe} with contribution values (i.e. proportional contribution) for each variable and model
 #' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}
 #' @export
 
