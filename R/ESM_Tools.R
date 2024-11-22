@@ -3,10 +3,10 @@
 #' @title Ensemble of Small Models: Sampling background points using 4 different methods.
 #' @description This function generates background following the 4 different methods described by Steen et al (2024).
 #' Two are generated in the environmental space whereas the remaining is in the geographic space (see details).
-#'  
+#' 
 #' @param env a \code{SpatRaster} of at least one layer. if \emph{method = "strat.geo"}, a minimum of 2 layers are needed.
 #' @param n.points \code{integer}. The number of background to be selected. \emph{Note that this number can change depending on the technique}
-#' @param method \code{character}. one of: "rand.geo", "strat.geo", "rand.env" or "strat.env". \emph{see Details}.
+#' @param method \code{character}. one of: "rand.geo", "strat.geo", "rand.env" or "strat.env". \emph{see Details}. \emph{Default: "rand.geo"}.
 #' @param digit.val.env \code{integer}. The number of digit to keep to remove too similar environmental values.
 #' Only needed when method = "rand.env". \emph{Default: 1}.
 #' @param aggr.fact.geo \code{integer}. The aggregating factor to generate the checkerboard. Only needed 
