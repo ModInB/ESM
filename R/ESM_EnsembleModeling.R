@@ -12,7 +12,7 @@
 #' @return \itemize{
 #' a \code{list} containing: 
 #' \item{data}: a \code{list} with the object resp, xy, env.var and sp.name. env.var is = to the data supplied in the argument env. 
-#' If env, was a SpatRaster, it corrsponds to the extracted values of these rasters for the species coordinates.
+#' If env, was a SpatRaster, it corresponds to the extracted values of these rasters for the species coordinates.
 #' \item{model.info}: a \code{list} of the models used, their options, the combination of bivariate models (which.biva), the modeling ID, 
 #' the path to the folder where are the stored the models (biva.path), and the failed models
 #' \item{cv.split.table}: a \code{matrix} used to train and test models. See explanation of the argument cv.split.table

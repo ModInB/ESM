@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_data.R
 \name{get_Chelsa.Clim}
 \alias{get_Chelsa.Clim}
-\title{Download chelsa data}
+\title{Download CHELSA data}
 \usage{
 get_Chelsa.Clim(
   var.names,

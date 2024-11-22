@@ -297,7 +297,7 @@ Bp_Sampling <- function(env,
 #' @param proj.fut \code{SpatRaster}. One or more ESM/SDM binary projections at future time.
 #' 
 #' @details
-#' The comparisons betwween SDM/ESM binary predictions are made following this formula: 
+#' The comparisons between SDM/ESM binary predictions are made following this formula: 
 #' \bold{RangeShift = proj.curr + 2*proj.fut}. 
 #' Therefore, when the value is equal to 0. It correspond to a pixel considered as "absent"/"unsuitable" in both 
 #' time period. 

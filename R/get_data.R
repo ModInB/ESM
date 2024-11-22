@@ -1,6 +1,6 @@
 #' @name get_Chelsa.Clim
 #' @author Flavien Collart \email{flaviencollart@hotmail.com} with contributions of Adèle Hotermans
-#' @title Download chelsa data
+#' @title Download CHELSA data
 #' @description
 #' Download and crop climatic variables at different time periods from CHELSA v.2.1.
 #' 
@@ -287,7 +287,7 @@ get_Chelsa.Clim <- function(var.names,
 #' Download and crop topographic variables from Amatulli et al (2018) using GMTED elevation data.
 #' 
 #' @param var.names \code{character}. Vector containing the variable name(s) to download. Can be either 'all' to download all variables or a subset of the variables  
-#' avaible in Amatulli et al (2018). See details for more information.
+#' available in Amatulli et al (2018). See details for more information.
 #' @param res \code{character}. Resolution of the data. One element from: '1KM','5KM','10KM','50KM','100KM'. \emph{Default: '1KM'}.
 #' @param aggr \code{character}. Vector containing the aggregating factor(s). Can be either 'all' to download all the aggregating factors or a subset 
 #' of c('md','mn','mi','ma','sd'). \emph{Default: 'md'}. See details for more information.

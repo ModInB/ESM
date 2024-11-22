@@ -19,14 +19,14 @@
 #' for each run, are used to train the model and the remaining to test it. "block" corresponds to a k-fold cross-validations 
 #' but where the presences (and absences) are equally split into the k blocks. If "custom", cv.split.table should be provided.
 #' @param cv.rep   \code{numeric}. Number of replicates used for the split-sampling. Only applicable when cv.method="split-sampling".
-#' @param cv.ratio  \code{numeric} betweem 0 and 1.Ratio of the dataset used to trained the model. Only applicable when cv.method="split-sampling".
+#' @param cv.ratio  \code{numeric} between 0 and 1.Ratio of the dataset used to trained the model. Only applicable when cv.method="split-sampling".
 #' @param cv.n.blocks \code{numeric}. Number of wanted blocks (k-fold cross-validation). Only applicable when cv.method = "block.
 #' @param cv.split.table a \code{matrix} or a \code{data.frame} filled with TRUE/FALSE to specify which part of data must be used for models calibration (TRUE) 
 #' and for models validation (FALSE). Each column corresponds to a 'RUN' and should be named "RUNX" where X correspond to the number of the run. 
 #' The last column should be filled with only TRUE and named "Full" to make a full model used for the future projection. Only applicable when cv.method="custom".
 #' @param SBI \code{logical}. Should the model evaluated with the Smooth Boyce Index (SBI=TRUE) or the regular Boyce Index (SBI=FALSE)? If TRUE, the SBI will be
 #' computed with the function \code{\link{Smooth.CBI}} and resulted from the ensemble of 5 smoothing techniques. \emph{Default: TRUE. Note that
-#' computing SBI instead of teh regular Boyce Index usually increases computation time.}
+#' computing SBI instead of the regular Boyce Index usually increases computation time.}
 #' @param which.biva \code{numeric}. which bivariate combinations should be used for modeling. \emph{Default}: \code{NULL}, 
 #' meaning that all the combinations will be made.
 #' @param parallel \code{logical}. Allows or not parallel job using the function parallel::makeCluster.
@@ -43,7 +43,7 @@
 #' for example all possible bivariate models (i.e. models that contain only two predictors at a time out of a larger set of predictors), 
 #' and then combine all possible bivariate models into an ensemble (Lomba et al. 2010; Breiner et al. 2015).
 #' 
-#' The ESM set of functions could be used to build ESMs using simple bivariate models which are averagedusing weights based on model performances. 
+#' The ESM set of functions could be used to build ESMs using simple bivariate models which are averaged using weights based on model performances. 
 #' They provide full functionality of the approach described in Breiner et al. (2015).
 #' 
 #' The argument which.biva allows to split model runs, e.g. if which.biva is 1:3, only the three first bivariate variable combinations will be modeled. 

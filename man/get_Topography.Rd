@@ -17,7 +17,7 @@ get_Topography(
 }
 \arguments{
 \item{var.names}{\code{character}. Vector containing the variable name(s) to download. Can be either 'all' to download all variables or a subset of the variables
-avaible in Amatulli et al (2018). See details for more information.}
+available in Amatulli et al (2018). See details for more information.}
 
 \item{res}{\code{character}. Resolution of the data. One element from: '1KM','5KM','10KM','50KM','100KM'. \emph{Default: '1KM'}.}
 
