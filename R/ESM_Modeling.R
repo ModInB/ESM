@@ -228,16 +228,22 @@ ESM_Modeling <- function(resp,
   }
   
   ## Check env and extract values if SpatRaster----
+  env.info <- list()
   if(is.data.frame(env)){
     if(length(resp) != nrow(env) | nrow(env) != nrow(xy)){
       stop("resp, xy and env must have the same length")
     }else{
       env.var <- env
+      env.info$type = "data.frame"
     }
     
   }else if(inherits(env,"SpatRaster")){
     xy <- as.matrix(xy)
     env.var <- terra::extract(env,xy)
+    env.info$type = "SpatRaster"
+    env.info$extent = terra::ext(env)
+    env.info$proj = terra::crs(env)
+    env.info$res = terra::res(env)
   }else{
     stop("env must be either a SpatRaster or a data.frame")
   }
@@ -390,10 +396,11 @@ ESM_Modeling <- function(resp,
                        validation = FALSE)
 
   ## Return outputs ----
-  obj <- list(data = list(resp = resp,
+  obj <- list(data = list(sp.name= sp.name,
+                          resp = resp,
                           xy = xy,
                           env.var = env.var,
-                          sp.name= sp.name,
+                          env.info = env.info,
                           SBI = SBI),
               model.info = list(models = models,
                                 models.options = models.options,
