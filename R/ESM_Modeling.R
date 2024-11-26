@@ -25,7 +25,7 @@
 #' and for models validation (FALSE). Each column corresponds to a 'RUN' and should be named "RUNX" where X correspond to the number of the run. 
 #' The last column should be filled with only TRUE and named "Full" to make a full model used for the future projection. Only applicable when cv.method="custom".
 #' @param SBI \code{logical}. Should the model evaluated with the Smooth Boyce Index (SBI=TRUE) or the regular Boyce Index (SBI=FALSE)? If TRUE, the SBI will be
-#' computed with the function \code{\link{Smooth.CBI}} and resulted from the ensemble of 5 smoothing techniques. \emph{Default: TRUE. Note that
+#' computed with the function \code{\link{Smooth_CBI}} and resulted from the ensemble of 5 smoothing techniques. \emph{Default: TRUE. Note that
 #' computing SBI instead of the regular Boyce Index usually increases computation time.}
 #' @param which.biva \code{numeric}. which bivariate combinations should be used for modeling. \emph{Default}: \code{NULL}, 
 #' meaning that all the combinations will be made.
@@ -330,7 +330,7 @@ ESM_Modeling <- function(resp,
   
  
   if(verbose){
-    cat("\n################### Start Modelling ###################")
+    cat("\n################### Start Modeling ###################")
   }
   
   if(parallel){

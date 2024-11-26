@@ -2,12 +2,14 @@
 % Please edit documentation in R/ESM_Tools.R
 \name{ESM_Generate.ODMAP}
 \alias{ESM_Generate.ODMAP}
-\title{Generate and prefill ODMAP table}
+\title{Generate and fill ODMAP table}
 \usage{
 ESM_Generate.ODMAP(ESM.Mod = NULL, ESM.ensembleMod = NULL, ask.to.fill = TRUE)
 }
 \description{
-Generate and prefill ODMAP table
+The function generates an ODMAP table to report your Modelling procedure 
+using the outputs of \code{\link{ESM_Modeling}} and 
+\code{\link{ESM_Ensemble.Modeling}}.
 }
 \author{
 Flavien Collart \email{flaviencollart@hotmail.com}

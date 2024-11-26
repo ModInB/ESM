@@ -16,8 +16,8 @@ ESM_Pooling.Evaluation(ESM.Mod, ESM.ensembleMod, EachSmallModels = FALSE)
 \value{
 a \code{list} containing:
 \itemize{
-\item{ESM.evaluations}: a \code{matrix} with the evaluation scores for the ESMs based on the different modelling algorithms and 
-based on the consensus across the modelling algorithms (called here "ensemble").
+\item{ESM.evaluations}: a \code{matrix} with the evaluation scores for the ESMs based on the different modeling algorithms and 
+based on the consensus across the modeling algorithms (called here "ensemble").
 \item{ESM.fit}: a \code{matrix} of predicted values resulting from the pooling procedure and used to compute the evaluation scores. 
 The column \emph{resp} is where the species occurs or not.
 \item{ESM.evaluations.bivariate.models}: a \code{list} containing a matrix of evaluation scores for each bivariate models 
@@ -37,6 +37,7 @@ the hold-out data (evaluation dataset) across replicates. As the same data point
 is presumably sampled in several replicates, the suitability values for each data point is consequently averaged across 
 replicates where they were sampled. This procedure generates a series of independent suitability values with a size approximately 
 equal (as some data points may not have been sampled by chance in any of the \emph{n} replicates) to that of the number of data point.
+For the use of this function, please refer to the manual of ESM_Modeling.
 }
 \references{
 Collart, F., & Guisan, A. (2023). Small to train, small to test: Dealing with low sample size in model evaluation. 

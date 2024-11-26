@@ -43,7 +43,8 @@ Project bivariate models
 \details{
 \describe{
 Each bivariate models are geographically projected into the new.env area. Note that the projected maps are multiplied 
-by 1000 and rounded to reduce storage space. 
+by 1000 and rounded to reduce storage space.
+For the use of this function, please refer to the manual of ESM_Modeling.
 }
 }
 \references{

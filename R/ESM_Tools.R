@@ -419,8 +419,14 @@ ESM_Binarize <- function(proj,
 }
 
 #' @name ESM_Generate.ODMAP
-#' @title Generate and prefill ODMAP table
+#' @title Generate and fill ODMAP table
 #' @author Flavien Collart \email{flaviencollart@hotmail.com}
+#' @description
+#' The function generates an ODMAP table to report your Modelling procedure 
+#' using the outputs of \code{\link{ESM_Modeling}} and 
+#' \code{\link{ESM_Ensemble.Modeling}}.
+#' 
+#' 
 #' @export
 ESM_Generate.ODMAP <- function(ESM.Mod = NULL,
                                ESM.ensembleMod = NULL,

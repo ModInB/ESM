@@ -22,7 +22,8 @@
 #' @details  
 #' \describe{
 #' Each bivariate models are geographically projected into the new.env area. Note that the projected maps are multiplied 
-#' by 1000 and rounded to reduce storage space. 
+#' by 1000 and rounded to reduce storage space.
+#' For the use of this function, please refer to the manual of ESM_Modeling.
 #' }
 #' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Ensemble.Projection}}
 #' @references Lomba, A., L. Pellissier, C.F. Randin, J. Vicente, F. Moreira, J. Honrado and A. Guisan. 2010. Overcoming the rare species 

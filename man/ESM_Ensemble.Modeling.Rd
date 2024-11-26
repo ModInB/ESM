@@ -42,6 +42,9 @@ and \code{weights.EF} a \code{matrix} of weights used to generate the ESMs. Note
 \description{
 This function averages simple bivariate models by weighted means to Ensemble Small Models.
 }
+\details{
+For the use of this function, please refer to the manual of ESM_Modeling.
+}
 \references{
 Lomba, A., L. Pellissier, C.F. Randin, J. Vicente, F. Moreira, J. Honrado and A. Guisan. 2010. Overcoming the rare species 
 modelling paradox: A novel hierarchical framework applied to an Iberian endemic plant. \emph{Biological Conservation}, \bold{143},2647-2657.

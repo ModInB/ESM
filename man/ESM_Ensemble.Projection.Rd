@@ -28,6 +28,9 @@ a \code{SpatRaster} or \code{data.frame}. EF = the ensemble across the modeling 
 \description{
 Generate the ESMs into a new space
 }
+\details{
+For the use of this function, please refer to the manual of ESM_Modeling.
+}
 \references{
 Lomba, A., L. Pellissier, C.F. Randin, J. Vicente, F. Moreira, J. Honrado and A. Guisan. 2010. Overcoming the rare species 
 modelling paradox: A novel hierarchical framework applied to an Iberian endemic plant. \emph{Biological Conservation}, \bold{143},2647-2657.
