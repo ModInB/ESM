@@ -136,13 +136,13 @@ ESM_Pooling.Evaluation <- function (ESM.Mod,
 #' @name ESM_Null.Models
 #' @author Flavien Collart \email{flaviencollart@hotmail.com}
 #' @title Ensemble of Small Models: Evaluation using Null Models
-#' @description Performed null models to test the significativity of the ESM evaluatuion as recommended in Collart & Guisan (2023) and performed in 
+#' @description Performed null models to test the significance of the ESM evaluatuion as recommended in Collart & Guisan (2023) and performed in 
 #' van Proosdij et al (2016). 
-#' It consists of running a series of null models, randomly shuffling the presences and absences, thus generating ‘fake’ occurrences.
-#' These models are performed folowing the same methodology as for the ESM (same model parameters, same number of cross-validations and 
+#' It consists of running a series of null models, randomly shuffling the presences and absences, thus generating 'fake' occurrences.
+#' These models are performed following the same methodology as for the ESM (same model parameters, same number of cross-validations and 
 #' same threshold for the ensemble). The pooling evaluation can also be combined with these null models with the option pooling = TRUE 
-#' (as recommended in Collart & Guisan, 2023). In addition to the pvalue, the observed evaluation metrics are then reajusted using the 
-#' value of the evaluation metric at a certain quantile following the methology developped in Verdon et al (2024). 
+#' (as recommended in Collart & Guisan, 2023). In addition to the pvalue, the observed evaluation metrics are then readjusted using the 
+#' value of the evaluation metric at a certain quantile following the methodology developed in Verdon et al (2024). 
 #' 
 #' @param  ESM.Mod The object returned by \code{ESM_Modeling}.
 #' @param ESM.ensembleMod The object returned by \code{\link{ESM_Ensemble.Modeling}}.
@@ -300,8 +300,8 @@ ESM_Null.Models <- function(ESM.Mod,
 #' @param ESM.ensembleMod The object returned by \code{\link{ESM_Ensemble.Modeling}}.
 #' @details 
 #' This function provides diverse thresholds which can be used to convert suitability 
-#' maps into binary maps. Various thresholds are provided: TSS (where sensitivity and specificity are maximised), MPA 1.0 (where all presences 
-#' are prdicted positive), MPA 0.95 (where 95\% of all presences are predicted positive), MPA 0.90 (where 90\% of all presences are predicted positive), 
+#' maps into binary maps. Various thresholds are provided: TSS (where sensitivity and specificity are maximized), MPA 1.0 (where all presences 
+#' are predicted positive), MPA 0.95 (where 95\% of all presences are predicted positive), MPA 0.90 (where 90\% of all presences are predicted positive), 
 #' Boyce.th.min (the lowest suitability value where the predicted/expected ratio is >1) and Boyce.th.max (the highest suitability value where the 
 #' predicted/expected ratio is =1). 
 #' @return 
@@ -439,7 +439,7 @@ ESM_Variable.Contributions <- function (ESM.Mod,
 #' to fix as constant the remaining variables when the predicted response is estimated for one of the variables.
 #' 
 #' @details 
-#' This function plots the response curves of a model for each variable, while keeping the remianing variables constant. 
+#' This function plots the response curves of a model for each variable, while keeping the remaining variables constant. 
 #' This is an adaptation of the Evaluation Strip method proposed by Elith et al.(2005).
 #' @return 
 #' A plot of the response curves is produced (red line Ensemble, other colour lines are for single algorithms) and a \code{list} with the output is provided.

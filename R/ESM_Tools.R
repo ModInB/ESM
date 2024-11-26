@@ -297,7 +297,7 @@ Bp_Sampling <- function(env,
 #' @param proj.fut \code{SpatRaster}. One or more ESM/SDM binary projections at future time.
 #' 
 #' @details
-#' The comparisons betwween SDM/ESM binary predictions are made following this formula: 
+#' The comparisons between SDM/ESM binary predictions are made following this formula: 
 #' \bold{RangeShift = proj.curr + 2*proj.fut}. 
 #' Therefore, when the value is equal to 0. It correspond to a pixel considered as "absent"/"unsuitable" in both 
 #' time period. 
@@ -417,3 +417,421 @@ ESM_Binarize <- function(proj,
   }
   return(proj.bin)
 }
+
+#' @name ESM_Generate.ODMAP
+#' @title Generate and prefill ODMAP table
+#' @author Flavien Collart \email{flaviencollart@hotmail.com}
+#' @export
+ESM_Generate.ODMAP <- function(ESM.Mod = NULL,
+                               ESM.ensembleMod = NULL,
+                               ask.to.fill = TRUE){
+  
+  ## Creation of an empty table ####
+  ODMAP <- as.data.frame(matrix("",ncol = 5, nrow = 84))
+  colnames(ODMAP) = c("section","subsection","element","Value", "Information")
+  ODMAP$section = c(rep("Overview",25),
+                    rep("Data",33),
+                    rep("Model",14),
+                    rep("Assessment", 5),
+                    rep("Prediction", 7))
+  
+  ODMAP$subsection = c(rep("Autorship",4),
+                       rep("Model objective",2),
+                       "Focal Taxon",
+                       "Location",
+                       rep("Scale of Analysis",5),
+                       rep("Biodiversity data",2),
+                       "Predictors","Hypotheses",
+                       "Assumptions",
+                       rep("Algorithms",3),
+                       "Workflow",
+                       rep("Software",3),
+                       rep("Biodiversity data",12),
+                       rep("Data partitioning",3),
+                       rep("Predictor variables",10),
+                       rep("Transfer data",8),
+                       "Variable pre-selection",
+                       "Multicollinearity",
+                       rep("Model settings",2),
+                       rep("Model estimates",3),
+                       rep("Model selection",3),
+                       rep("Analysis and Correction of non-independence",3),
+                       "Threshold selection",
+                       rep("Performance statistics",3),
+                       rep("Plausibility check",2),
+                       rep("Prediction output",2),
+                       rep("Uncertainty quantification",5))
+  
+  ODMAP$element = c("Study title","Author names","Contact ","Study link",
+                    "Model objective","Target output","Focal Taxon","Location",
+                    "Spatial extent","Spatial resolution","Temporal extent",
+                    "Temporal resolution","Boundary","Observation type",
+                    "Response data type","Predictor types","Hypotheses",
+                    "Model assumptions","Modelling techniques","Model complexity",
+                    "Model averaging","Model workflow","Software","Code availability",
+                    "Data availability","Taxon names","Taxonomic reference system",
+                    "Ecological level","Data sources","Sampling design","Sample size",
+                    "Clipping","Scaling","Cleaning","Absence data","Background data",
+                    "Errors and biases","Training data","Validation data",
+                    "Test data","Predictor variables","Data sources","Spatial extent",
+                    "Spatial resolution","Coordinate reference system","Temporal extent",
+                    "Temporal resolution","Data processing","Errors and biases",
+                    "Dimension reduction","Data sources","Spatial extent",
+                    "Spatial resolution","Temporal extent","Temporal resolution",
+                    "Models and scenarios","Data processing","Quantification of Novelty",
+                    "Variable pre-selection","Multicollinearity","Model settings (fitting)",
+                    "Model settings (extrapolation)","Coefficients","Parameter uncertainty",
+                    "Variable importance","Model selection","Model averaging","Model ensembles",
+                    "Spatial autocorrelation","Temporal autocorrelation","Nested data",
+                    "Threshold selection","Performance on training data",
+                    "Performance on validation data","Performance on test data","Response shapes",
+                    "Expert judgement","Prediction unit","Post-processing",
+                    "Algorithmic uncertainty","Input data uncertainty",
+                    "Parameter uncertainty","Scenario uncertainty","Novel environments")
+  
+  ## Add Information to certain complicated rows to fill
+  ODMAP$Information = c(rep("",3),
+                        "Link to study (e.g., DOI, web address)",
+                        rep("",8),
+                        "Natural, political and/or rectangle",
+                        "citizen science, field survey, GPS tracking, range map and/or standardised montoring data",
+                        "","climatic, edaphic, habitat and/or topographic",
+                        "Hypotheses about species-environment relationships",
+                        "Critical model assumptions (see table 2 in Zurell et al 2020. 10.1111/ecog.04960)",
+                        "","Justification of the model complexity choice","","Complete conceptual description of the different modelling steps (fitting, evaluation, prediction)",
+                        "", "Here add if possible a github link with you code", 
+                        "Here add if possible the link to your data","",
+                        "","", "Communties, individuals, OTU, populations and/or species",
+                        "Details on species data source: e.g., URL/DOI, accession date, database version",
+                        "Sampling design: spatial design: e.g. random, uniform, stratified), temporal design, nestedness",
+                        "Country/region mask, if applicable","Details on scaling, if applicable: e.g., rasterisation of polygon maps, spatial and temporal thinning, measures to address spatial uncertainties",
+                        "Details on data cleaning/filtering steps, if applicable: e.g., taxonomically, outlier presence/treatment",
+                        "Details on absence collection if applicable", "Details on background data derivation, if applicable. See ESM::Bp.Sampling",
+                        "Details on potential errors and biases in data, if applicable: e.g., detection probability, misidentification potential, geo-referencing errors, sampling bias",
+                        rep("",3),
+                        "Here write the list of available predictors  (before the selection of predictor)",
+                        "Here you can write DOI or refs for your predictors",
+                        rep("",4),"Temporal resolution of raw data, if applicable",
+                        "Details on data processing and on spatial, temporal and thematic scaling: e.g. upscaling/downscaling, transformations, normalisations, thematic aggregations (e.g. of land cover classes), measures to address spatial uncertainties",
+                        "Details on measurements errors and bias, when known",
+                        "Details on dimension reduction of variable set, if applicable - if model-based, this should be contained in Model section (element: Details on pre-selection of variables)",
+                        "Details on data sources: e.g., URL/DOI, accession date, database version",
+                        "Spatial extent of transfer data", 
+                        "Spatial resolution of transfer data", 
+                        "Temporal extent of transfer data", 
+                        "Temporal resolution of transfer data", 
+                        "Models and scenarios used", 
+                        "Details on data processing and scaling (see section Predictor variables)", 
+                        "Quantification of novel environmental conditions and novel environmental combinations: e.g., distance to training data.  Here, if temporal projection or projection onto a new geographical extent, we recommend to perform ecospat::ecospat.climan or ecospat::ecopat.mess", 
+                        "Details on pre-selection of variables, if applicable", "Methods for identifying and dealing with multicollinearity (Dormann, et al. 2013) or justification if multicollinearity is not explicitly dealt with",
+                        "","", "Here, you could use ESM::ESM_VariableContributions" , 
+                        "Details on quantification of parameter uncertainty, e.g. resampling", 
+                        "Here, you could use ESM::ESM_VariableContributions" , 
+                        "Model selection strategy: e.g. information-theoretic approach for variable selection, shrinkage and regularization", 
+                        "Method for model averaging: e.g. derivation of weights", 
+                        "Ensemble method: e.g. initial conditions (input data), model classes, model parameters, boundary conditions", 
+                        "Method for addressing spatial autocorrelation in residuals", 
+                        "Method for addressing temporal autocorrelation in residuals", 
+                        "Method to account for nested data: e.g., fixed and random effects", 
+                        "Here, you could use ESM::ESM_Threshold",
+                        "","" , "", "Response plots, e.g. partial response plots, evaluation strips, inflated response plots. Check ESM::ESM_Response.Plot", 
+                        "Expert judgements, e.g. map display","", "Post-processing, e.g. clipping, reprojection",
+                        "Algorithmic uncertainity, if applicable", 
+                        "Uncertainty in input data, if applicable", 
+                        "Effect of parameter uncertainty, error propagation, if applicable", 
+                        "Uncertainty in scenarios (e.g. climate models, land use models, storylines)", 
+                        "Visualization/treatment of novel environments: e.g., masking). Here, if temporal projection or projection onto a new geographical extent, we recommend to perform ecospat::ecospat.climan or ecospat::ecopat.mess")
+  colnames(ODMAP)[5] = "Information to correctly fill the 'Value' column"
+  
+  ## Start pre-fill the table based on the provided object ####
+  ODMAP$Value[23] = paste(R.version.string, "With ESM package version", packageVersion("ESM"))
+  if(!is.null(ESM.Mod)){
+    ODMAP$Value[19] = paste(ESM.Mod$model.info$models, collapse = ", ")
+    ODMAP$Value[26] = ESM.Mod$data$sp.name
+    N.obs <- sum(ESM.Mod$data$resp)
+    prevalence <- round(100*N.obs/length(ESM.Mod$data$resp),2)
+    ODMAP$Value[31] = paste(N.obs,"occurrences were used in the models with a prevalence of",
+                            prevalence,"%. This prevalence was afterwards set to", 100*ESM.Mod$model.info$prevalence,
+                            "% in the models.")
+    
+    ODMAP$Value[41] = paste0(colnames(ESM.Mod$data$env.var),collapse = ", ")
+    if(ESM.Mod$data$env.info$type == "SpatRaster"){
+      ODMAP$Value[c(9,43)] = paste(names(as.vector(ESM.Mod$data$env.info$extent)),as.vector(ESM.Mod$data$env.info$extent), sep =" = ",collapse = ", ")
+      ODMAP$Value[c(10,44)] = paste(c("xres = ", "yres = "),ESM.Mod$data$env.info$res, collapse = ", ")
+      EPSG <- terra::crs(ESM.Mod$data$env.info$proj,describe=TRUE)[,c("authority","code")]
+      proj4String <- terra::crs(ESM.Mod$data$env.info$proj,proj=TRUE)
+      ODMAP$Value[45] = paste(paste0(EPSG,collapse = ":"),
+                              "; PROJ-string = ",proj4String)
+    }
+    ODMAP$Value[60] = .printModelParameters(model.options = ESM.Mod$model.info$models.options,models = ESM.Mod$model.info$models)
+    cv.method <- ESM.Mod$cv.method
+    if(cv.method=="block"){
+      cv.method <- "-fold"
+    }
+    ODMAP$Value[38] = paste("All bivariate models were evaluated using", ncol(ESM.Mod$cv.split.table)-1,ESM.Mod$cv.method,
+                            "cross-validation.")
+    if(cv.method == "split-sampling"){
+      cv.ratio = round(sum(ESM.Mod$cv.split.table[,1])/nrow(ESM.Mod$cv.split.table),2)
+      ODMAP$Value[38] = paste(ODMAP$Value[38],100*cv.ratio, "% were employed to calibrate the model and the remaining to evaluate it.")
+    }
+    ODMAP$Value[39] = ODMAP$Value[38]
+    
+    ODMAP$Value[74] = ODMAP$Value[73] = paste0(colnames(ESM.Mod$biva.calibration[[1]]), collapse = ", ")
+    
+  }
+  if(!is.null(ESM.ensembleMod)){
+    ODMAP$Value[67] = "weighted mean"
+    if(nrow(ESM.ensembleMod$EF.algo$weights.algo)>1){
+      ODMAP$Value[c(21,68)] = paste("The ensemble models were generated using a weighted mean, weighting each bivariate model by its", ESM.ensembleMod$weighting.score, "value for each modelling algorithm and removing all models having a performance <",ESM.ensembleMod$threshold,".")
+      
+    }else{
+      ODMAP$Value[c(21,68)] = paste("The ensemble models were generated using a weighted mean, weighting each bivariate model by its", ESM.ensembleMod$weighting.score, "value for each modelling algorithmand removing all models having a performance <",ESM.ensembleMod$threshold,". An ensemble was then
+                              realized between the algorithms by applying a weighted mean, weighting each ensemble by its", ESM.ensembleMod$weighting.score,"value.")
+    }
+  }
+  
+  ## Ask information to fill the cells ####
+  if(ask.to.fill){
+    cat("Starting the filing of ODMAP (~20 questions), please enter your answers without quote. You can simply let the value empty by pressing enter. If you want to stop the process but keep your data that you've already filled, write 'stop' (without the quote) during a question.")
+    ## Overview ----
+    ### Study ----
+    x <- readline(prompt = "Enter your study title:")
+    if(x == "stop"){
+      return(ODMAP)
+    }
+    
+    ODMAP$Value[1] = x
+    
+    ### Authors ----
+    x <- readline(prompt = "Enter the authors:")
+    if(x == "stop"){
+      return(ODMAP)
+    }
+    
+    ODMAP$Value[2] = x
+    
+    ### Contacts ----
+    x <- readline(prompt = "Enter your email address:")
+    if(x == "stop"){
+      return(ODMAP)
+    }
+    
+    ODMAP$Value[3] = x
+    
+    ### Objectives ----
+    x <- readline(prompt = "What is your model objetive? write:\n\t1 for Inference and explanation\n\t2 for Mapping and Interpolation\n\t3 for Forecast and Transfer")
+    if(x == "stop"){
+      return(ODMAP)
+    }
+    x <- as.numeric(x)
+    Objective <- x
+    if(is.na(x) | x>3|x<=0){
+      cat("\n Not a correct answer. This question will be passed.")
+      Objective <- 1
+    }else{
+      ODMAP$Value[5] = c("Inference and explanation","Mapping and Interpolation","Forecast and Transfer")[x]
+    }
+    
+    if(Objective>1){
+      x <- readline(prompt = "What is your main target output? write:\n\t1 for suitable vs. unsuitable habitat\n\t2 continuous habitat suitability index")
+      if(x == "stop"){
+        return(ODMAP)
+      }
+      x <- as.numeric(x)
+      if(is.na(x) | x>2|x<=0){
+        cat("\n Not a correct answer. This question will be passed.")
+      }else{
+        ODMAP$Value[6] = c("suitable vs. unsuitable habitat","continuous habitat suitability index")[x]
+      }
+      
+      
+    }
+    
+    ## Focal Taxon
+    x <- readline(prompt = "What is your focal taxon? (If you want to stop the process, write stop)")
+    if(x == "stop"){
+      return(ODMAP)
+    }
+    ODMAP$Value[7] = x
+    
+    ## Study area
+    x <- readline(prompt = "What is your study area? (e.g., Switzerland, Europe)")
+    if(x == "stop"){
+      return(ODMAP)
+    }
+    ODMAP$Value[8] = x
+    
+    ##Temporal extent
+    x <- readline(prompt = "What is your temporal extent of your observation data? (e.g, 1981-2010)")
+    if(x == "stop"){
+      return(ODMAP)
+    }
+    ODMAP$Value[11] = x
+    
+    ## Boundary
+    x <- readline(prompt = "What is the boundary type of your study area? write:\n\t1 for Natural \n\t2 for Political \n\t3 for Rectangle")
+    if(x == "stop"){
+      return(ODMAP)
+    }
+    x <- as.numeric(x)
+    if(is.na(x) | x>3|x<=0){
+      cat("\n Not a correct answer. This question will be passed.")
+    }else{
+      ODMAP$Value[13] = c("Natural","Political","Rectangle")[x]
+    }
+    
+    ## Observation data
+    x <- readline(prompt = "What is the type of your observation data? Allow several answers (e.g, write 13 to select citizen science data and GPS tracking)\n\t1 citizen science \n\t2 field survey \n\t3 GPS tracking \n\t4 range map \n\t5 standardised monitoring data")
+    if(x == "stop"){
+      return(ODMAP)
+    }
+    if(is.na(x)){
+      cat("\n Not a correct answer. This question will be passed.")
+    }else{
+      ToKeep <- sapply(as.character(1:5),grep, x= x)==1
+      ToKeep <- !is.na(ToKeep)
+      if(sum(ToKeep)==0){
+        cat("\n Not a correct answer. This question will be passed.")
+        
+      }else{
+        ODMAP$Value[14] = paste(c("citizen science", "field survey", "GPS tracking", "range map", "standardised monitoring data")[ToKeep],collapse = ", ")
+      }
+      
+    }
+    
+    ## Response variables
+    x <- readline(prompt = "What is the type of your response data?\n\t1 for presence/absence \n\t2 for presence-only")
+    if(x == "stop"){
+      return(ODMAP)
+    }
+    x <- as.numeric(x)
+    if(is.na(x) | x>2 | x<0){
+      cat("\n Not a correct answer. This question will be passed.")
+    }else{
+      ODMAP$Value[15]  = c("presence/absence","presence-only")[x]
+    }
+    
+    ##Predictor type
+    
+    x <- readline(prompt = "What are the categories of your predictors? Allow several answers (e.g, write 14 to select climate and topographic predictors)\n\t1 climate \n\t2 edaphic \n\t3 habitat (i.e, land-cover) \n\t4 topographic")
+    if(x == "stop"){
+      return(ODMAP)
+    }
+    if(is.na(x)){
+      cat("\n Not a correct answer. This question will be passed.")
+    }else{
+      ToKeep <- sapply(as.character(1:4),grep, x = x)==1
+      ToKeep <- !is.na(ToKeep)
+      if(sum(ToKeep)==0){
+        cat("\n Not a correct answer. This question will be passed.")
+        
+      }else{
+        ODMAP$Value[16] = paste(c("climate", "edaphic", "habitat", "topographic")[ToKeep],collapse = ", ")
+      }
+      
+    }
+    
+    
+    x <- readline(prompt = "What is the ecological level of your observation data? Allow several answers (e.g., write 23 for Individuals and OTUs) \n\t1 Communities \n\t2 Individual \n\t3 OTUs \n\t4 Population \n\t5 Species")
+    if(x == "stop"){
+      return(ODMAP)
+    }
+    if(is.na(x)){
+      cat("\n Not a correct answer. This question will be passed.")
+    }else{
+      ToKeep <- sapply(as.character(1:5),grep, x = x)==1
+      ToKeep <- !is.na(ToKeep)
+      if(sum(ToKeep)==0){
+        cat("\n Not a correct answer. This question will be passed.")
+        
+      }else{
+        ODMAP$Value[28] = paste(c("Communties", "Individuals", "OTU", "Populations", "species")[ToKeep],collapse = ", ")
+      }
+      
+    }
+    
+    x <- readline(prompt = "Did you clip your observation data to a single region? \n\t1 for Yes \n\t2 for False \n\t stop to stop")
+    if(x == "stop"){
+      return(ODMAP)
+    }
+    x <- as.numeric(x)
+    if(is.na(x) | x>2 | x<0){
+      cat("\n Not a correct answer. This question will be passed.")
+    }else{
+      ODMAP$Value[32]  = c("The observation data were clipped","No clipping was made")[x]
+    }
+    
+    
+    x <- readline(prompt = "What was the temporal extent of your predictor data for the modeling? (e.g., 1981-2010)")
+    if(x == "stop"){
+      return(ODMAP)
+    }
+    ODMAP$Value[46] = x
+    if(Objective == 3){
+      x <- readline(prompt = "If you projected your models, what was the other temporal extent? (e.g, 2041-2070)")
+      if(x == "stop"){
+        return(ODMAP)
+      }
+      ODMAP$Value[54] = x
+      
+      x <- readline(prompt = "What were the scenarios? (e.g, UKESM ssp 5-8.5)")
+      if(x == "stop"){
+        return(ODMAP)
+      }
+      ODMAP$Value[56] = x
+    }
+    
+  }
+  cat("\n\n Your ODMAP have been generated with your information. Please try to fill the other cells. We added help to fill the different sections that could not be filled.")
+  return(ODMAP)
+}
+
+.printModelParameters <- function(model.options, models){
+  ToReturn <- NULL
+  for(i in 1:length(models)){
+    if(models[i] == "GLM"){
+      if(model.options$GLM$test=="none"){
+        sentence <- paste("GLM was performed under the",model.options$GLM$family$family, "family with",model.options$GLM$type,
+                          "terms")
+      }else{
+        sentence <- paste("GLMs were performed under the",model.options$GLM$family$family, "family with",model.options$GLM$type,
+                          "terms, selecting the best structure with a stepwise AIC")
+      }
+      ToReturn <- c(ToReturn, 
+                    sentence)
+    }else if(models[i] == "ANN"){
+      sentence <- paste0("ANNs were performed with ", model.options$ANN$size, " units in the hidden layers, a weight decay of ", model.options$ANN$decay,
+                         ", an initial random weight of ", model.options$ANN$rang, ", and a maximum of ", model.options$ANN$maxit,
+                         " iterations, all other parameters was set as default")
+      ToReturn <- c(ToReturn, 
+                    sentence)
+    }else if(models[i] == "CTA"){
+      # xval = 5, minbucket = 5, minsplit = 5, cp = 0, maxdepth =25
+      sentence <- paste0("CTAs were performed with a minimum of ", model.options$CTA$control$minsplit,
+                         " observations existing in a node in order for a split to be attempted, a minimum of ",
+                         model.options$CTA$control$minbucket, " observations in a terminal node, a complexity of ",
+                         model.options$CTA$control$cp,", ", model.options$CTA$control$maxcompete,
+                         " competitor splits retained in the output, ", model.options$CTA$control$maxsurrogate,
+                         " surrogate splits retained in the output, a maximal depth of ", model.options$CTA$control$maxdepth,
+                         ", and ",model.options$CTA$control$xval," internal cross-validations, all other parameters were set as default")
+      ToReturn <- c(ToReturn, 
+                    sentence)
+      
+    }else if(models[i] == "GBM"){
+      sentence <- paste0("GBMs were performed under a ", model.options$GBM$distribution," distribution with ",
+                         model.options$GBM$n.trees, " trees, a maximum interaction depth of ", model.options$GBM$interaction.depth,
+                         ", a minimum of ", model.options$GBM$n.minobsinnode," observation in the termal nodes of trees, a learning rate of ",
+                         model.options$GBM$shrinkage,", a fraction of ", model.options$GBM$bag.fraction,
+                         " of the training set observations randomly selected to propose the next tree in the expansion, a first fraction of ",
+                         model.options$GBM$train.fraction, " to fit the model and ",model.options$GBM$cv.folds," internal cross-vaidations, all other parameters was set as default")
+      ToReturn <- c(ToReturn, 
+                    sentence)
+    }else{
+      ToReturn <- c(ToReturn, 
+                    "MAXNET were performed with all default parameters.")
+    }
+  }
+  ToReturn <- paste(ToReturn,collapse = "; ")
+  return(ToReturn)
+}
+

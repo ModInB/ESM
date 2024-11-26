@@ -53,7 +53,7 @@ but where the presences (and absences) are equally split into the k blocks. If "
 
 \item{cv.rep}{\code{numeric}. Number of replicates used for the split-sampling. Only applicable when cv.method="split-sampling".}
 
-\item{cv.ratio}{\code{numeric} betweem 0 and 1.Ratio of the dataset used to trained the model. Only applicable when cv.method="split-sampling".}
+\item{cv.ratio}{\code{numeric} between 0 and 1.Ratio of the dataset used to trained the model. Only applicable when cv.method="split-sampling".}
 
 \item{cv.n.blocks}{\code{numeric}. Number of wanted blocks (k-fold cross-validation). Only applicable when cv.method = "block.}
 
@@ -63,7 +63,7 @@ The last column should be filled with only TRUE and named "Full" to make a full 
 
 \item{SBI}{\code{logical}. Should the model evaluated with the Smooth Boyce Index (SBI=TRUE) or the regular Boyce Index (SBI=FALSE)? If TRUE, the SBI will be
 computed with the function \code{\link{Smooth.CBI}} and resulted from the ensemble of 5 smoothing techniques. \emph{Default: TRUE. Note that
-computing SBI instead of teh regular Boyce Index usually increases computation time.}}
+computing SBI instead of the regular Boyce Index usually increases computation time.}}
 
 \item{which.biva}{\code{numeric}. which bivariate combinations should be used for modeling. \emph{Default}: \code{NULL}, 
 meaning that all the combinations will be made.}
@@ -109,7 +109,7 @@ The basic idea of ensemble of small models (ESMs) is to model a species distribu
 for example all possible bivariate models (i.e. models that contain only two predictors at a time out of a larger set of predictors), 
 and then combine all possible bivariate models into an ensemble (Lomba et al. 2010; Breiner et al. 2015).
 
-The ESM set of functions could be used to build ESMs using simple bivariate models which are averagedusing weights based on model performances. 
+The ESM set of functions could be used to build ESMs using simple bivariate models which are averaged using weights based on model performances. 
 They provide full functionality of the approach described in Breiner et al. (2015).
 
 The argument which.biva allows to split model runs, e.g. if which.biva is 1:3, only the three first bivariate variable combinations will be modeled. 

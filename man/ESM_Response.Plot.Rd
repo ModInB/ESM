@@ -21,7 +21,7 @@ A plot of the response curves is produced (red line Ensemble, other colour lines
 This function creates response plots (evaluation strips) for Ensembles of Small Models (ESMs).
 }
 \details{
-This function plots the response curves of a model for each variable, while keeping the remianing variables constant. 
+This function plots the response curves of a model for each variable, while keeping the remaining variables constant. 
 This is an adaptation of the Evaluation Strip method proposed by Elith et al.(2005).
 }
 \references{
