@@ -29,7 +29,7 @@ ESM_Modeling(
 )
 }
 \arguments{
-\item{resp}{\code{numeric} of 0-1. 0 the species si absent and 1 when present.}
+\item{resp}{\code{numeric} of 0-1. 0 when the species is absent and 1 when present.}
 
 \item{xy}{\code{matrix} or \code{data.frame} containing the X and Y coordinate of the species.}
 

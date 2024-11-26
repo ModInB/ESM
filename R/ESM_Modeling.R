@@ -4,7 +4,7 @@
 #' @title Ensemble of Small Models: Calibration of Bivariate Models
 #' @description Model and evaluate species distribution based on the method Ensemble of Small Models (ESM).
 #' 
-#' @param resp \code{numeric} of 0-1. 0 the species si absent and 1 when present.
+#' @param resp \code{numeric} of 0-1. 0 when the species is absent and 1 when present.
 #' @param xy \code{matrix} or \code{data.frame} containing the X and Y coordinate of the species.
 #' @param env \code{matrix}, \code{data.frame} or \code{SpatRaster} of the species predictors.
 #' @param sp.name \code{character}. Name of the species (To generate of ESM folder with this name).
