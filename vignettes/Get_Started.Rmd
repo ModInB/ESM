@@ -131,4 +131,12 @@ my.ESM_EFproj_current_binary <- (Ens.proj >
                               (my.ESM_thresholds$TSS.th*1000))*1
 ```
 
-\#' \### get the variable contributions of ESMs \#' ESM_Variable.Contributions(my.ESM,my.ESM_EF) \#' \#' \### get the response plots of ESMs \#' my.ESM_responsePlot\<- ESM_Response.Plot(my.ESM, \#' my.ESM_EF, \#' fixed.var.metric = 'mean') \`\`\`
+```{r}
+## get the variable contributions of ESMs
+
+ESM_Variable.Contributions(my.ESM,my.ESM_EF)
+
+## get the response plots of ESMs
+
+my.ESM_responsePlot <- ESM_Response.Plot(my.ESM,my.ESM_EF, fixed.var.metric = 'mean') 
+```
