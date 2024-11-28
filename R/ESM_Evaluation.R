@@ -650,6 +650,18 @@ Smooth_CBI <- function(pres,
   if(!is.logical(mean.CBI)){
     stop("mean.CBI must be logical")
   }
+  if(length(unique(p))<3){
+    warning("Less than 3 values are available in model predictions. Thus, the  Smooth CBI will be NA.")
+    pred.CBI = S.BI = matrix(NA,ncol=length(method),nrow=1)
+    colnames(pred.CBI) = paste0("Pred.",method)
+    colnames(S.BI) = paste0("SBI.",method)
+    if(mean.CBI){
+      pred.CBI <- cbind(pred.CBI, Pred.m = NA)
+      S.BI <- cbind(S.BI, SBI.m = NA)
+    }
+    return(list(SBI = S.BI,
+                pred.CBI = cbind.data.frame(prd,pred.CBI)))
+  }
   
   S.BI <- list()
   pred.CBI <- list()

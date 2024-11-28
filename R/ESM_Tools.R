@@ -380,12 +380,17 @@ ESM_Range.Shift <- function(proj.curr,
 #' @param thr \code{numeric}. threshold to binarize the probabilities. \bold{must be a single value}. 
 #' 
 #' @details
-#' proj < thr will return 0 while proj >= thr will be equal to 1.
+#' \describe{
+#' Probabilities strictly below the threshold will be assigned to 0 (
+#' environmentally unsuitable for the species) while probabilities greater or 
+#' equal to the threshold will be 1 (environementally suitable).
+#' }
 #' 
 #' @return 
-#' An object of the same class as proj
+#' An object of the same class as proj: \code{SpatRaster}, \code{data.frame}, \code{matrix}, or \code{numeric}.
 #' 
-#' @seealso \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}},\code{\link{ESM_Range.Shift}}
+#' @seealso \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}, \code{\link{ESM_Threshold}} ,\code{\link{ESM_Range.Shift}}
+#' 
 #' @examples 
 #' ## Generate a vector to binarize
 #' proj <- seq(0,1000, by = 100)
@@ -419,13 +424,17 @@ ESM_Binarize <- function(proj,
 }
 
 #' @name ESM_Generate.ODMAP
-#' @title Generate and fill ODMAP table
+#' @title Generates and fills ODMAP table
 #' @author Flavien Collart \email{flaviencollart@hotmail.com}
 #' @description
 #' The function generates an ODMAP table to report your Modelling procedure 
 #' using the outputs of \code{\link{ESM_Modeling}} and 
-#' \code{\link{ESM_Ensemble.Modeling}}.
+#' \code{\link{ESM_Ensemble.Modeling}} but also with some questions that will be
+#' asked.
 #' 
+#' @seealso \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Modeling}}}
+#' 
+#' @references 
 #' 
 #' @export
 ESM_Generate.ODMAP <- function(ESM.Mod = NULL,

@@ -40,12 +40,12 @@ Functions to perform and evaluate Ensemble of small models (Alpha version). Thes
 |		| ESM_Ensemble.Projection	| Generates the ESM in the geographical space |
 | Evaluation	| ESM_Pooling.Evaluation	| Evaluates each bivariate model and the ESM based on the pooling method |
 |		| ESM_Null.Models	| Tests the significance of the evaluation metrics of the ESM based on null models and recalibrate the evaluation metrics |
-|		| ESM_Threshold	| Computes diverse threshold to binarize ESMs |
 |		| ESM_Variable.Contributions	| Computes the contribution of each variable in the ESM |
 |		| ESM_Response.Plot	| Generates species response curve for each variable |
 |		| Smooth_CBI| Computes the Smooth continuous Boyce Index (SBI) |
 | Post Modeling	| ESM_Binarize	| Binarizes probability values |
 |		| ESM_Generate.ODMAP	| Generates and fills ODMAP table  |
+|		| ESM_Threshold	| Computes diverse threshold to binarize ESMs |
 |		| ESM_Range.Shift	| Computes range changes between two projections  |
 
 
