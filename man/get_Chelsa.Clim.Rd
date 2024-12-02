@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_data.R
 \name{get_Chelsa.Clim}
 \alias{get_Chelsa.Clim}
-\title{Download chelsa data}
+\title{Download CHELSA data}
 \usage{
 get_Chelsa.Clim(
   var.names,
@@ -17,9 +17,11 @@ get_Chelsa.Clim(
 )
 }
 \arguments{
-\item{var.names}{\code{character}. Vector containing the variable names to download. See details for more information.}
+\item{var.names}{\code{character}. Vector containing either 'all' to download all the variables (works only at present time), 'all_fut'
+for all variables that are also available for future time periods, 'bioclim' to download the 19 bioclimatic variables,
+or the variable names to download. See details for more information.}
 
-\item{time}{\code{character}. The time period(s) wanted. Must be: '1981-2010','2011-2040','2041-2070', and/or'2071-2100'.
+\item{time}{\code{character}. The time period(s) wanted. Must be: '1981-2010','2011-2040','2041-2070',and/or '2071-2100'.
 \emph{Default: '1981-2010'}}
 
 \item{gcm}{\code{character}. A vector containing the Global Circulation Models for which you want to download the datasets. 
@@ -68,24 +70,25 @@ The description of the different variables is available at the point 7 (p.11) of
 The parameter "var.names" allows you to select the variables taken into account :
 \itemize{
 
-\item{all}: only the future variables are selected.
-\item{bioclim}: only the 19 bioclim variables are selected.
-\item{all_fut}: only the variables available in present AND future time are selected.
+\item{all}: All available variables are selected. \emph{Note: Only works for present time}
+\item{all_fut}: All the variables available in present AND future time are selected.
+\item{bioclim}: the 19 bioclimatic variables are selected.
 }
-The variables available in the future are to be combined with a future scenario by choosing a global circular model (gcm.chelsa) and a shared-socioeconomic pathway (ssp.chelsa) :
+The variables available in the future are to be combined with a future scenario by choosing a global circular model (gcm) and a shared-socioeconomic pathway (ssp) :
 \itemize{
 
 \item{ssp126}: ssp1 (Sustainability - Taking the green road) combined with a radiative forcing of 2.6 W/m².
 \item{ssp370}: ssp3 (Regional rivalry - A rocky road) combined with a radiative forcing of 7 W/m².
 \item{ssp585}: ssp5 (Fossil-fueled development - Taking the highway) with a radiative forcing of 8.5 W/m². 
 }
-The complete description of the ssp is available in O'Neill et al. 2017.
+The complete description of the ssp is available in O'Neill et al. 2017. These ssp are combined with
+Global circulation Models (GCM) to assess future climate.
 
 If the files are to heavy and/or your connection is to slow, you may want to modified the timeout parameter to a greater period of time.
-Note that you always have to end your number with "L" to make sure your time is an integer (e.g. "100L", "200L", "300L").
+Note that you always have to end your number with "L" to make sure your time is an integer (e.g. 300L, 500L).
 
 To crop a map to a different size than the original one, it is possible to add an extent and a mask parameter. If the extent of 
-the map is significant, you may want to compress it.
+the map is large, you may want to compress it, reducing storage space without significantly increase the reading time in R.
 }
 }
 \examples{

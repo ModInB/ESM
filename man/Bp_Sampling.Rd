@@ -20,7 +20,7 @@ Bp_Sampling(
 
 \item{n.points}{\code{integer}. The number of background to be selected. \emph{Note that this number can change depending on the technique}}
 
-\item{method}{\code{character}. one of: "rand.geo", "strat.geo", "rand.env" or "strat.env". \emph{see Details}.}
+\item{method}{\code{character}. one of: "rand.geo", "strat.geo", "rand.env" or "strat.env". \emph{see Details}. \emph{Default: "rand.geo"}.}
 
 \item{digit.val.env}{\code{integer}. The number of digit to keep to remove too similar environmental values.
 Only needed when method = "rand.env". \emph{Default: 1}.}

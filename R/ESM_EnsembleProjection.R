@@ -15,6 +15,8 @@
 #' Breiner F.T., A. Guisan, A. Bergamini and M.P. Nobis. 2015. Overcoming limitations of modelling rare species by using ensembles of small models. \emph{Methods in Ecology and Evolution}, \bold{6},1210-1218.
 #' 
 #' Breiner F.T., Nobis M.P., Bergamini A., Guisan A. 2018. Optimizing ensembles of small models for predicting the distribution of species with few occurrences. \emph{Methods in Ecology and Evolution}. \doi{10.1111/2041-210X.12957}
+#' @details
+#' For the use of this function, please refer to the manual of ESM_Modeling.
 #' @seealso \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Projection}}
 #' @export
 #################################################################################################################################################

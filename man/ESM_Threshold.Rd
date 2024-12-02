@@ -17,10 +17,11 @@ This function evaluates the full model which is used for projections and provide
 }
 \details{
 This function provides diverse thresholds which can be used to convert suitability 
-maps into binary maps. Various thresholds are provided: TSS (where sensitivity and specificity are maximised), MPA 1.0 (where all presences 
-are prdicted positive), MPA 0.95 (where 95\% of all presences are predicted positive), MPA 0.90 (where 90\% of all presences are predicted positive), 
+maps into binary maps. Various thresholds are provided: TSS (where sensitivity and specificity are maximized), MPA 1.0 (where all presences 
+are predicted positive), MPA 0.95 (where 95\% of all presences are predicted positive), MPA 0.90 (where 90\% of all presences are predicted positive), 
 Boyce.th.min (the lowest suitability value where the predicted/expected ratio is >1) and Boyce.th.max (the highest suitability value where the 
-predicted/expected ratio is =1).
+predicted/expected ratio is =1). 
+For the use of this function, please refer to the manual of ESM_Modeling.
 }
 \references{
 Hirzel, Alexandre H., et al. Evaluating the ability of habitat suitability models to predict species presences. 

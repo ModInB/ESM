@@ -22,12 +22,13 @@
 #' is presumably sampled in several replicates, the suitability values for each data point is consequently averaged across 
 #' replicates where they were sampled. This procedure generates a series of independent suitability values with a size approximately 
 #' equal (as some data points may not have been sampled by chance in any of the \emph{n} replicates) to that of the number of data point.
+#' For the use of this function, please refer to the manual of ESM_Modeling.
 #' 
 #' @return 
 #' a \code{list} containing:
 #' \itemize{
-#' \item{ESM.evaluations}: a \code{matrix} with the evaluation scores for the ESMs based on the different modelling algorithms and 
-#' based on the consensus across the modelling algorithms (called here "ensemble").
+#' \item{ESM.evaluations}: a \code{matrix} with the evaluation scores for the ESMs based on the different modeling algorithms and 
+#' based on the consensus across the modeling algorithms (called here "ensemble").
 #' \item{ESM.fit}: a \code{matrix} of predicted values resulting from the pooling procedure and used to compute the evaluation scores. 
 #' The column \emph{resp} is where the species occurs or not.
 #' \item{ESM.evaluations.bivariate.models}: a \code{list} containing a matrix of evaluation scores for each bivariate models 
@@ -136,13 +137,15 @@ ESM_Pooling.Evaluation <- function (ESM.Mod,
 #' @name ESM_Null.Models
 #' @author Flavien Collart \email{flaviencollart@hotmail.com}
 #' @title Ensemble of Small Models: Evaluation using Null Models
-#' @description Performed null models to test the significativity of the ESM evaluatuion as recommended in Collart & Guisan (2023) and performed in 
-#' van Proosdij et al (2016). 
-#' It consists of running a series of null models, randomly shuffling the presences and absences, thus generating ‘fake’ occurrences.
-#' These models are performed folowing the same methodology as for the ESM (same model parameters, same number of cross-validations and 
+#' @description Performed null models to test the significance of the ESM evaluation as recommended in Collart & Guisan (2023). 
+#' 
+#' @details
+#' It consists of running a series of null models, randomly shuffling the presences and absences, thus generating 'fake' occurrences.
+#' These models are performed following the same methodology as for the ESM (same model parameters, same number of cross-validations and 
 #' same threshold for the ensemble). The pooling evaluation can also be combined with these null models with the option pooling = TRUE 
-#' (as recommended in Collart & Guisan, 2023). In addition to the pvalue, the observed evaluation metrics are then reajusted using the 
-#' value of the evaluation metric at a certain quantile following the methology developped in Verdon et al (2024). 
+#' (as recommended in Collart & Guisan, 2023). In addition to the pvalue, the observed evaluation metrics are then readjusted using the 
+#' value of the evaluation metric at a certain quantile following the methodology developed in Verdon et al (2024). 
+#' For the use of this function, please refer to the manual of ESM_Modeling.
 #' 
 #' @param  ESM.Mod The object returned by \code{ESM_Modeling}.
 #' @param ESM.ensembleMod The object returned by \code{\link{ESM_Ensemble.Modeling}}.
@@ -300,10 +303,11 @@ ESM_Null.Models <- function(ESM.Mod,
 #' @param ESM.ensembleMod The object returned by \code{\link{ESM_Ensemble.Modeling}}.
 #' @details 
 #' This function provides diverse thresholds which can be used to convert suitability 
-#' maps into binary maps. Various thresholds are provided: TSS (where sensitivity and specificity are maximised), MPA 1.0 (where all presences 
-#' are prdicted positive), MPA 0.95 (where 95\% of all presences are predicted positive), MPA 0.90 (where 90\% of all presences are predicted positive), 
+#' maps into binary maps. Various thresholds are provided: TSS (where sensitivity and specificity are maximized), MPA 1.0 (where all presences 
+#' are predicted positive), MPA 0.95 (where 95\% of all presences are predicted positive), MPA 0.90 (where 90\% of all presences are predicted positive), 
 #' Boyce.th.min (the lowest suitability value where the predicted/expected ratio is >1) and Boyce.th.max (the highest suitability value where the 
 #' predicted/expected ratio is =1). 
+#' For the use of this function, please refer to the manual of ESM_Modeling.
 #' @return 
 #' A \code{data.frame} with diverse threshold values.
 #' @references 
@@ -381,15 +385,20 @@ ESM_Threshold <- function (ESM.ensembleMod){
 #' @param ESM.Mod The object returned by \code{\link{ESM_Modeling}}.
 #' @param ESM.ensembleMod The object returned by \code{\link{ESM_Ensemble.Modeling}}.
 #' 
-#' @details Calculates the ratio between sum of weights of bivariate models where a focal variable was used and sum of weights of bivariate 
-#' models where the focal variable was not used. The ratio is corrected for the number of models with or without the focal variable. 
+#' @details Calculates the ratio between sum of weights (e.g., AUC, TSS,..) of bivariate models where the variable of interest was used 
+#' and the sum of weights of bivariate models where the variable of interest was not used. The ratio is corrected for the number of models 
+#' with or without the variable of interest. 
+#' 
 #' This ratio gives an indication on the proportional contribution of the variable in the final ensemble model. A value of higher than 1 
 #' indicate that the focal variable has a higher contribution than average.
+#' 
 #' In the case of multiple methods (e.g., GLM,...), the contributions are counted per method. For ensemble model, the contributions 
-#' are then weighted means (based on the weighting score as chosen in ecospat.ESM.EnsembleModeling of single methods.
+#' are then weighted means (based on the weighting score as chosen in \code{\link{ESM_Ensemble.Modeling}} of single methods.
+#' 
+#' For the use of this function, please refer to the manual of ESM_Modeling.
 #' 
 #' @return 
-#' a \code{dataframe} with contribution values (i.e. proportional contribution) by variable and model
+#' a \code{dataframe} with contribution values (i.e. proportional contribution) for each variable and model
 #' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}
 #' @export
 
@@ -436,8 +445,10 @@ ESM_Variable.Contributions <- function (ESM.Mod,
 #' to fix as constant the remaining variables when the predicted response is estimated for one of the variables.
 #' 
 #' @details 
-#' This function plots the response curves of a model for each variable, while keeping the remianing variables constant. 
+#' This function plots the response curves of a model for each variable, while keeping the remaining variables constant. 
 #' This is an adaptation of the Evaluation Strip method proposed by Elith et al.(2005).
+#' For the use of this function, please refer to the manual of ESM_Modeling.
+#' 
 #' @return 
 #' A plot of the response curves is produced (red line Ensemble, other colour lines are for single algorithms) and a \code{list} with the output is provided.
 #' 
@@ -525,7 +536,7 @@ ESM_Response.Plot <- function (ESM.Mod,
   return(proj.fixed.list = proj.fixed.list)
 }
 
-#' @name Smooth.CBI
+#' @name Smooth_CBI
 #' @title Compute the Smooth continuous Boyce Index (SBI) of Liu et al (2024)
 #' @author Flavien Collart \email{flaviencollart@hotmail.com} from the code available in Liu et al (2024).
 #' @description 
@@ -573,7 +584,7 @@ ESM_Response.Plot <- function (ESM.Mod,
 #' @examples 
 #' library(ecospat)
 #' data <- ecospat::ecospat.testData 
-#' SBI <- Smooth.CBI(
+#' SBI <- Smooth_CBI(
 #' pres = data$glm_Saxifraga_oppositifolia[which(data$Saxifraga_oppositifolia==1)],
 #' abs = data$glm_Saxifraga_oppositifolia[which(data$Saxifraga_oppositifolia==0)],
 #' ktry = 10,
@@ -587,7 +598,7 @@ ESM_Response.Plot <- function (ESM.Mod,
 #' @importFrom stats binomial cor
 #' @export
 
-Smooth.CBI <- function(pres, 
+Smooth_CBI <- function(pres, 
                        abs, 
                        ktry=10,
                        method = "all",
@@ -638,6 +649,18 @@ Smooth.CBI <- function(pres,
   ## Check mean.CBI ####
   if(!is.logical(mean.CBI)){
     stop("mean.CBI must be logical")
+  }
+  if(length(unique(p))<3){
+    warning("Less than 3 values are available in model predictions. Thus, the  Smooth CBI will be NA.")
+    pred.CBI = S.BI = matrix(NA,ncol=length(method),nrow=1)
+    colnames(pred.CBI) = paste0("Pred.",method)
+    colnames(S.BI) = paste0("SBI.",method)
+    if(mean.CBI){
+      pred.CBI <- cbind(pred.CBI, Pred.m = NA)
+      S.BI <- cbind(S.BI, SBI.m = NA)
+    }
+    return(list(SBI = S.BI,
+                pred.CBI = cbind.data.frame(prd,pred.CBI)))
   }
   
   S.BI <- list()
@@ -693,7 +716,7 @@ Smooth.CBI <- function(pres,
   tss.test <- ecospat::ecospat.max.tss(Pred = Pred, Sp.occ = resp)[[2]]
   
   if(SBI){
-    SBI.test <- spsUtil::quiet(Smooth.CBI(pres = pred.esmPres, 
+    SBI.test <- spsUtil::quiet(Smooth_CBI(pres = pred.esmPres, 
                                           abs = pred.esmAbs)$SBI[,"SBI.m"])
   }else{
     SBI.test <- ecospat::ecospat.boyce(c(pred.esmPres, pred.esmAbs), 

@@ -48,13 +48,15 @@ a \code{list} containing:
 }
 }
 \description{
-Performed null models to test the significativity of the ESM evaluatuion as recommended in Collart & Guisan (2023) and performed in 
-van Proosdij et al (2016). 
-It consists of running a series of null models, randomly shuffling the presences and absences, thus generating ‘fake’ occurrences.
-These models are performed folowing the same methodology as for the ESM (same model parameters, same number of cross-validations and 
+Performed null models to test the significance of the ESM evaluation as recommended in Collart & Guisan (2023).
+}
+\details{
+It consists of running a series of null models, randomly shuffling the presences and absences, thus generating 'fake' occurrences.
+These models are performed following the same methodology as for the ESM (same model parameters, same number of cross-validations and 
 same threshold for the ensemble). The pooling evaluation can also be combined with these null models with the option pooling = TRUE 
-(as recommended in Collart & Guisan, 2023). In addition to the pvalue, the observed evaluation metrics are then reajusted using the 
-value of the evaluation metric at a certain quantile following the methology developped in Verdon et al (2024).
+(as recommended in Collart & Guisan, 2023). In addition to the pvalue, the observed evaluation metrics are then readjusted using the 
+value of the evaluation metric at a certain quantile following the methodology developed in Verdon et al (2024). 
+For the use of this function, please refer to the manual of ESM_Modeling.
 }
 \references{
 Collart, F., & Guisan, A. 2023. Small to train, small to test: Dealing with low sample size in model evaluation. 
