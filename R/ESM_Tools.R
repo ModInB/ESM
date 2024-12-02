@@ -462,7 +462,7 @@ ESM_Binarize <- function(proj,
 #' Schröder, B., Serra-Diaz, J.M., Thuiller, W., Yates, K.L., Zimmermann, N.E. 
 #' and Merow, C. (2020), A standard protocol for reporting species distribution 
 #' models. \emph{Ecography}, \bold{43}, 1261-1277. \doi{10.1111/ecog.04960}
-#' 
+#' @importFrom utils packageVersion
 #' @export
 ESM_Generate.ODMAP <- function(ESM.Mod = NULL,
                                ESM.ensembleMod = NULL,
