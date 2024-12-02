@@ -12,13 +12,17 @@ ESM_Binarize(proj, thr)
 \item{thr}{\code{numeric}. threshold to binarize the probabilities. \bold{must be a single value}.}
 }
 \value{
-An object of the same class as proj
+An object of the same class as proj: \code{SpatRaster}, \code{data.frame}, \code{matrix}, or \code{numeric}.
 }
 \description{
 This function binarizes probability values based on a specific threshold
 }
 \details{
-proj < thr will return 0 while proj >= thr will be equal to 1.
+\describe{
+Probabilities strictly below the threshold will be assigned to 0 (
+environmentally unsuitable for the species) while probabilities greater or 
+equal to the threshold will be 1 (environementally suitable).
+}
 }
 \examples{
 ## Generate a vector to binarize
@@ -28,7 +32,7 @@ ESM_Binarize(proj = proj, thr = 400)
 
 }
 \seealso{
-\code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}},\code{\link{ESM_Range.Shift}}
+\code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}, \code{\link{ESM_Threshold}} ,\code{\link{ESM_Range.Shift}}
 }
 \author{
 Flavien Collart \email{flaviencollart@hotmail.com}

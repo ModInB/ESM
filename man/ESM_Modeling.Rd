@@ -193,8 +193,13 @@ ESM_Variable.Contributions(my.ESM,my.ESM_EF)
 my.ESM_responsePlot<- ESM_Response.Plot(my.ESM,
                                         my.ESM_EF,
                                         fixed.var.metric = 'mean')
+### Generate an ODMAP table. Note that you still have to fill the other 
+# sections and check the prefilled ones
+ ODMAP_Table <- ESM_Generate.ODMAP(ESM.Mod = my.ESM,
+                                   ESM.ensembleMod = my.ESM_EF,
+                                   ask.to.fill = FALSE)
                                         
-#To avoid a note: DO NOT RUN 
+# To avoid a note in cran: DO NOT RUN 
 unlink("ESM.output_test", recursive = TRUE)
 }
 }
