@@ -23,10 +23,12 @@ and the sum of weights of bivariate models where the variable of interest was no
 with or without the variable of interest. 
 
 This ratio gives an indication on the proportional contribution of the variable in the final ensemble model. A value of higher than 1 
-indicate that the focal variable has a higher contribution than average.
+indicates that the focal variable has a higher contribution than average.
 
 In the case of multiple methods (e.g., GLM,...), the contributions are counted per method. For ensemble model, the contributions 
 are then weighted means (based on the weighting score as chosen in \code{\link{ESM_Ensemble.Modeling}} of single methods.
+
+For the use of this function, please refer to the manual of ESM_Modeling.
 }
 \seealso{
 \code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}

@@ -380,12 +380,17 @@ ESM_Range.Shift <- function(proj.curr,
 #' @param thr \code{numeric}. threshold to binarize the probabilities. \bold{must be a single value}. 
 #' 
 #' @details
-#' proj < thr will return 0 while proj >= thr will be equal to 1.
+#' \describe{
+#' Probabilities strictly below the threshold will be assigned to 0 (
+#' environmentally unsuitable for the species) while probabilities greater or 
+#' equal to the threshold will be 1 (environementally suitable).
+#' }
 #' 
 #' @return 
-#' An object of the same class as proj
+#' An object of the same class as proj: \code{SpatRaster}, \code{data.frame}, \code{matrix}, or \code{numeric}.
 #' 
-#' @seealso \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}},\code{\link{ESM_Range.Shift}}
+#' @seealso \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}, \code{\link{ESM_Threshold}} ,\code{\link{ESM_Range.Shift}}
+#' 
 #' @examples 
 #' ## Generate a vector to binarize
 #' proj <- seq(0,1000, by = 100)
@@ -419,8 +424,45 @@ ESM_Binarize <- function(proj,
 }
 
 #' @name ESM_Generate.ODMAP
-#' @title Generate and prefill ODMAP table
+#' @title Generates and fills ODMAP table
 #' @author Flavien Collart \email{flaviencollart@hotmail.com}
+#' @description
+#' The function generates an ODMAP table to report your Modelling procedure 
+#' using the outputs of \code{\link{ESM_Modeling}} and asks you some
+#' questions to help you fill this table.
+#' @param ESM.Mod The object returned by \code{\link{ESM_Modeling}}. \emph{Note that the object can also be NULL}
+#' @param ESM.ensembleMod The object returned by \code{\link{ESM_Ensemble.Modeling}}. \emph{Note that the object can also be NULL}
+#' @param ask.to.fill \code{logical}. If TRUE, teh functions will ask you 20 questions to fill some parts of the table.
+#' @details
+#' ODMAP (Overview, Data, Model, Assessment, Prediction) is a standard protocol
+#' to report your study on SDMs proposed by Zurell et al (2020).This function
+#' helps you to fill a part of this ODMAP table. However, some parts cannot be 
+#' filled automatically. We've added a column in this table to help you to fill
+#' the other lines on your own. 
+#' 
+#' @return a \code{data.frame} containing the 4 columns and 84 lines of the ODMAP table.
+#' some values can be filled depending on the arguments. The fifth column is an help
+#' to fill the different lines.
+#' 
+#' \code{\link{ESM_Ensemble.Modeling}} but also with some questions that will be
+#' asked.
+#' 
+#' @seealso \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Modeling}}
+#' @examples
+#' # A simple example where no values are filled in the table
+#'  ODMAP_Table <- ESM_Generate.ODMAP(ESM.Mod = NULL,
+#'                                    ESM.ensembleMod = NULL,
+#'                                    ask.to.fill = FALSE)
+#' # To see another example, see in ?ESM_Modeling
+#'  
+#' @references 
+#' Zurell, D., Franklin, J., König, C., Bouchet, P.J., Dormann, C.F., Elith, J., 
+#' Fandos, G., Feng, X., Guillera-Arroita, G., Guisan, A., Lahoz-Monfort, J.J., 
+#' Leitão, P.J., Park, D.S., Peterson, A.T., Rapacciuolo, G., Schmatz, D.R., 
+#' Schröder, B., Serra-Diaz, J.M., Thuiller, W., Yates, K.L., Zimmermann, N.E. 
+#' and Merow, C. (2020), A standard protocol for reporting species distribution 
+#' models. \emph{Ecography}, \bold{43}, 1261-1277. \doi{10.1111/ecog.04960}
+#' @importFrom utils packageVersion
 #' @export
 ESM_Generate.ODMAP <- function(ESM.Mod = NULL,
                                ESM.ensembleMod = NULL,

@@ -62,7 +62,7 @@ and for models validation (FALSE). Each column corresponds to a 'RUN' and should
 The last column should be filled with only TRUE and named "Full" to make a full model used for the future projection. Only applicable when cv.method="custom".}
 
 \item{SBI}{\code{logical}. Should the model evaluated with the Smooth Boyce Index (SBI=TRUE) or the regular Boyce Index (SBI=FALSE)? If TRUE, the SBI will be
-computed with the function \code{\link{Smooth.CBI}} and resulted from the ensemble of 5 smoothing techniques. \emph{Default: TRUE. Note that
+computed with the function \code{\link{Smooth_CBI}} and resulted from the ensemble of 5 smoothing techniques. \emph{Default: TRUE. Note that
 computing SBI instead of the regular Boyce Index usually increases computation time.}}
 
 \item{which.biva}{\code{numeric}. which bivariate combinations should be used for modeling. \emph{Default}: \code{NULL}, 
@@ -193,8 +193,13 @@ ESM_Variable.Contributions(my.ESM,my.ESM_EF)
 my.ESM_responsePlot<- ESM_Response.Plot(my.ESM,
                                         my.ESM_EF,
                                         fixed.var.metric = 'mean')
+### Generate an ODMAP table. Note that you still have to fill the other 
+# sections and check the prefilled ones
+ ODMAP_Table <- ESM_Generate.ODMAP(ESM.Mod = my.ESM,
+                                   ESM.ensembleMod = my.ESM_EF,
+                                   ask.to.fill = FALSE)
                                         
-#To avoid a note: DO NOT RUN 
+# To avoid a note in cran: DO NOT RUN 
 unlink("ESM.output_test", recursive = TRUE)
 }
 }
