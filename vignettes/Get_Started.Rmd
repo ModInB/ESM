@@ -39,8 +39,8 @@ data("ESM_species.env")
 data("ESM_Env")
 
 xy <- ESM_species.env[,1:2] #coords
-resp <- ESM_species.env[,3] #occurences
-sp.name <- "Tayloria_serrata" #species selected
+resp <- ESM_species.env[,5] #occurences
+sp.name <- "Tortella_pseudofragilis" #"Tayloria_serrata" #species selected
 env  <- terra::unwrap(ESM_Env) #the environment 
 
 ```
@@ -59,16 +59,16 @@ terra::points(xy[resp ==1,], pch = 16, col = "black")
 The first step to model species distribution is to select the modelling technique you will used. With the package ESM, you can modify the parameters of each of the 5 modelling techniques available, with the function *ESM_Models.Options*. For this example, we will perform GLM with a binomial family, allowing linear and quadratic terms and performing a step AIC to select the best structure.
 
 ```{r echo=TRUE}
-mod.options <- ESM_Models.Options(GLM = list(type = "quadratic",                                             test = "AIC")                                  
-                          )
+mod.options <- ESM_Models.Options(GLM = list(type = "quadratic",
+                                             test = 'AIC'))
 ```
 
 Once the modelling technique is selected, the next step is to generate bivariate models using the function *ESM_Modeling*, allowing by default all the possible pairs of predictors.
 
 ```{r}
 my.ESM <- ESM_Modeling(resp = resp,
-                       xy=xy,
-                       env=env,
+                       xy = xy,
+                       env = env,
                        sp.name = sp.name,
                        models = c("GLM"),
                        models.options = mod.options,
@@ -79,64 +79,89 @@ my.ESM <- ESM_Modeling(resp = resp,
                        parallel = FALSE,
                        save.models = FALSE,
                        save.obj = FALSE,
-                       verbose = FALSE)
+                       verbose = T)
 ```
 
 Once the models are generated, *ESM_Modeling* also calculates the predictions and the evaluation of the calibration and the transferability of all the bivariate models :
 
 ```{r}
-myESM$biva.predictions
+# Prediction for one bivariate model
+head(my.ESM$biva.predictions$ddeg0.mind68)
 
-myESM$biva.calibration #is the model able to correctly predict the probability of occurrence inside the environment in which it was calibrated (70% of our data if ratio = 0.7).
+my.ESM$biva.calibration #is the model able to correctly predict the probability of occurrence inside the environment in which it was calibrated (70% of our data if ratio = 0.7).
 
 my.ESM$biva.evaluations#is the model able to correctly predict the probability of occurrence of new points based on new environmental data (30% of our data if ratio = 0.7).
 ```
 
-Finally, you can use the function *ESM_Projection* to predict new probability of occurrence of *Tayloria serrata* in a completely new environment. The function will produce raster maps (.tif) that will be stocked in a new folder of your computer.
+Finally, you can use the function *ESM_Projection* to predict new probability of occurrence of *Tayloria serrata* in a completely new environment (the totality of our map). The function will produce raster maps (.tif) that will be stored in a new folder of your computer.
 
 ```{r}
-proj <- ESM_Projection(ESM.Mod = my.ESM, new.env = env,
-                        name.env = "current", parallel = FALSE, save.obj = FALSE)
+proj <- ESM_Projection(ESM.Mod = my.ESM, 
+                       new.env = env,
+                      name.env = "current", 
+                      parallel = FALSE, 
+                      save.obj = FALSE)
 
-Proj_TS <- rast(list.files(paste0(getwd(),"/ESM.output_Tayloria_serrata/current"), full.names=T)) #load all the maps from the new folder
+Proj_TS <- rast(list.files(paste0(getwd(),"/ESM.output_Tayloria_serrata/current"), 
+                           full.names=T)) #load all the maps from the new folder
 
-plot(Proj_TS) #plot all the maps
-plot(Proj_TS[[1]]) #plot the first map
+plot(Proj_TS[[1]]) #plot the first climatic map
 ```
 
 Now, in practice, you will not use these bivariate models to make predictions. The objective of the ESMs is to generate bivariate models to overcome the overfitting problem related to the low number of occurrences and then combine them. To do so, you will have to use the function *ESM_Ensemble.Modeling* that will generates an ensemble model combining all the bivariate ones based on their respective performances.
 
-In this case, the max TSS was chosen to represent the performance of each model but you're free the chose any other metrics.
+In this case, the max TSS was chosen to represent the performance of each model as we are in a Presence/Absence case but you're free the chose any other metrics.
 
 ```{r}
-my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM, weighting.score=c("MaxTSS"), threshold=0,save.obj = FALSE)
+my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM, 
+                                   weighting.score=c("MaxTSS"), 
+                                   threshold=0,
+                                   save.obj = FALSE)
+
+```
+
+The function *ESM_Response.Plot* allows you to visualize the response curves of the studied species to the different variables.
+
+```{r}
+## get the response plots of ESMs
+my.ESM_responsePlot <- ESM_Response.Plot(my.ESM,my.ESM_EF, fixed.var.metric = 'mean') 
+
+
+```
+
+Once all the bivariate models and the ensemble model are build, you can evaluate them based on the pooling procedure as recommended in Collart & Guisan (2023).
+
+```{r}
+eval <- ESM_Pooling.Evaluation(ESM.Mod = my.ESM,
+                                ESM.ensembleMod = my.ESM_EF,
+                                EachSmallModels = FALSE)
+                                
+## Performances of the ensemble
+eval$ESM.evaluations
 ```
 
 Then, as above, the function *ESM_Ensemble.Projection* will allow you to predict new probability of occurrence for our species of interest based on the ensemble model which combine all the variables in our environment !
 
 ```{r}
 Ens.proj <- ESM_Ensemble.Projection(ESM.proj = proj,
-ESM.ensembleMod = my.ESM_EF,
-save.obj = FALSE)
+                                    ESM.ensembleMod = my.ESM_EF,
+                                    save.obj = FALSE)
 
 plot(Ens.proj)
 ```
 
-Secondly, you can determine a threshold that will set the limit between your presences and absences among the probabilities of occurrence using the function *my.ESM_thresholds*. Once the threshold is determine, you can project a binary map based on this one using *my.ESM_EFproj_current_binary*. In this case, the one based on the max TSS of calibrated ESMs into a new space was used.
+Secondly, you can determine a threshold that will set the limit between your presences and absences among the probabilities of occurrence using the function *ESM_thresholds*. Once the different possible thresholds are determine, you can project a binary map based on one of these using *ESM_Binarize*. In this case, the one based on the max TSS of calibrated ESMs into a new space was used.
 
 ```{r}
 my.ESM_thresholds <- ESM_Threshold(my.ESM_EF)
 
-my.ESM_EFproj_current_binary <- (Ens.proj > 
-                              (my.ESM_thresholds$TSS.th*1000))*1
+my.ESM_EFproj_current_binary <- ESM_Binarize(Ens.proj, 1000*my.ESM_thresholds$TSS.th)
+plot(my.ESM_EFproj_current_binary)
 ```
+
+Finally, you can analyse the proportional contribution of the variable in the final ensemble model by using the *ESM_Variable.Contributions* function. As value of higher than 1 indicates that the focal variable has a higher contribution than average.
 
 ```{r}
 ## get the variable contributions of ESMs
-
-ESM_Variable.Contributions(my.ESM,my.ESM_EF)
-
-## get the response plots of ESMs
-
-my.ESM_responsePlot <- ESM_Response.Plot(my.ESM,my.ESM_EF, fixed.var.metric = 'mean') 
+ESM_Variable.Contributions(my.ESM, my.ESM_EF)
 ```
