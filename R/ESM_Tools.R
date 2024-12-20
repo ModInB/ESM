@@ -616,6 +616,9 @@ ESM_Generate.ODMAP <- function(ESM.Mod = NULL,
       cv.ratio = round(sum(ESM.Mod$cv.split.table[,1])/nrow(ESM.Mod$cv.split.table),2)
       ODMAP$Value[38] = paste(ODMAP$Value[38],100*cv.ratio, "% were employed to calibrate the model and the remaining to evaluate it.")
     }
+    if(my.ESM$model.info$pooling){
+      ODMAP$Value[38] = paste(ODMAP$Value[38], "The pooling method as described in Collart & Guisan (2023. Ecol Inform) was afterwards applied to evaluate each model.")
+    }
     ODMAP$Value[39] = ODMAP$Value[38]
     
     ODMAP$Value[74] = ODMAP$Value[73] = paste0(colnames(ESM.Mod$biva.calibration[[1]]), collapse = ", ")

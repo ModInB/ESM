@@ -24,6 +24,7 @@
 #' @param cv.split.table a \code{matrix} or a \code{data.frame} filled with TRUE/FALSE to specify which part of data must be used for models calibration (TRUE) 
 #' and for models validation (FALSE). Each column corresponds to a 'RUN' and should be named "RUNX" where X correspond to the number of the run. 
 #' The last column should be filled with only TRUE and named "Full" to make a full model used for the future projection. Only applicable when cv.method="custom".
+#' @param pooling \code{logical}. Should the models be evaluated via the pooling method? \emph{Default = TRUE}. See \code{\link{ESM_Pooling.Evaluation}} for more information.
 #' @param SBI \code{logical}. Should the model evaluated with the Smooth Boyce Index (SBI=TRUE) or the regular Boyce Index (SBI=FALSE)? If TRUE, the SBI will be
 #' computed with the function \code{\link{Smooth_CBI}} and resulted from the ensemble of 5 smoothing techniques. \emph{Default: TRUE. Note that
 #' computing SBI instead of the regular Boyce Index usually increases computation time.}
@@ -43,8 +44,9 @@
 #' for example all possible bivariate models (i.e. models that contain only two predictors at a time out of a larger set of predictors), 
 #' and then combine all possible bivariate models into an ensemble (Lomba et al. 2010; Breiner et al. 2015).
 #' 
-#' The ESM set of functions could be used to build ESMs using simple bivariate models which are averaged using weights based on model performances. 
-#' They provide full functionality of the approach described in Breiner et al. (2015).
+#' The ESM set of functions could be used to build ESMs using simple bivariate models which are averaged using weights based on model performances 
+#' as described in Breiner et al. (2015). Note that if 'pooling = TRUE', the weights will be computed via the pooling evaluation (as recommended in
+#' Collart & Guisan, 2023) and will thus change from the approach of Breiner et al (2015).
 #' 
 #' The argument which.biva allows to split model runs, e.g. if which.biva is 1:3, only the three first bivariate variable combinations will be modeled. 
 #' This allows to run different biva splits on different computers. However, it is better not to use this option if all models are run on a single computer.
@@ -55,7 +57,8 @@
 #' \item{data}: a \code{list} with the object resp, xy, env.var and sp.name. env.var is = to the data supplied in the argument env. 
 #' If env, was a SpatRaster, it corresponds to the extracted values of these rasters.
 #' \item{model.info}: a \code{list} of the models used (models), their options (model.options), the combination of bivariate models (which.biva), 
-#' the failed models (failed.mod), the modeling ID (modeling.id), the prevalence argument and, the path to the folder where are the stored the models (biva.path).
+#' the failed models (failed.mod), the modeling ID (modeling.id), the prevalence argument, the path to the folder where are the stored the models (biva.path),
+#' and (pooling = TRUE or FALSE) if the pooling method  was applied or not to evaluate models (results in biva.evaluations and biva.calibration).
 #' \item{cv.split.table}: a \code{matrix} used to train and test models. See explanation of the argument cv.split.table.
 #' \item{cv.method }: a \code{character} corresponding to the used cross-validation method.
 #' \item{biva.predictions}: a \code{list} of the predictions of all the runs for each bivariate models.
@@ -72,6 +75,8 @@
 #' Breiner F.T., A. Guisan, A. Bergamini and M.P. Nobis. 2015. Overcoming limitations of modelling rare species by using ensembles of small models. \emph{Methods in Ecology and Evolution}, \bold{6},1210-1218.
 #' 
 #' Breiner F.T., Nobis M.P., Bergamini A., Guisan A. 2018. Optimizing ensembles of small models for predicting the distribution of species with few occurrences. \emph{Methods in Ecology and Evolution}. \doi{10.1111/2041-210X.12957}
+#' 
+#' Collart, F., & Guisan, A. (2023). Small to train, small to test: Dealing with low sample size in model evaluation. \emph{Ecological Informatics}. \bold{75}, 102106. \doi{10.1016/j.ecoinf.2023.102106}.
 #' 
 #' @seealso \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Modeling}},   \code{\link{ESM_Ensemble.Projection}}, 
 #' \code{\link{ESM_Pooling.Evaluation}}
@@ -96,13 +101,14 @@
 #'                        cv.method = "split-sampling",
 #'                        cv.rep = 2,
 #'                        cv.ratio = 0.7,
+#'                        pooling = TRUE,
 #'                        SBI = FALSE,
 #'                        parallel = FALSE,
 #'                        save.models = FALSE,
 #'                        save.obj = FALSE,
 #'                        verbose = FALSE)
 #'                        
-#' # Performances of each bivariate model
+#' # Performances of each bivariate model based on the pooling method
 #' my.ESM$biva.evaluations
 #' 
 #' ### Ensemble models using a weighted mean based on maxTSS
@@ -111,19 +117,10 @@
 #'                                    threshold=0,
 #'                                    save.obj = FALSE)
 #'                                    
-#' ## Performances of the ensemble across the replicates
-#' ## The full model evaluation corresponds to the mean value across the replicates
+#' ## Performances of the ensemble across the replicates based 
+#' # on the pooling method
 #' my.ESM_EF$evaluations
 #' 
-#' ### Evaluation of the ensemble models based on the pooling procedure 
-#' ### as recommended in Collart & Guisan (2023)
-#' eval <- ESM_Pooling.Evaluation(ESM.Mod = my.ESM,
-#'                                ESM.ensembleMod = my.ESM_EF,
-#'                                EachSmallModels = FALSE)
-#'                                
-#' ## Performances of the ensemble
-#' eval$ESM.evaluations
-#'
 #' ### Predictions of each bivariate model into a new space
 #' proj <- ESM_Projection(ESM.Mod = my.ESM,
 #'                        new.env = env,
@@ -175,6 +172,7 @@ ESM_Modeling <- function(resp,
                           cv.ratio = 0.7,
                           cv.n.blocks = NULL,
                           cv.split.table = NULL,
+                          pooling = TRUE,
                           SBI = TRUE,
                           which.biva = NULL,
                           parallel = FALSE,
@@ -324,7 +322,7 @@ ESM_Modeling <- function(resp,
   # Generate all the possible combination variables
   combinations <- utils::combn(colnames(env.var), 2)
   
-  if (is.null(which.biva)) {
+  if(is.null(which.biva)) {
     which.biva <- 1:ncol(combinations)
   }else if(sum(!(which.biva %in% (1:ncol(combinations))))>0){ ## Error check
     stop(paste("which.biva must be an integer vector with values inside", deparse(as.character(1:ncol(combinations)))))
@@ -341,7 +339,7 @@ ESM_Modeling <- function(resp,
   if(parallel){
     cl <- parallel::makeCluster(n.cores)
     biva.mods <-  parallel::parApply(cl, combinations, 2, 
-                                     .bivaModeling,resp = resp,
+                                     ESM:::.bivaModeling,resp = resp,
                        env.var = env.var, models = models,
                        models.options = models.options,
                        cv.split.table = cv.split.table,
@@ -387,18 +385,31 @@ ESM_Modeling <- function(resp,
   }
   
   
-  ## Evaluation----
-  biva.eval <- lapply(biva.mods.filt,.bivaEvaluation,
-                      resp=resp, models=models,
-                      cv.split.table=cv.split.table,
-                      SBI = SBI,
-                      validation = TRUE) #If the full Model failed Next
+  if(pooling){
+    biva.eval <- lapply(biva.mods.filt,.pooling.ESM.Mod,
+                        resp=resp, models=models,
+                        cv.split.table=cv.split.table[,-ncol(cv.split.table)],
+                        SBI = SBI)
+    biva.calib <- lapply(biva.mods.filt,.pooling.ESM.Mod,
+                        resp=resp, models=models,
+                        cv.split.table=!(cv.split.table[,-ncol(cv.split.table)]),
+                        SBI = SBI)
+  }else{
+    ## Evaluation----
+    biva.eval <- lapply(biva.mods.filt,.bivaEvaluation,
+                        resp=resp, models=models,
+                        cv.split.table=cv.split.table,
+                        SBI = SBI,
+                        validation = TRUE) #If the full Model failed Next
+    
+    biva.calib <- lapply(biva.mods.filt,.bivaEvaluation,
+                         resp=resp, models=models,
+                         cv.split.table=!(cv.split.table),
+                         SBI = SBI,
+                         validation = FALSE)
+  }
   
-  biva.calib <- lapply(biva.mods.filt,.bivaEvaluation,
-                       resp=resp, models=models,
-                       cv.split.table=!(cv.split.table),
-                       SBI = SBI,
-                       validation = FALSE)
+  
 
   ## Return outputs ----
   obj <- list(data = list(sp.name= sp.name,
@@ -413,7 +424,8 @@ ESM_Modeling <- function(resp,
                                 failed.mod = failed.mods,
                                 modeling.id = modeling.id,
                                 prevalence = prevalence,
-                                biva.path = newwd),
+                                biva.path = newwd,
+                                pooling = pooling),
               cv.split.table = cv.split.table,
               cv.method = cv.method,
               biva.predictions = biva.mods.filt,

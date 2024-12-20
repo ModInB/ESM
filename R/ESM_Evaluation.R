@@ -36,6 +36,53 @@
 #' \item{ESM.fit.bivariate.models}: a \code{list} containing a matrix of of predicted values resulting from the pooling procedure 
 #' for each bivariate models (generated only if EachSmallModels = T).
 #' }
+#' @examples \donttest{
+#' library(terra)
+#' #Loading test data
+#' data(ESM_species.env)
+#' data(ESM_Env)
+#' #species occurrences
+#' xy <- ESM_species.env[,1:2]
+#' resp <- ESM_species.env[,3] #Tayloria_serrata
+#' env <- terra::unwrap(ESM_Env)
+#' ### Calibration of simple bivariate models
+#' ## Following Breiner et al 2015 and thus without 
+#' ## the pooling method to ensemble the bivariate
+#' ## models
+#' my.ESM <- ESM_Modeling(resp = resp,
+#'                        xy=xy,
+#'                        env=env,
+#'                        sp.name = "test",
+#'                        models = c("GLM"),
+#'                        models.options = NULL,
+#'                        prevalence = 0.5,
+#'                        cv.method = "split-sampling",
+#'                        cv.rep = 2,
+#'                        cv.ratio = 0.7,
+#'                        pooling = FALSE,
+#'                        SBI = FALSE,
+#'                        parallel = FALSE,
+#'                        save.models = FALSE,
+#'                        save.obj = FALSE,
+#'                        verbose = FALSE)
+#'                        
+#' ### Ensemble models using a weighted mean based on maxTSS
+#' my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
+#'                                    weighting.score=c("MaxTSS"),
+#'                                    threshold=0,
+#'                                    save.obj = FALSE)
+#'                                    
+#' ## Performances of the ensemble across the replicates
+#' ## The full model evaluation corresponds to the mean value across the replicates
+#' my.ESM_EF$evaluations
+#' 
+#' ### Evaluation of the ensemble models based on the pooling procedure 
+#' ### as recommended in Collart & Guisan (2023)
+#' eval <- ESM_Pooling.Evaluation(ESM.Mod = my.ESM,
+#'                                ESM.ensembleMod = my.ESM_EF,
+#'                                EachSmallModels = FALSE)
+#' }
+#' 
 #' 
 #' @references 
 #' Collart, F., & Guisan, A. (2023). Small to train, small to test: Dealing with low sample size in model evaluation. 
@@ -814,6 +861,44 @@ Smooth_CBI <- function(pres,
   }
   return(evalBiva)
 }
+
+## Perform the pooling evaluation for ESM_Modeling
+.pooling.ESM.Mod <- function(Indiv,
+                             resp,
+                             cv.split.table,
+                             models,
+                             SBI){
+  evalBiva <- NULL
+  for(i in 1:length(models)){
+    models.prediction <- Indiv[, grep(models[i], colnames(Indiv))]
+    models.prediction <- models.prediction[, -c(grep("Full", colnames(models.prediction)))]
+    models.prediction <- cbind.data.frame(resp = resp, 
+                                          models.prediction)
+    Pred <- .ecospat.pooling(calib = cv.split.table, 
+                             models.prediction = models.prediction)
+    Pred <- stats::na.omit(Pred)
+    if(length(Pred)==0){
+      evalInter <- as.data.frame(matrix(NA, ncol = 4, nrow = 1))
+      if(SBI){
+        colnames(evalInter) = c("AUC","SomersD","SBI","MaxTSS")
+      }else{
+        colnames(evalInter) = c("AUC","SomersD","Boyce","MaxTSS")
+      }
+    }else{
+      evalInter <- .evaluationScores(Pred = Pred[,-1], 
+                                     resp=Pred[,1],
+                                     SBI = SBI)
+    }
+    
+    evalBiva <- rbind(evalBiva, evalInter)
+    rownames(evalBiva)[nrow(evalBiva)] = paste0("Full.",models[i])
+  }
+  return(evalBiva)
+}
+
+
+
+
 ## Perform the pooling 
 .ecospat.pooling<-function (calib, models.prediction) 
 {

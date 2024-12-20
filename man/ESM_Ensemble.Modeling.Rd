@@ -30,6 +30,7 @@ If env, was a SpatRaster, it corresponds to the extracted values of these raster
 \item{model.info}: a \code{list} of the models used, their options, the combination of bivariate models (which.biva), the modeling ID, 
 the path to the folder where are the stored the models (biva.path), and the failed models
 \item{cv.split.table}: a \code{matrix} used to train and test models. See explanation of the argument cv.split.table
+\item{pooling}: a \code{logical}. Does the pooling method to evaluate the models was performed?
 \item{evaluations}: a \code{matrix} The evaluation of the ensemble based on 4 metrics: the AUC, the Somer's D (=2*AUC-1),
 maxTSS, and the smooth Boyce Index (SBI, if SBI = TRUE in ESM_Modeling) or the regular Boyce Index (if SBI = FALSE).
 \item{EF.algo}: a \code{list} containing \code{pred.EF.algo} which is a \code{matrix} of ensemble predictions for each run 
@@ -43,6 +44,9 @@ and \code{weights.EF} a \code{matrix} of weights used to generate the ESMs. Note
 This function averages simple bivariate models by weighted means to Ensemble Small Models.
 }
 \details{
+If the pooling evaluation was selected in \code{ESM_Modeling}, the different weights will result from 
+this evaluation. In addition, the final ensemble will also be evaluated using the pooling method (see Collart & Guisan 2023).
+
 For the use of this function, please refer to the manual of ESM_Modeling.
 }
 \references{
@@ -52,6 +56,8 @@ modelling paradox: A novel hierarchical framework applied to an Iberian endemic 
 Breiner F.T., A. Guisan, A. Bergamini and M.P. Nobis. 2015. Overcoming limitations of modelling rare species by using ensembles of small models. \emph{Methods in Ecology and Evolution}, \bold{6},1210-1218.
 
 Breiner F.T., Nobis M.P., Bergamini A., Guisan A. 2018. Optimizing ensembles of small models for predicting the distribution of species with few occurrences. \emph{Methods in Ecology and Evolution}. \doi{10.1111/2041-210X.12957}
+
+Collart, F., & Guisan, A. (2023). Small to train, small to test: Dealing with low sample size in model evaluation. \emph{Ecological Informatics}. \bold{75}, 102106. \doi{10.1016/j.ecoinf.2023.102106}.
 }
 \seealso{
 \code{\link{ESM_Modeling}}, \code{\link{ESM_Projection}} and  \code{\link{ESM_Ensemble.Projection}}
