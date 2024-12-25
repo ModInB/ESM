@@ -8,7 +8,7 @@
 #' @param xy \code{matrix} or \code{data.frame} containing the X and Y coordinate of the species.
 #' @param env \code{matrix}, \code{data.frame} or \code{SpatRaster} of the species predictors.
 #' @param sp.name \code{character}. Name of the species (To generate of ESM folder with this name).
-#' @param models  \code{character} of the wanted algorithm methods. Can be c("ANN","CTA","GLM","GBM","MAXNET) or a subset of these 5 techniques.
+#' @param models  \code{character} of the wanted algorithm methods. Can be c("ANN","CTA","GAM","GLM","GBM","MAXNET) or a subset of these 5 techniques.
 #' @param models.options \code{NULL} or the output from \code{\link{ESM_Models.Options}}
 #' @param prevalence \code{NULL} or a \code{numeric} comprised between 0-1. Prevalence value is used to build 
 #' 'weighted response weights'. The default is 0.5 (weighting presences equally to the absences). 
@@ -159,6 +159,7 @@
 #' unlink("ESM.output_test", recursive = TRUE)
 #' }
 #' @export
+#' @importFrom mgcv s
 #### ESM_Modeling----
 ESM_Modeling <- function(resp,
                           xy,
@@ -217,15 +218,15 @@ ESM_Modeling <- function(resp,
   
   ## Check model names ----
   
-  if(any(!(models  %in% c("GLM","GBM","MAXNET","ANN", "CTA")))){
-    stop("models must be = to ANN, CTA, GLM, GBM, and/or MAXNET")
+  if(any(!(models  %in% c("GAM","GLM","GBM","MAXNET","ANN", "CTA")))){
+    stop("models must be = to ANN, CTA, GLM, GAM, GBM, and/or MAXNET")
   }
   
   ## Check model options----
   if(is.null(models.options)){
     models.options = ESM_Models.Options()
   }else{
-    if(!is.list(models.options) | deparse(names(models.options))!= deparse(c("ANN", "CTA","GLM","GBM"))){
+    if(!is.list(models.options) | deparse(names(models.options))!= deparse(c("ANN", "CTA","GAM","GLM","GBM"))){
      stop("models.options must be null or formatted via ESM_Models.Options()") 
     }
   }
@@ -653,90 +654,56 @@ ESM_Modeling <- function(resp,
         if(verbose){
           cat(paste("\nGLM", nameRun))
         }
-        
-        if(is.null(models.options$GLM$myFormula)){
-          if(models.options$GLM$test == "none"){
-            
-            formula <- .makeGLMFormula(env.var,
-                                       models.options$GLM)
-            tryCatch(expr={mod <-   spsUtil::quiet(stats::glm(formula = formula,
-                       family = models.options$GLM$family,
-                       weights = w,
-                       data = data))}, error=function(e){
-                         cat(paste("\n model",models[j],nameRun,"failed"))
-                         err <<-TRUE
-                       })
-            if(err){
-              pred <- as.data.frame(rep(NA,nrow(env.var)))
-              colnames(pred) = "GLM" 
-            }else{
-              pred <- as.data.frame(predict(mod,newdata = env.var,type = "response"))
-              colnames(pred) = "GLM" 
-            }
-            
-            if(save.obj & !(err)){
-              save(mod,file=paste("ESM",nameRun,
-                                  colnames(env.var)[1],
-                                  colnames(env.var)[2],
-                                  models[j],"model.out",
-                                  sep="_"))
-            }else if(nameRun == "Full" & !(err)){
-              save(mod,file=paste("ESM",nameRun,
-                                  colnames(env.var)[1],
-                                  colnames(env.var)[2],
-                                  models[j],"model.out",
-                                  sep="_"))
-            }
-            
-          }else if(models.options$GLM$test == "AIC"){
-            formula <- .makeGLMFormula(env.var,
-                                       models.options$GLM)
-            mod.full<-   spsUtil::quiet(stats::glm(formula = formula,
-                           family = models.options$GLM$family,
-                           weights = w,
-                           data = data))
-            tryCatch(expr={
-              mod <-   spsUtil::quiet(stats::step(mod.full,
-                        scope = "resp~1",
-                        direction = "both",
-                        trace=F))
-            if(verbose){cat(paste0("\n\tBest Formula:",deparse(mod$formula)))}
-              }, error=function(e){
-                          cat(paste("\n model",models[j],nameRun,"failed"))
-                          err <<-TRUE
-                        })
-            
-            if(err){
-              pred <- as.data.frame(rep(NA,nrow(env.var)))
-              colnames(pred) = "GLM" 
-            }else{
-              pred <- as.data.frame(predict(mod,newdata = env.var,type = "response"))
-              colnames(pred) = "GLM" 
-            }
-            
-            if(save.obj & !(err)){
-              save(mod,file=paste("ESM",nameRun,
-                                  colnames(env.var)[1],
-                                  colnames(env.var)[2],
-                                  models[j],"model.out",
-                                  sep="_"))
-            }else if(nameRun == "Full" & !(err)){
-              save(mod,file=paste("ESM",nameRun,
-                                  colnames(env.var)[1],
-                                  colnames(env.var)[2],
-                                  models[j],"model.out",
-                                  sep="_"))
-            }
-          } 
+        if(models.options$GLM$test == "none"){
           
-        }else{
-         tryCatch(expr={mod <-   spsUtil::quiet(stats::glm(formula = models.options$GLM$myFormula,
-                     family = models.options$GLM$family,
-                     weights = w,
-                     data = data))}, error=function(e){
-                       cat(paste("\n model",models[j],nameRun,"failed"))
-                       err <<-TRUE
-                     })
+          formula <- .makeGLMFormula(env.var,
+                                     models.options$GLM)
+          tryCatch(expr={mod <-   spsUtil::quiet(stats::glm(formula = formula,
+                                                            family = models.options$GLM$family,
+                                                            weights = w,
+                                                            data = data))}, error=function(e){
+                                                              cat(paste("\n model",models[j],nameRun,"failed"))
+                                                              err <<-TRUE
+                                                            })
+          if(err){
+            pred <- as.data.frame(rep(NA,nrow(env.var)))
+            colnames(pred) = "GLM" 
+          }else{
+            pred <- as.data.frame(predict(mod,newdata = env.var,type = "response"))
+            colnames(pred) = "GLM" 
+          }
+          
+          if(save.obj & !(err)){
+            save(mod,file=paste("ESM",nameRun,
+                                colnames(env.var)[1],
+                                colnames(env.var)[2],
+                                models[j],"model.out",
+                                sep="_"))
+          }else if(nameRun == "Full" & !(err)){
+            save(mod,file=paste("ESM",nameRun,
+                                colnames(env.var)[1],
+                                colnames(env.var)[2],
+                                models[j],"model.out",
+                                sep="_"))
+          }
+          
+        }else if(models.options$GLM$test == "AIC"){
+          formula <- .makeGLMFormula(env.var,
+                                     models.options$GLM)
+          mod.full<-   spsUtil::quiet(stats::glm(formula = formula,
+                                                 family = models.options$GLM$family,
+                                                 weights = w,
+                                                 data = data))
+          tryCatch(expr={
+            mod <-   spsUtil::quiet(stats::step(mod.full,
+                                                scope = "resp~1",
+                                                direction = "both",
+                                                trace=F))
+            if(verbose){cat(paste0("\n\tBest Formula:",deparse(mod$formula)))}
+          }, error=function(e){
+            cat(paste("\n model",models[j],nameRun,"failed"))
+            err <<-TRUE
+          })
           
           if(err){
             pred <- as.data.frame(rep(NA,nrow(env.var)))
@@ -752,15 +719,14 @@ ESM_Modeling <- function(resp,
                                 colnames(env.var)[2],
                                 models[j],"model.out",
                                 sep="_"))
-          }else if(nameRun == "Full"& !(err)){
+          }else if(nameRun == "Full" & !(err)){
             save(mod,file=paste("ESM",nameRun,
                                 colnames(env.var)[1],
                                 colnames(env.var)[2],
                                 models[j],"model.out",
                                 sep="_"))
           }
-        }
-      
+        } 
       }
       if(models[j]=="GBM"){
         if(verbose){
@@ -837,6 +803,59 @@ ESM_Modeling <- function(resp,
         }
       }
       
+      if(models[j] == "GAM"){
+        if(verbose){
+          cat(paste("\nGAM", nameRun,"\n"))
+        }
+        formula <- stats::as.formula(paste0("resp ~ ",paste0("s(",
+                                                             colnames(env.var),
+                                                             ", k = ",models.options$GAM$smooth.k,
+                                                             ", bs = '",models.options$GAM$smooth.bs,
+                                                             "')",
+                                                             collapse="+")))
+        
+        tryCatch(expr={mod <- mgcv::gam(formula,
+                                        data = data,
+                                        weights = w,
+                                        family = models.options$GAM$family,
+                                        method = models.options$GAM$method,
+                                        optimizer = models.options$GAM$optimizer,
+                                        scale = models.options$GAM$scale,
+                                        control = models.options$GAM$control,
+                                        select = models.options$GAM$select,
+                                        gamma = models.options$GAM$gamma,
+                                        knots = models.options$GAM$knots,
+                                        H = models.options$GAM$H)}, 
+                 error=function(e){
+                   cat(paste("\n model",models[j],nameRun,"failed"))
+                   err <<-TRUE
+                 })
+        
+        if(err){
+          pred <- as.data.frame(rep(NA,nrow(env.var)))
+          colnames(pred) = "GAM" 
+        }else{
+          pred <- mgcv::predict.gam(mod,newdata = env.var,type="response")
+          colnames(pred) = "GAM" 
+          
+        }
+        
+        if(save.obj & !(err)){
+          save(mod,file=paste("ESM",nameRun,
+                              colnames(env.var)[1],
+                              colnames(env.var)[2],
+                              models[j],"model.out",
+                              sep="_"))
+        }else if(nameRun == "Full"& !(err)){
+          save(mod,file=paste("ESM",nameRun,
+                              colnames(env.var)[1],
+                              colnames(env.var)[2],
+                              models[j],"model.out",
+                              sep="_"))
+        }
+        
+      }
+      
       
       
       if(j == 1){
@@ -867,6 +886,9 @@ ESM_Modeling <- function(resp,
   return(stats::as.formula(formula))
   
 }
+
+
+
 ## .checkFailedMods----
 # Check Failed Mods
 .checkFailedMods <- function(biva.mod){

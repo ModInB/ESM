@@ -8,8 +8,11 @@ ESM_Projection(
   ESM.Mod,
   new.env,
   name.env,
+  rounded = TRUE,
+  pred.multiplier = 1000,
   parallel = FALSE,
   n.cores = 1,
+  datatype = "INT2U",
   save.obj = T
 )
 }
@@ -21,9 +24,17 @@ should be projected. Note that the colnames or the names of the predictors shoul
 
 \item{name.env}{a \code{character} which will be used to generate a folder to save the individual projections.}
 
+\item{rounded}{\code{logical}. Should the prediction be rounded to become an integer? \emph{Default:} TRUE.}
+
+\item{pred.multiplier}{\code{numeric}. The factor to multiply the predictions before rounding them (must be a power of 10). \emph{Default:} 1000. 
+if round = FALSE, pred.multiplier can be set to 1.}
+
 \item{parallel}{\code{logical}. Allows or not parallel job using the functions makeCluster.}
 
 \item{n.cores}{\code{integer}. Number of CPU cores used to make the models.}
+
+\item{datatype}{a \code{character} When new.env is a  \code{SpatRaster}, which datatype should be used to save the files? \emph{Default:} 'INT2U'.
+Note that if round = FALSE, datatype must be changed to a float (e.g., 'FLT4S' or 'FLT8S'.)}
 
 \item{save.obj}{\code{logical}. Allows or not the final output.}
 }
@@ -42,8 +53,11 @@ Project bivariate models
 }
 \details{
 \describe{
-Each bivariate models are geographically projected into the new.env area. Note that the projected maps are multiplied 
-by 1000 and rounded to reduce storage space.
+Each bivariate models are geographically projected into the new.env area. 
+Note that if new.env is a SpatRaster, the projected maps are by default multiplied by 1000 and 
+rounded to reduce storage space. They are also store in compress tif file (with these parameters: "COMPRESS=DEFLATE","PREDICTOR=2").
+If the argument 'round' is changed to FALSE, please change datatype to 'FLT4S' or 'FLT8S' to keep decimals as by default maps will
+be stored with integer ('INT2U').
 For the use of this function, please refer to the manual of ESM_Modeling.
 }
 }

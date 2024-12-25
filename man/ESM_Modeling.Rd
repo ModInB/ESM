@@ -38,7 +38,7 @@ ESM_Modeling(
 
 \item{sp.name}{\code{character}. Name of the species (To generate of ESM folder with this name).}
 
-\item{models}{\code{character} of the wanted algorithm methods. Can be c("ANN","CTA","GLM","GBM","MAXNET) or a subset of these 5 techniques.}
+\item{models}{\code{character} of the wanted algorithm methods. Can be c("ANN","CTA","GAM","GLM","GBM","MAXNET) or a subset of these 5 techniques.}
 
 \item{models.options}{\code{NULL} or the output from \code{\link{ESM_Models.Options}}}
 

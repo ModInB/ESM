@@ -1,4 +1,4 @@
-[![Github Version](https://img.shields.io/badge/dev%20version-0.4-53AA93.svg)](https://github.com/ModInB/ESM)
+[![Github Version](https://img.shields.io/badge/dev%20version-0.5-53AA93.svg)](https://github.com/ModInB/ESM)
 [![Last Commit](https://img.shields.io/github/last-commit/ModInB/ESM.svg)](https://github.com/ModInB/ESM/commits/main)
 [![R-CMD-check](https://github.com/ModInB/ESM/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ModInB/ESM/actions/workflows/R-CMD-check.yaml)
 
@@ -16,7 +16,7 @@
 
 
 
-- **Development version** [![v](https://img.shields.io/badge/dev%20version-0.4-53AA93.svg)](https://github.com/ModInB/ESM)
+- **Development version** [![v](https://img.shields.io/badge/dev%20version-0.5-53AA93.svg)](https://github.com/ModInB/ESM)
 ```R
 library(devtools)
 devtools::install_github("ModInB/ESM", dependencies = TRUE)
@@ -53,7 +53,7 @@ Functions to perform and evaluate Ensemble of small models (Alpha version). Thes
 
 To cite this package, please use the following reference:
 
-<code> <i> Collart, F., Hotermans, A., Broennimann, O., Guisan, A. 2024. ESM: Ensemble of Small Models_. R package version 0.4.</code> </i>
+<code> <i> Collart, F., Hotermans, A., Broennimann, O., Guisan, A. 2024. ESM: Ensemble of Small Models_. R package version 0.5.</code> </i>
 
 ### References
 
