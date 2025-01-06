@@ -27,7 +27,7 @@ library(terra)
 
 Here we first need to load our data. To realize an ESM, we first gather some information: the coordinates of the observations (called xy); a response vector (resp) attributing 1 if the species was present or 0 if absent; the name of the species (sp.name) and; environmental predictors (env), which can be a SpatRaster from terra package or a data.frame.
 
-Let's focus here to model the distribution of *Tayloria serrata*, which were only found 15 times out of 413 plots, in the Western Swiss Alps. Here, we will use 5 predictors, obtained from the ecospat package and projected into the same CRS as our observations.
+Let's focus here to model the distribution of *Tortella_pseudofragilis*, which were only found 15 times out of 413 plots, in the Western Swiss Alps. Here, we will use 5 predictors, obtained from the ecospat package and projected into the same CRS as our observations.
 
 We first need to download and prepare our data :
 
@@ -40,7 +40,7 @@ data("ESM_Env")
 
 xy <- ESM_species.env[,1:2] #coords
 resp <- ESM_species.env[,5] #occurences
-sp.name <- "Tortella_pseudofragilis" #"Tayloria_serrata" #species selected
+sp.name <- "Tortella_pseudofragilis" ##Do not work anymore
 env  <- terra::unwrap(ESM_Env) #the environment 
 
 ```
@@ -56,14 +56,14 @@ terra::points(xy[resp ==1,], pch = 16, col = "black")
 
 ### Modeling Core
 
-The first step to model species distribution is to select the modelling technique you will used. With the package ESM, you can modify the parameters of each of the 5 modelling techniques available, with the function *ESM_Models.Options*. For this example, we will perform GLM with a binomial family, allowing linear and quadratic terms and performing a step AIC to select the best structure.
+The first step to model species distribution is to select the modelling technique you will used. With the package ESM, you can modify the parameters of 5 of the 6 modelling techniques available, with the function *ESM_Models.Options*. For this example, we will perform GLM with a binomial family, allowing linear and quadratic terms and performing a step AIC to select the best structure.
 
 ```{r echo=TRUE}
 mod.options <- ESM_Models.Options(GLM = list(type = "quadratic",
                                              test = 'AIC'))
 ```
 
-Once the modelling technique is selected, the next step is to generate bivariate models using the function *ESM_Modeling*, allowing by default all the possible pairs of predictors.
+Once the modelling technique is selected, the next step is to generate bivariate models using the function *ESM_Modeling*, allowing by default all the possible pairs of predictors. The pooling procedure is applied directly to evaluate each bivariate models as recommended in Collart & Guisan (2023. \emph{Ecol. Inform.}) with the argument 'pooling = TRUE'. As the Boyce Index is biased with a low prevalence, the Smooth Continuous Boyce Index (SBI) can be computed as a mean across 5 smoothing methods developed in Liu et al (2024. \emph{Ecography}) with the argument 'SBI = TRUE'.
 
 ```{r}
 my.ESM <- ESM_Modeling(resp = resp,
@@ -76,10 +76,13 @@ my.ESM <- ESM_Modeling(resp = resp,
                        cv.method = "split-sampling",
                        cv.rep = 10,
                        cv.ratio = 0.7,
+                       pooling = TRUE,
+                       SBI = TRUE,
                        parallel = FALSE,
+                       n.cores = 1,
                        save.models = FALSE,
                        save.obj = FALSE,
-                       verbose = T)
+                       verbose = FALSE)
 ```
 
 Once the models are generated, *ESM_Modeling* also calculates the predictions and the evaluation of the calibration and the transferability of all the bivariate models :
@@ -88,9 +91,13 @@ Once the models are generated, *ESM_Modeling* also calculates the predictions an
 # Prediction for one bivariate model
 head(my.ESM$biva.predictions$ddeg0.mind68)
 
-my.ESM$biva.calibration #is the model able to correctly predict the probability of occurrence inside the environment in which it was calibrated (70% of our data if ratio = 0.7).
+# Is the model able to correctly predict the probability of occurrence inside 
+# the environment in which it was calibrated (70% of our data if ratio = 0.7).
+my.ESM$biva.calibration 
 
-my.ESM$biva.evaluations#is the model able to correctly predict the probability of occurrence of new points based on new environmental data (30% of our data if ratio = 0.7).
+# Is the model able to correctly predict the probability of occurrence of new 
+# points based on new environmental data (30% of our data if ratio = 0.7).
+my.ESM$biva.evaluations
 ```
 
 Finally, you can use the function *ESM_Projection* to predict new probability of occurrence of *Tayloria serrata* in a completely new environment (the totality of our map). The function will produce raster maps (.tif) that will be stored in a new folder of your computer.
@@ -98,14 +105,14 @@ Finally, you can use the function *ESM_Projection* to predict new probability of
 ```{r}
 proj <- ESM_Projection(ESM.Mod = my.ESM, 
                        new.env = env,
-                      name.env = "current", 
-                      parallel = FALSE, 
-                      save.obj = FALSE)
+                       name.env = "current", 
+                       parallel = FALSE,
+                       save.obj = FALSE)
 
-Proj_TS <- rast(list.files(paste0(getwd(),"/ESM.output_Tayloria_serrata/current"), 
+Proj_TS <- rast(list.files("ESM.output_Tortella_pseudofragilis/current", 
                            full.names=T)) #load all the maps from the new folder
 
-plot(Proj_TS[[1]]) #plot the first climatic map
+plot(Proj_TS[[1]]) #plot the fmap base on the first bivariate model
 ```
 
 Now, in practice, you will not use these bivariate models to make predictions. The objective of the ESMs is to generate bivariate models to overcome the overfitting problem related to the low number of occurrences and then combine them. To do so, you will have to use the function *ESM_Ensemble.Modeling* that will generates an ensemble model combining all the bivariate ones based on their respective performances.
@@ -117,7 +124,8 @@ my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
                                    weighting.score=c("MaxTSS"), 
                                    threshold=0,
                                    save.obj = FALSE)
-
+## Performances of the ensemble based on the pooling evaluation
+my.ESM_EF$evaluations
 ```
 
 The function *ESM_Response.Plot* allows you to visualize the response curves of the studied species to the different variables.
@@ -127,17 +135,6 @@ The function *ESM_Response.Plot* allows you to visualize the response curves of 
 my.ESM_responsePlot <- ESM_Response.Plot(my.ESM,my.ESM_EF, fixed.var.metric = 'mean') 
 
 
-```
-
-Once all the bivariate models and the ensemble model are build, you can evaluate them based on the pooling procedure as recommended in Collart & Guisan (2023).
-
-```{r}
-eval <- ESM_Pooling.Evaluation(ESM.Mod = my.ESM,
-                                ESM.ensembleMod = my.ESM_EF,
-                                EachSmallModels = FALSE)
-                                
-## Performances of the ensemble
-eval$ESM.evaluations
 ```
 
 Then, as above, the function *ESM_Ensemble.Projection* will allow you to predict new probability of occurrence for our species of interest based on the ensemble model which combine all the variables in our environment !

@@ -77,8 +77,7 @@ ESM_Models.Options <- function(ANN = NULL,
                                CTA = NULL,
                                GAM = NULL,
                                GLM = NULL,
-                               GBM = NULL
-                               ){
+                               GBM = NULL){
   ## Default options
   opt <- list(ANN = list(size = 8,
                          decay = 0.001,
