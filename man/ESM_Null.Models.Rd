@@ -8,7 +8,7 @@ ESM_Null.Models(
   ESM.Mod,
   ESM.ensembleMod,
   n.rep = 99,
-  quant = 95,
+  quant = 0.95,
   pooling = FALSE,
   hist.plot = FALSE,
   parallel = FALSE,

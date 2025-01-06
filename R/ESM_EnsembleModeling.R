@@ -97,6 +97,10 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
     },model = models[i],ws=weighting.score))
     row.names(w) = models[i]
     w[w<threshold | is.na(w)] = 0
+    if(length(w)==sum(w==0)){
+      warning(paste("All weights for models based on",models[i],"are null consider changing the threshold."))
+    }
+    
     if(i == 1){
       weights.algo <- w
     }else{

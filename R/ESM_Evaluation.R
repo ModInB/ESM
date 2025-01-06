@@ -229,7 +229,7 @@ ESM_Pooling.Evaluation <- function (ESM.Mod,
 ESM_Null.Models <- function(ESM.Mod,
                             ESM.ensembleMod,
                             n.rep = 99,
-                            quant = 95,
+                            quant = 0.95,
                             pooling = FALSE,
                             hist.plot = FALSE,
                             parallel = FALSE,
@@ -267,6 +267,8 @@ ESM_Null.Models <- function(ESM.Mod,
   
   ##Create a check for quantile
   models <- ESM.Mod$model.info$models
+  pooling.int <- ESM.Mod$model.info$pooling
+  
   if(parallel){
     cl <- parallel::makeCluster(n.cores)
     eval.nullModel <- parallel::parSapply(cl, 1:n.rep, 
@@ -288,7 +290,7 @@ ESM_Null.Models <- function(ESM.Mod,
     )
   }
   
-  if(pooling){
+  if(pooling & !(pooling.int)){
     ESM.pool <- ESM_Pooling.Evaluation(ESM.Mod = ESM.Mod,
                                        ESM.ensembleMod = ESM.ensembleMod)
     
@@ -324,11 +326,11 @@ ESM_Null.Models <- function(ESM.Mod,
     old.par <- graphics::par(no.readonly = TRUE)
     on.exit(graphics::par(old.par))
     graphics::par(mfrow = c(2, 2))
-    for(i in 1:4){
+    for(i in c(1,3,4)){
       hist.data <- graphics::hist(eval.nullModel[i,-1],xlim = c(min(eval.nullModel[i,],na.rm=T),
                                                                 max(eval.nullModel[i,],na.rm=T)+0.05),
                                   main = rownames(eval.nullModel)[i],
-                                  xlab = paste(rownames(eval.nullModel)[i]), "Null")
+                                  xlab = paste(rownames(eval.nullModel)[i], "Null"))
       graphics::segments(x0=eval.nullModel[i,1], x1= eval.nullModel[i,1], y0=0,y1=max(hist.data$counts),col = "red")
       graphics::points(x = eval.nullModel[i,1], y = max(hist.data$counts), col = "red",pch = 19)
     }
@@ -944,6 +946,7 @@ Smooth_CBI <- function(pres,
   sp.name <- ESM.Mod$data$sp.name
   xy <- ESM.Mod$data$xy
   SBI <- ESM.Mod$data$SBI
+  pooling.int <- ESM.Mod$model.info$pooling
   ## Ensemble information
   weighting.score <- ESM.ensembleMod$weighting.score
   threshold  <- ESM.ensembleMod$threshold
@@ -958,6 +961,7 @@ Smooth_CBI <- function(pres,
                                               cv.method = cv.method,
                                               cv.rep = cv.rep,
                                               cv.n.blocks = cv.n.blocks,
+                                              pooling = pooling.int,
                                               SBI = SBI,
                                               which.biva = which.biva,
                                               parallel = FALSE,
@@ -966,17 +970,18 @@ Smooth_CBI <- function(pres,
                                               save.models = F,
                                               save.obj = F)
   )
+  
   ESM.ensembleMod.Null  <-  spsUtil::quiet(ESM_Ensemble.Modeling(ESM.Mod = ESM.Mod.Null,
                                                                  weighting.score = weighting.score,
                                                                  threshold = threshold,
-                                                                 save.obj = F
+                                                                 save.obj = F)
   )
-  )
+  
   if(!save.obj){
     unlink(paste0(pathToSaveObject,"/ESM.output_",sp.name,".Null/NullModel",x),recursive = T, force = T)
   }
   
-  if(pooling){
+  if(pooling & !(pooling.int)){
     ESM.pool.NULL <- ESM_Pooling.Evaluation(ESM.Mod = ESM.Mod.Null,
                                             ESM.ensembleMod = ESM.ensembleMod.Null)
     if(length(models)==1){
