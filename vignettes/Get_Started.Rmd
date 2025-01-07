@@ -164,6 +164,7 @@ plot(Ens.proj)
 Secondly, you can determine a threshold that will set the limit between your presences and absences among the probabilities of occurrence using the function *ESM_thresholds*. Once the different possible thresholds are determine, you can project a binary map based on one of these using *ESM_Binarize*. In this case, the one based on the max TSS of calibrated ESMs into a new space was used.
 
 ```{r}
+
 my.ESM_thresholds <- ESM_Threshold(my.ESM_EF)
 
 my.ESM_EFproj_current_binary <- ESM_Binarize(Ens.proj, 
