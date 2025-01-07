@@ -5,7 +5,7 @@
 \alias{ESM_Env}
 \title{Environmental SpatRaster to perform ESM with the ESM package}
 \format{
-A SpatRaster with 5 layers:
+A SpatRaster with 4 layers:
 \describe{
 \item{ch_edaphic_eivdescombes_pixel_r}{Ecological indicator values reflecting 
 Soil pH.}

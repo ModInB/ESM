@@ -177,3 +177,6 @@ Finally, you can analyse the proportional contribution of the variable in the fi
 ## get the variable contributions of ESMs
 ESM_Variable.Contributions(my.ESM, my.ESM_EF)
 ```
+
+## Case 2: Modeling with presence-only data
+

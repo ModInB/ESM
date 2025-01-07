@@ -42,7 +42,7 @@
 #' 
 #' Contains stack of 4 predictors at 25m resolution in the Western Swiss Alps.
 #'
-#' @format A SpatRaster with 5 layers:
+#' @format A SpatRaster with 4 layers:
 #' \describe{
 #' \item{ch_edaphic_eivdescombes_pixel_r}{Ecological indicator values reflecting 
 #' Soil pH.}
@@ -70,3 +70,59 @@
 #' ESM_Env <- terra::unwrap(ESM_Env)
 #' 
 "ESM_Env"
+
+
+#' Species occurrence data to perform ESM
+#' 
+#' Contains a filtered dataset obtained from GBIF.org for \emph{Splachnum melanocaulon},
+#' a rare endangered species in Scandinavia.
+#'
+#' @format A data.frame with 36 lines and 50 columns in the GBIF format:
+#' \describe{
+#' \item{decimalLongitude}{Longitude in the CRS EPSG:4326}
+#' \item{decimalLatitude}{Latitude in the CRS EPSG:4326}
+#' }
+#' 
+#' @author Flavien Collart
+#' @details
+#' The data has been downloaded from GBIF.org and afterwards filtered using the default
+#' parameter of the function "clean_coordinates" from the "CoordinateCleaner" R package.
+#' The temporal data is between 1981 and 2024 and coordinate uncertainty is less than 500 m.
+#' 
+#' @references
+#' GBIF.org (16 December 2024) GBIF Occurrence Download. \doi{10.15468/dl.a5fhfv}.
+#' 
+#' @examples 
+#' data(ESM_Splachnum.Data)
+"ESM_Splachnum.Data"
+
+#' Environmental SpatRaster to perform ESM in Scandinavia
+#' 
+#' Contains stack of 4 predictors at ~20km resolution in Scandinavia at present time.
+#'
+#' @format A SpatRaster with 4 layers:
+#' \describe{
+#' \item{bio1}{Annual Mean Temperature averaged between 1981-2010}
+#' \item{bio3}{Isothermalithy. It is equal to: Mean Diurnal 
+#' Range/Temperature Annual Range * 100. The values have been averaged between 
+#' 1981 and 2010}
+#' \item{bio5}{Max Temperature of Warmest Month averaged between 1981-2010}
+#' \item{northness}{Northness.close to 1 corresponds to a northern exposition on a 
+#' vertical slope, while a value close to -1 corresponds to a very steep southern slope}
+#' }
+#' @details
+#' Data were downloaded using get_Chelsa.Clim and get_Topography and aggregated to ~20km.
+#' 
+#' @author Flavien Collart
+#' 
+#' @references
+#' Amatulli, G., Domisch, S., Tuanmu, M.-N., Parmentier, B., Ranipeta, A., Malczyk, J., and Jetz, W. (2018) A suite of global, cross-scale topographic variables for environmental and biodiversity modeling. \emph{Scientific Data}. \bold{5}, 180040. \doi{10.1038/sdata.2018.40}. 
+#' 
+#' Karger, D.N., Conrad, O., Böhner, J., Kawohl, T., Kreft, H., Soria-Auza, R.W., Zimmermann, N.E., Linder, P., Kessler, M. (2017). Climatologies at high resolution for the Earth land surface areas. \emph{Scientific Data}. \bold{4}, 170122. \doi{10.1038/sdata.2017.122}.
+#' 
+#' @examples 
+#' library(terra)
+#' data(ESM_Splachnum.Env)
+#' ESM_Splachnum.Env <- terra::unwrap(ESM_Splachnum.Env)
+#' 
+"ESM_Splachnum.Env"
