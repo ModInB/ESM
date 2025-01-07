@@ -363,8 +363,8 @@ the Western Swiss Alps. Here, we will use 4 predictors Ecological
 indicator values reflecting Soil pH (ch_edaphic_eivdescombes_pixel_r);
 Annual solar radiation (sradY); Isothermalithy (bio3_tiso_8110_LV95);
 and Precipitation Seasonality (bio15_ps_8110_LV95). Species data are
-from Collart et al (2024. ). Environmental variables were gathered from
-different sources listed in Collart et al (2024).</p>
+from Collart et al (2024. <em>STOTEN</em>). Environmental variables were
+gathered from different sources listed in Collart et al (2024).</p>
 <p>We first need to download and prepare our data :</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="do">## Species information with environmental values</span></span>
@@ -401,11 +401,11 @@ performing a step AIC to select the best structure.</p>
 generate bivariate models using the function <em>ESM_Modeling</em>,
 allowing by default all the possible pairs of predictors. The pooling
 procedure is applied directly to evaluate each bivariate models as
-recommended in Collart &amp; Guisan (2023. ) with the argument ‘pooling
-= TRUE’. As the Boyce Index is biased with a low prevalence, the Smooth
-Continuous Boyce Index (SBI) can be computed as a mean across 5
-smoothing methods developed in Liu et al (2024. ) with the argument ‘SBI
-= TRUE’.</p>
+recommended in Collart &amp; Guisan (2023. <em>Ecol. Inform.</em>) with
+the argument ‘pooling = TRUE’. As the Boyce Index is biased with a low
+prevalence, the Smooth Continuous Boyce Index (SBI) can be computed as a
+mean across 5 smoothing methods developed in Liu et al (2024.
+<em>Ecography</em>) with the argument ‘SBI = TRUE’.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>my.ESM <span class="ot">&lt;-</span> <span class="fu">ESM_Modeling</span>(<span class="at">resp =</span> resp,</span>
 <span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>                       <span class="at">xy =</span> xy,</span>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>                       <span class="at">env =</span> env,</span>
@@ -427,7 +427,7 @@ smoothing methods developed in Liu et al (2024. ) with the argument ‘SBI
 <p>Once the models are generated, <em>ESM_Modeling</em> also calculates
 the predictions and the evaluation of the calibration and the
 transferability of all the bivariate models, resulting from the pooling
-evaluation (Collart et al. 2023. ) :</p>
+evaluation (Collart et al. 2023. <em>Ecol. Inform.</em>) :</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># Prediction for one bivariate model</span></span>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">head</span>(my.ESM<span class="sc">$</span>biva.predictions<span class="sc">$</span>bio15_ps_8110_LV95.sradY)</span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt;     RUN1.GLM   RUN2.GLM   RUN3.GLM     RUN4.GLM     RUN5.GLM   RUN6.GLM</span></span>

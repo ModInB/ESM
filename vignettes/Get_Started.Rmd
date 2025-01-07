@@ -27,7 +27,7 @@ library(terra)
 
 Here we first need to load our data. To realize an ESM, we first gather some information: the coordinates of the observations (called xy); a response vector (resp) attributing 1 if the species was present or 0 if absent; the name of the species (sp.name) and; environmental predictors (env), which can be a SpatRaster from terra package or a data.frame.
 
-Let's focus here to model the distribution of *Solenostoma gracillimum*, which were only found 14 times out of 413 plots, in the Western Swiss Alps. Here, we will use 4 predictors Ecological indicator values reflecting Soil pH (ch_edaphic_eivdescombes_pixel_r); Annual solar radiation (sradY); Isothermalithy (bio3_tiso_8110_LV95); and Precipitation Seasonality (bio15_ps_8110_LV95). Species data are from Collart et al (2024. \emph{STOTEN}). Environmental variables were gathered from different sources listed in Collart et al (2024).
+Let's focus here to model the distribution of *Solenostoma gracillimum*, which were only found 14 times out of 413 plots, in the Western Swiss Alps. Here, we will use 4 predictors Ecological indicator values reflecting Soil pH (ch_edaphic_eivdescombes_pixel_r); Annual solar radiation (sradY); Isothermalithy (bio3_tiso_8110_LV95); and Precipitation Seasonality (bio15_ps_8110_LV95). Species data are from Collart et al (2024. *STOTEN*). Environmental variables were gathered from different sources listed in Collart et al (2024).
 
 We first need to download and prepare our data :
 
@@ -66,7 +66,7 @@ mod.options <- ESM_Models.Options(GLM = list(type = "quadratic",
                                              test = 'AIC'))
 ```
 
-Once the modelling technique is selected, the next step is to generate bivariate models using the function *ESM_Modeling*, allowing by default all the possible pairs of predictors. The pooling procedure is applied directly to evaluate each bivariate models as recommended in Collart & Guisan (2023. \emph{Ecol. Inform.}) with the argument 'pooling = TRUE'. As the Boyce Index is biased with a low prevalence, the Smooth Continuous Boyce Index (SBI) can be computed as a mean across 5 smoothing methods developed in Liu et al (2024. \emph{Ecography}) with the argument 'SBI = TRUE'.
+Once the modelling technique is selected, the next step is to generate bivariate models using the function *ESM_Modeling*, allowing by default all the possible pairs of predictors. The pooling procedure is applied directly to evaluate each bivariate models as recommended in Collart & Guisan (2023. *Ecol. Inform.*) with the argument 'pooling = TRUE'. As the Boyce Index is biased with a low prevalence, the Smooth Continuous Boyce Index (SBI) can be computed as a mean across 5 smoothing methods developed in Liu et al (2024. *Ecography*) with the argument 'SBI = TRUE'.
 
 ```{r}
 my.ESM <- ESM_Modeling(resp = resp,
@@ -89,7 +89,7 @@ my.ESM <- ESM_Modeling(resp = resp,
                        verbose = FALSE) 
 ```
 
-Once the models are generated, *ESM_Modeling* also calculates the predictions and the evaluation of the calibration and the transferability of all the bivariate models, resulting from the pooling evaluation (Collart et al. 2023. \emph{Ecol. Inform.} ) :
+Once the models are generated, *ESM_Modeling* also calculates the predictions and the evaluation of the calibration and the transferability of all the bivariate models, resulting from the pooling evaluation (Collart et al. 2023. *Ecol. Inform.*) :
 
 ```{r}
 # Prediction for one bivariate model
