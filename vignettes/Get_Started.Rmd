@@ -104,7 +104,7 @@ my.ESM$biva.calibration
 my.ESM$biva.evaluations
 ```
 
-Finally, you can use the function *ESM_Projection* to predict new probability of occurrence of *Tayloria serrata* in a completely new environment (the totality of our map). The function will produce raster maps (.tif) that will be stored in a new folder of your computer.
+Finally, you can use the function *ESM_Projection* to predict new probability of occurrence of *Solenostoma gracillimum* in a completely new environment (the totality of our map). The function will produce raster maps (.tif) that will be stored in a new folder of your computer.
 
 ```{r}
 proj <- ESM_Projection(ESM.Mod = my.ESM, 
