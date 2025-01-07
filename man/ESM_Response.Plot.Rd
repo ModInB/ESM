@@ -4,7 +4,7 @@
 \alias{ESM_Response.Plot}
 \title{Produce response plots for ESMs}
 \usage{
-ESM_Response.Plot(ESM.Mod, ESM.ensembleMod, fixed.var.metric = "median")
+ESM_Response.Plot(ESM.Mod, ESM.ensembleMod, fixed.var.metric = "median", ...)
 }
 \arguments{
 \item{ESM.Mod}{The object returned by \code{\link{ESM_Modeling}}.}
@@ -13,6 +13,8 @@ ESM_Response.Plot(ESM.Mod, ESM.ensembleMod, fixed.var.metric = "median")
 
 \item{fixed.var.metric}{Either 'median' (\emph{Default}), 'mean', 'min' or 'max' specifying the statistic used 
 to fix as constant the remaining variables when the predicted response is estimated for one of the variables.}
+
+\item{...}{other graphical parameters for plot function.}
 }
 \value{
 A plot of the response curves is produced (red line Ensemble, other colour lines are for single algorithms) and a \code{list} with the output is provided.
@@ -22,7 +24,8 @@ This function creates response plots (evaluation strips) for Ensembles of Small 
 }
 \details{
 This function plots the response curves of a model for each variable, while keeping the remaining variables constant. 
-This is an adaptation of the Evaluation Strip method proposed by Elith et al.(2005).
+This is an adaptation of the Evaluation Strip method proposed by Elith et al.(2005). Additionnal arguments for plot function
+can be provided and won't be checked by this function.
 For the use of this function, please refer to the manual of ESM_Modeling.
 }
 \references{

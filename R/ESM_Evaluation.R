@@ -492,10 +492,12 @@ ESM_Variable.Contributions <- function (ESM.Mod,
 #' @param ESM.ensembleMod The object returned by \code{\link{ESM_Ensemble.Modeling}}.
 #' @param fixed.var.metric Either 'median' (\emph{Default}), 'mean', 'min' or 'max' specifying the statistic used 
 #' to fix as constant the remaining variables when the predicted response is estimated for one of the variables.
-#' 
+#' @param ... other graphical parameters for plot function.	
+#'
 #' @details 
 #' This function plots the response curves of a model for each variable, while keeping the remaining variables constant. 
-#' This is an adaptation of the Evaluation Strip method proposed by Elith et al.(2005).
+#' This is an adaptation of the Evaluation Strip method proposed by Elith et al.(2005). Additionnal arguments for plot function
+#' can be provided and won't be checked by this function.
 #' For the use of this function, please refer to the manual of ESM_Modeling.
 #' 
 #' @return 
@@ -511,7 +513,8 @@ ESM_Variable.Contributions <- function (ESM.Mod,
 
 ESM_Response.Plot <- function (ESM.Mod, 
                                ESM.ensembleMod, 
-                               fixed.var.metric = "median"){
+                               fixed.var.metric = "median",
+                               ...){
   
   models <- ESM.Mod$model.info$models
   weights <- ESM.ensembleMod$EF.algo$weights.algo
@@ -554,7 +557,7 @@ ESM_Response.Plot <- function (ESM.Mod,
                                                            min(x[, -1])
                                                          })), max(sapply(proj.fixed.list, function(x) {
                                                            max(x[, -1])
-                                                         }))), type = "n", las = TRUE)
+                                                         }))), type = "n", las = TRUE,...)
       graphics::points(proj.fixed.list[[i]][, 2] ~ proj.fixed.list[[i]][, 
                                                               1], xlab = names(proj.fixed.list)[i], col = "red", 
              lwd = 2, type = "l")
@@ -567,7 +570,7 @@ ESM_Response.Plot <- function (ESM.Mod,
                                                            min(x[, -1])
                                                          })), max(sapply(proj.fixed.list, function(x) {
                                                            max(x[, -1])
-                                                         }))), type = "l", lwd=2, col = "red")
+                                                         }))), type = "l", lwd=2, col = "red",...)
       graphics::legend("topleft", legend = c("ensemble", models), 
              fill = c("red", ColModels[1:length(models)]), 
              box.lty = 0)
