@@ -9,6 +9,7 @@ Bp_Sampling(
   n.points = 10000,
   method = "rand.geo",
   digit.val.env = 1,
+  res.grid.env = 100,
   aggr.fact.geo = 5,
   n.strat.env = 3,
   To.plot = FALSE,
@@ -24,6 +25,9 @@ Bp_Sampling(
 
 \item{digit.val.env}{\code{integer}. The number of digit to keep to remove too similar environmental values.
 Only needed when method = "rand.env". \emph{Default: 1}.}
+
+\item{res.grid.env}{\code{numeric}. Number of rows and columns to generate the grid (see Details). Only needed
+when method = "rand.env". \emph{see Details}. \emph{Default: 100}.}
 
 \item{aggr.fact.geo}{\code{integer}. The aggregating factor to generate the checkerboard. Only needed 
 when method = "strat.geo". \emph{see Details}. \emph{Default: 5}.}
@@ -53,7 +57,8 @@ pixels can be modified with the argument 'aggr.fact.geo'. For each pixel of the 
 background points are randomly selected to reach the value of \emph{n.points}. Selecting background points can also 
 be performed in the environmental space (see Steen et al, 2024). The first method is the full random background
 point selection (method = "rand.env"). To do so, a PCA is first performed and the two fist axes are kept to 
-reflect the environmental space. Then, a grid of 100*100 pixel is created. To reduce too similar points, 
+reflect the environmental space. Then, a grid of res.grid.env*res.grid.env (default 100\*100) pixel is created. Note that 
+increasing this value will strongly increase computation time. To reduce too similar points, 
 the PCA scores of each observation are rounded at a certain digit (argument digit.val.env) and only 
 one observation among the similar ones is kept. Several points are then randomly selected in each pixel of this grid.
 By doing this, the entire environmental is captured avoiding the over-abundance of some common environment. The
@@ -85,6 +90,7 @@ Bp <- Bp_Sampling(env = env,
                   n.points = 1000,
                   method = "rand.env",
                   digit.val.env = 2,
+                  res.grid.env = 100,
                   To.plot = FALSE)       
                                         
 # Selection stratified in the environmental space                     

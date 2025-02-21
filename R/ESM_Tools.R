@@ -9,6 +9,8 @@
 #' @param method \code{character}. one of: "rand.geo", "strat.geo", "rand.env" or "strat.env". \emph{see Details}. \emph{Default: "rand.geo"}.
 #' @param digit.val.env \code{integer}. The number of digit to keep to remove too similar environmental values.
 #' Only needed when method = "rand.env". \emph{Default: 1}.
+#' @param res.grid.env \code{numeric}. Number of rows and columns to generate the grid (see Details). Only needed
+#' when method = "rand.env". \emph{see Details}. \emph{Default: 100}.
 #' @param aggr.fact.geo \code{integer}. The aggregating factor to generate the checkerboard. Only needed 
 #' when method = "strat.geo". \emph{see Details}. \emph{Default: 5}.
 #' @param n.strat.env \code{integer}. The number of classes to create for each environmental layer. Only needed
@@ -25,7 +27,8 @@
 #' background points are randomly selected to reach the value of \emph{n.points}. Selecting background points can also 
 #' be performed in the environmental space (see Steen et al, 2024). The first method is the full random background
 #' point selection (method = "rand.env"). To do so, a PCA is first performed and the two fist axes are kept to 
-#' reflect the environmental space. Then, a grid of 100*100 pixel is created. To reduce too similar points, 
+#' reflect the environmental space. Then, a grid of res.grid.env*res.grid.env (default 100\*100) pixel is created. Note that 
+#' increasing this value will strongly increase computation time. To reduce too similar points, 
 #' the PCA scores of each observation are rounded at a certain digit (argument digit.val.env) and only 
 #' one observation among the similar ones is kept. Several points are then randomly selected in each pixel of this grid.
 #' By doing this, the entire environmental is captured avoiding the over-abundance of some common environment. The
@@ -61,6 +64,7 @@
 #'                   n.points = 1000,
 #'                   method = "rand.env",
 #'                   digit.val.env = 2,
+#'                   res.grid.env = 100,
 #'                   To.plot = FALSE)       
 #'                                         
 #' # Selection stratified in the environmental space                     
@@ -80,6 +84,7 @@ Bp_Sampling <- function(env,
                         n.points = 10000,
                         method = "rand.geo",
                         digit.val.env = 1,
+                        res.grid.env = 100,
                         aggr.fact.geo = 5,
                         n.strat.env = 3,
                         To.plot = FALSE,
@@ -129,7 +134,7 @@ Bp_Sampling <- function(env,
     # bb <- lapply(aa, function(x){do.call(cbind,x)[,c(2:3)]})
     # cc <- terra::vect(bb,type = "polygons",crs="")
     # cc<-terra::aggregate(cc)
-    grid.env <- terra::rast(terra::ext(apply(env.score.round,2, range)), ncols = 100, nrows = 100,crs="") #vals = 1:(100*100)
+    grid.env <- terra::rast(terra::ext(apply(env.score.round,2, range)), ncols = res.grid.env, nrows = res.grid.env,crs="") #vals = 1:(100*100)
     # ee <- terra::mask(vide,cc)
     
     env.score.round.filt <- unique(env.score.round)
