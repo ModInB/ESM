@@ -157,7 +157,7 @@ ESM_Projection <- function(ESM.Mod,
              rounded = rounded,
              pred.multiplier = pred.multiplier)
   if(save.obj){
-    save(obj,file=paste0("../ESM.Projection.",ESM.Mod$model.info$modeling.id,".out"))
+    save(obj,file=paste0("../ESM.Projection.",name.env,".",ESM.Mod$model.info$modeling.id,".out"))
   }
   return(obj)
 }
