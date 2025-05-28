@@ -125,11 +125,11 @@ This allows to run different biva splits on different computers. However, it is 
 \donttest{
 library(terra)
 #Loading test data
-data(ESM_species.env)
+data(ESM_Species.env)
 data(ESM_Env)
 #species occurrences
-xy <- ESM_species.env[,1:2]
-resp <- ESM_species.env[,3] #Tayloria_serrata
+xy <- ESM_Species.env[,1:2]
+resp <- ESM_Species.env[,3] #Tayloria_serrata
 env <- terra::unwrap(ESM_Env)
 ### Calibration of simple bivariate models
 my.ESM <- ESM_Modeling(resp = resp,

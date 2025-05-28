@@ -15,6 +15,7 @@
 #' @param datatype a \code{character} When new.env is a  \code{SpatRaster}, which datatype should be used to save the files? \emph{Default:} 'INT2U'.
 #' Note that if round = FALSE, datatype must be changed to a float (e.g., 'FLT4S' or 'FLT8S'.)
 #' @param save.obj \code{logical}. Allows or not the final output.
+#' @param verbose \code{logical}. Allows or not message.
 #' 
 #' @return  a \code{list} containing: 
 #' \itemize{
@@ -53,7 +54,8 @@ ESM_Projection <- function(ESM.Mod,
                            parallel = FALSE,
                            n.cores = 1,
                            datatype = "INT2U",
-                           save.obj = T){
+                           save.obj = T,
+                           verbose = TRUE){
   iniwd <- getwd()
   on.exit(setwd(iniwd))
   setwd(ESM.Mod$model.info$biva.path)
@@ -109,7 +111,8 @@ ESM_Projection <- function(ESM.Mod,
                                  name.env = name.env, biva.pred = biva.pred,
                                  datatype = datatype,
                                  rounded = rounded,
-                                 pred.multiplier = pred.multiplier)
+                                 pred.multiplier = pred.multiplier,
+                                 verbose = verbose)
       parallel::stopCluster(cl)
       
     }else{
@@ -118,7 +121,8 @@ ESM_Projection <- function(ESM.Mod,
                     name.env = name.env, biva.pred = biva.pred,
                     datatype = datatype,
                     rounded = rounded,
-                    pred.multiplier = pred.multiplier)
+                    pred.multiplier = pred.multiplier,
+                    verbose = verbose)
     }
    
   }else{
@@ -135,7 +139,8 @@ ESM_Projection <- function(ESM.Mod,
                                  biva.pred = biva.pred,
                                  datatype = datatype,
                                  rounded = rounded,
-                                 pred.multiplier = pred.multiplier)
+                                 pred.multiplier = pred.multiplier,
+                                 verbose = verbose)
       parallel::stopCluster(cl)
       
     }else{
@@ -145,7 +150,8 @@ ESM_Projection <- function(ESM.Mod,
                     biva.pred = biva.pred,
                     datatype = datatype,
                     rounded = rounded,
-                    pred.multiplier = pred.multiplier)
+                    pred.multiplier = pred.multiplier,
+                    verbose = verbose)
     }
   }
   
@@ -168,17 +174,26 @@ ESM_Projection <- function(ESM.Mod,
 #' @import nnet
 #' @import rpart
 #' @import maxnet
-.IndividualProj <- function(x,new.env,models,name.env,parallel, biva.pred,
+.IndividualProj <- function(x,
+                            new.env,
+                            models,
+                            name.env,
+                            parallel, 
+                            biva.pred,
                             datatype,
                             rounded,
-                            pred.multiplier){
-  if(!is.data.frame(new.env)){
+                            pred.multiplier,
+                            verbose){
+  
+  if(!is.data.frame(new.env) & verbose){
     cat(paste("\n Projections of bivariate model:",x[1],x[2]))}
   done <- c()
   for(j in 1:length(models)){
     ToSkip <- anyNA(biva.pred[[paste(x[1],x[2], sep=".")]][,paste0("Full.",models[j])])
     if(ToSkip){
-      cat(paste("\nThe Full model",x[1],x[2],models[j]),"failed and thus won't be projected")
+      if(verbose){
+        cat(paste("\nThe Full model",x[1],x[2],models[j]),"failed and thus won't be projected")
+      }
       next
     }
     mod <- paste("ESM_Full",x[1],x[2],models[j],"model.out",sep="_")
@@ -221,7 +236,10 @@ ESM_Projection <- function(ESM.Mod,
         write.table(pred,paste0("../",name.env,"/ESM_",x[1],"_",x[2],"_",models[j],".txt"),sep="\t")
         
       }else{
-        cat(paste0("\n\t",models[j]))
+        if(verbose){
+          cat(paste0("\n\t",models[j]))
+        }
+        
         
         if(parallel){
           new.env <- terra::unwrap(new.env)
@@ -263,7 +281,7 @@ ESM_Projection <- function(ESM.Mod,
       }
       
     }else{
-      cat(paste("\n",paste("ESM_Full",x[1],x[2],models[j],"model.out",sep="_"),"is not present and thus won't be projected"))
+      warning(paste("\n",paste("ESM_Full",x[1],x[2],models[j],"model.out",sep="_"),"is not present and thus won't be projected"))
     }
     
     

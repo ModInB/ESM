@@ -17,10 +17,10 @@ This function evaluates the full model which is used for projections and provide
 }
 \details{
 This function provides diverse thresholds which can be used to convert suitability 
-maps into binary maps. Various thresholds are provided: TSS (where sensitivity and specificity are maximized), MPA 1.0 (where all presences 
-are predicted positive), MPA 0.95 (where 95\% of all presences are predicted positive), MPA 0.90 (where 90\% of all presences are predicted positive), 
-Boyce.th.min (the lowest suitability value where the predicted/expected ratio is >1) and Boyce.th.max (the highest suitability value where the 
-predicted/expected ratio is =1). 
+maps into binary maps. Various thresholds are provided: TSS (where sensitivity and specificity are maximized) MCC (where the MCC is maximized), 
+MPA 1.0 (where all presences are predicted positive), MPA 0.95 (where 95\% of all presences are predicted positive), MPA 0.90 (where 90\% of all 
+presences are predicted positive), Boyce.th.min (the lowest suitability value where the predicted/expected ratio is >1) and Boyce.th.max (the highest
+suitability value where the predicted/expected ratio is =1). 
 For the use of this function, please refer to the manual of ESM_Modeling.
 }
 \references{
@@ -32,6 +32,9 @@ from occurrence and pseudo-absence data. \emph{Journal of applied ecology}, \bol
 
 Fielding, Alan H., and John F. Bell. A review of methods for the assessment of prediction errors in conservation presence/absence models. 
 \emph{Environmental conservation}, \bold{24.1} (1997): 38-49.
+
+Hellegers, M., van Hinsberg, A., Lenoir, J., Dengler, J., Huijbregts, M.A.J. and Schipper, A.M. (2025), Multiple Threshold-Selection Methods 
+Are Needed to Binarise Species Distribution Model Predictions. \emph{Divers Distrib}, 31: e70019. \doi{10.1111/ddi.70019}.
 }
 \seealso{
 \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}

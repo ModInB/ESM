@@ -84,11 +84,11 @@
 #' @examples \donttest{
 #' library(terra)
 #' #Loading test data
-#' data(ESM_species.env)
+#' data(ESM_Species.env)
 #' data(ESM_Env)
 #' #species occurrences
-#' xy <- ESM_species.env[,1:2]
-#' resp <- ESM_species.env[,3] #Tayloria_serrata
+#' xy <- ESM_Species.env[,1:2]
+#' resp <- ESM_Species.env[,3] #Tayloria_serrata
 #' env <- terra::unwrap(ESM_Env)
 #' ### Calibration of simple bivariate models
 #' my.ESM <- ESM_Modeling(resp = resp,
@@ -340,7 +340,7 @@ ESM_Modeling <- function(resp,
   if(parallel){
     cl <- parallel::makeCluster(n.cores)
     biva.mods <-  parallel::parApply(cl, combinations, 2, 
-                                     ESM:::.bivaModeling,resp = resp,
+                                     .bivaModeling,resp = resp,
                        env.var = env.var, models = models,
                        models.options = models.options,
                        cv.split.table = cv.split.table,
@@ -374,18 +374,19 @@ ESM_Modeling <- function(resp,
   }
   
 
-  failed.mods <- lapply(biva.mods,.checkFailedMods)
+  failed.mods <- lapply(biva.mods,
+                        .checkFailedMods)
   biva.mods.filt <- lapply(1:length(biva.mods), .PutNAsFailed, 
                            biva.mods,failed.mods)
   names(biva.mods.filt) = names(biva.mods)
-  lapply(1:length(biva.mods), .PrintFailedMods, 
-         biva.mods,failed.mods)
-  if(verbose){
+
+  if(verbose){  
+    lapply(1:length(biva.mods), .PrintFailedMods,
+           biva.mods,failed.mods)
       cat("\n############### Start evaluations ###############")
 
   }
-  
-  
+
   if(pooling){
     biva.eval <- lapply(biva.mods.filt,.pooling.ESM.Mod,
                         resp=resp, models=models,
@@ -547,7 +548,6 @@ ESM_Modeling <- function(resp,
     ratio.Pres.Abs <- table(data$resp)/nrow(data)
     ratio.Pres.Abs["1"] <- prevalence/ratio.Pres.Abs["1"]
     ratio.Pres.Abs["0"] <- (1-prevalence)/ratio.Pres.Abs["0"]
-    ratio.Pres.Abs <- round(ratio.Pres.Abs/min(ratio.Pres.Abs)) #so that the min weight is 1
     w <- data$resp
     w[data$resp==1] = ratio.Pres.Abs["1"]
     w[data$resp==0] = ratio.Pres.Abs["0"]
@@ -892,22 +892,36 @@ ESM_Modeling <- function(resp,
 ## .checkFailedMods----
 # Check Failed Mods
 .checkFailedMods <- function(biva.mod){
+  
   IsNa <- apply(biva.mod, 2, anyNA)
   IsFlat <- apply(biva.mod, 2, stats::sd) == 0
+  IsOverfit <- apply(biva.mod, 2, unique)
+  if(is.data.frame(IsOverfit)| is.matrix(IsOverfit)){
+    IsOverfit <- apply(IsOverfit,2, length) < 3
+  }else{
+    IsOverfit <- sapply(IsOverfit, length) < 3
+  }
   
-  Failed <- IsNa | IsFlat
+  Failed <- IsNa | IsFlat | IsOverfit
+
   return(Failed)
+  
 }
 ##.PutNAsFailed ----
 # Transform Failed models into NAs
 .PutNAsFailed <- function(biva,biva.mods,failed.mods){
+  
   biva.mods[[biva]][failed.mods[[biva]]] = NA
+  
   return(biva.mods[[biva]])
+  
 }
 ## .PrintFailedMods----
-# Print Failed Mods
+# Print Failed Models
 .PrintFailedMods <- function(biva,biva.mods,failed.mods){
+  
   if(sum(failed.mods[[biva]])>0){
     cat(paste("\nFailed Models for combination",names(biva.mods)[biva],":",colnames(biva.mods[[biva]])[failed.mods[[biva]]] ))
   }
+  
 }

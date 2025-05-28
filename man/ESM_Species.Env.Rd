@@ -5,7 +5,7 @@
 \alias{ESM_Species.Env}
 \title{Species and environmental data to perform ESM with the ESM package}
 \format{
-A data.frame with 413 plots and 10 variables:
+A data.frame with 413 plots and 9 variables:
 \describe{
 \item{x}{x coordinate in the CRS EPSG:2056}
 \item{y}{y coordinate in the CRS EPSG:2056}

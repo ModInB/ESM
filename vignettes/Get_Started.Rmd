@@ -135,9 +135,9 @@ my.ESM_EF$evaluations
 The function *ESM_Response.Plot* allows you to visualize the response curves of the studied species to the different variables.
 
 ```{r}
-## get the response plots of ESMs
 ## 'par' Only needed to build the vignette
 par(mar=c(2, 4, 3, 1) + 0.1)  
+## get the response plots of ESMs
 my.ESM_responsePlot <- ESM_Response.Plot(my.ESM,my.ESM_EF, 
                                          fixed.var.metric = 'mean',
                                          cex.main = 0.8,
@@ -161,14 +161,14 @@ Ens.proj <- ESM_Ensemble.Projection(ESM.proj = proj,
 plot(Ens.proj)
 ```
 
-Secondly, you can determine a threshold that will set the limit between your presences and absences among the probabilities of occurrence using the function *ESM_thresholds*. Once the different possible thresholds are determine, you can project a binary map based on one of these using *ESM_Binarize*. In this case, the one based on the max TSS of calibrated ESMs into a new space was used.
+Secondly, you can determine a threshold that will set the limit between your presences and absences among the probabilities of occurrence using the function *ESM_thresholds*. Once the different possible thresholds are determine, you can project a binary map based on one of these using *ESM_Binarize*. In this case, the one based on the max MCC of calibrated ESMs into a new space was used.
 
 ```{r}
 
 my.ESM_thresholds <- ESM_Threshold(my.ESM_EF)
 
 my.ESM_EFproj_current_binary <- ESM_Binarize(Ens.proj, 
-                                             1000*my.ESM_thresholds$TSS.th)
+                                             1000*my.ESM_thresholds$MCC.th)
 plot(my.ESM_EFproj_current_binary)
 ```
 
@@ -179,5 +179,153 @@ Finally, you can analyse the proportional contribution of the variable in the fi
 ESM_Variable.Contributions(my.ESM, my.ESM_EF)
 ```
 
+
+```{r, echo = FALSE}
+## remove folder
+unlink("ESM.output_Solenostoma_gracillimum",recursive = TRUE)
+```
+
+
 ## Case 2: Modeling with presence-only data
+
+Modelling species distribution based on presence-only is often challenging. For this example, we chose *Splachnum melanocaulon*, an endangered bryophyte species mainly living in Scandinavia. The aim of this study case is to assess the impact of climate change on this endangered species in Scandinavia.
+
+### Data preparation
+
+We first collected observation data based on GBIF for the period 1981-2024 with a coordinate uncertainty less than 500m (doi: 10.15468/dl.a5fhfv). 
+```{r}
+set.seed(123)
+## Species information with environmental values
+data("ESM_Splachnum.Data") 
+
+## SpatRaster with 5 environmental predictors
+data("ESM_Splachnum.Env")
+
+
+sp.name <- "Splachnum_melanocaulon" 
+xy <- ESM_Splachnum.Data[,c("decimalLongitude","decimalLatitude")] # coordinates
+colnames(xy) = c("x","y")
+
+env  <- terra::unwrap(ESM_Splachnum.Env) 
+## Splitting the SpatRaster between present and future climate data
+env.pres <- terra::subset(env,1:4)
+env.fut <- terra::subset(env,4:8)
+## Rename the future climatic layer to match the name of the present one
+names(env.fut) = c("northness","bio1","bio3","bio5")
+```
+
+
+
+```{r}
+BP <- Bp_Sampling(env = env.pres,
+                  n.points = 10000,
+                  method = "rand.geo",
+                  To.plot = TRUE,
+                  xy.pres = xy)
+
+## Merge the occurrence data with the background points
+xy <- rbind(xy,BP[,1:2])
+resp <- rep(c(1,0),times = c(nrow(ESM_Splachnum.Data),nrow(BP)))
+
+```
+
+### Modeling Core
+
+
+```{r}
+
+my.ESM <- ESM_Modeling(resp = resp,
+                       xy = xy,
+                       env = env.pres,
+                       sp.name = sp.name,
+                       models = c("GLM"),
+                       pooling = FALSE,
+                       SBI = TRUE,
+                       # set verbose = TRUE to see the progression
+                       verbose = FALSE) 
+```
+
+
+
+```{r}
+# Is the model able to correctly predict the probability of occurrence inside 
+# the environment in which it was calibrated 
+my.ESM$biva.calibration 
+
+# Is the model able to correctly predict the probability of occurrence of new points 
+my.ESM$biva.evaluations
+```
+
+
+
+```{r}
+my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM, 
+                                   weighting.score=c("MaxTSS"), 
+                                   threshold=0,
+                                   save.obj = FALSE)
+## Performances of the ensemble based on the pooling evaluation
+my.ESM_EF$evaluations
+
+## Pooling evaluation
+myEval <- ESM_Pooling.Evaluation(ESM.Mod = my.ESM,
+                                 ESM.ensembleMod = my.ESM_EF,
+                                 EachSmallModels = FALSE)
+
+```
+
+
+
+```{r}
+proj.curr <- ESM_Projection(ESM.Mod = my.ESM, 
+                       new.env = env.pres,
+                       name.env = "current", 
+                       parallel = FALSE,
+                       save.obj = FALSE,
+                       verbose = FALSE)
+
+```
+
+
+
+
+```{r}
+Ens.proj.curr <- ESM_Ensemble.Projection(ESM.proj = proj.curr,
+                                    ESM.ensembleMod = my.ESM_EF,
+                                    save.obj = FALSE)
+
+plot(Ens.proj.curr)
+```
+Projecting in 2071-2100 according to the scenario UKESM ssp 5-8.5
+```{r}
+proj.fut <- ESM_Projection(ESM.Mod = my.ESM, 
+                       new.env = env.fut,
+                       name.env = "future", 
+                       parallel = FALSE,
+                       save.obj = FALSE)
+
+Ens.proj.fut <- ESM_Ensemble.Projection(ESM.proj = proj.fut,
+                                    ESM.ensembleMod = my.ESM_EF,
+                                    save.obj = FALSE)
+
+plot(Ens.proj.fut)
+```
+
+You can determine a threshold that will set the limit between your presences and absences among the probabilities of occurrence using the function *ESM_thresholds*. Once the different possible thresholds are determine, you can project a binary map based on one of these using *ESM_Binarize*. In this case, the one based on the max TSS of calibrated ESMs into a new space was used.
+
+```{r}
+
+my.ESM_thresholds <- ESM_Threshold(my.ESM_EF)
+
+my.ESM_EFproj_current_binary <- ESM_Binarize(Ens.proj.curr, 
+                                             1000*my.ESM_thresholds$TSS.th)
+plot(my.ESM_EFproj_current_binary)
+```
+
+### Output Analyses
+
+```{r, echo = FALSE}
+## remove folder
+unlink("ESM.output_Splachnum_melanocaulon",recursive = TRUE)
+```
+
 

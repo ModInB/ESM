@@ -70,6 +70,7 @@ of the different possible combination of classes available, the same number of b
 reach the value of \emph{n.points}.
 }
 \examples{
+\donttest{
 library(terra)
 env <- terra::unwrap(ESM_Env)
 # Selection full random in the geographic space
@@ -98,7 +99,8 @@ Bp <- Bp_Sampling(env = env,
                   n.points = 1000,
                   method = "strat.env",
                   n.strat.env = 3,
-                  To.plot = FALSE)                          
+                  To.plot = FALSE)       
+}               
 }
 \references{
 Steen,B., Broennimann, O., Maiorano, L., Guisan, . 2024. How sensitive are species distribution models to different background point 

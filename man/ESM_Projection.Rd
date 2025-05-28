@@ -13,7 +13,8 @@ ESM_Projection(
   parallel = FALSE,
   n.cores = 1,
   datatype = "INT2U",
-  save.obj = T
+  save.obj = T,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ if round = FALSE, pred.multiplier can be set to 1.}
 Note that if round = FALSE, datatype must be changed to a float (e.g., 'FLT4S' or 'FLT8S'.)}
 
 \item{save.obj}{\code{logical}. Allows or not the final output.}
+
+\item{verbose}{\code{logical}. Allows or not message.}
 }
 \value{
 a \code{list} containing: 

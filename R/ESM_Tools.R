@@ -44,6 +44,7 @@
 #' or environmental classes (named "BigClass) to which the observation belongs (only for method = "strat.geo" or "strat.env")
 #'  
 #' @examples 
+#' \donttest{
 #' library(terra)
 #' env <- terra::unwrap(ESM_Env)
 #' # Selection full random in the geographic space
@@ -72,7 +73,8 @@
 #'                   n.points = 1000,
 #'                   method = "strat.env",
 #'                   n.strat.env = 3,
-#'                   To.plot = FALSE)                          
+#'                   To.plot = FALSE)       
+#' }               
 #' @references 
 #' Steen,B., Broennimann, O., Maiorano, L., Guisan, . 2024. How sensitive are species distribution models to different background point 
 #' selection strategies? A test with species at various equilibrium levels. 
@@ -117,7 +119,7 @@ Bp_Sampling <- function(env,
   }else if(method == "rand.env"){
     
     if(terra::nlyr(env)<2){
-      stop("when method == rand.env or strat.env, a minimum of 2 environnmental layers is needed in env.")
+      stop("when method == 'rand.env' or 'strat.env', a minimum of 2 environnmental layers is needed in env.")
     }
     if(digit.val.env %%1 !=0 | digit.val.env < 0){
       stop("digit.val.env must be an integer greater than 0")
@@ -171,7 +173,7 @@ Bp_Sampling <- function(env,
       }
     }
     
-    
+
     bp <- env.dat[rownames(env.score.round.filt)[ToKeep],]
     
     
@@ -621,7 +623,7 @@ ESM_Generate.ODMAP <- function(ESM.Mod = NULL,
       cv.ratio = round(sum(ESM.Mod$cv.split.table[,1])/nrow(ESM.Mod$cv.split.table),2)
       ODMAP$Value[38] = paste(ODMAP$Value[38],100*cv.ratio, "% were employed to calibrate the model and the remaining to evaluate it.")
     }
-    if(my.ESM$model.info$pooling){
+    if(ESM.Mod$model.info$pooling){
       ODMAP$Value[38] = paste(ODMAP$Value[38], "The pooling method as described in Collart & Guisan (2023. Ecol Inform) was afterwards applied to evaluate each model.")
     }
     ODMAP$Value[39] = ODMAP$Value[38]
@@ -867,13 +869,20 @@ ESM_Generate.ODMAP <- function(ESM.Mod = NULL,
       ToReturn <- c(ToReturn, 
                     sentence)
       
+    }else if(models[i] == "GAM"){
+      sentence <- paste0("GAMs were performed under a ", model.options$GAM$family," distribution with ",
+                         model.options$GAM$smooth.k, " dimension(s) used to represent the smooth term, ", model.options$GaM$smooth.bs,
+                         " as a penalized smoothing basis, ", paste(model.options$GaM$optimizer,collapse = " and "), 
+                         " as the optimization method(s) to use to optimize the smoothing parameter estimation criterion, all other parameters were set as default.")
+      ToReturn <- c(ToReturn, 
+                    sentence)
     }else if(models[i] == "GBM"){
       sentence <- paste0("GBMs were performed under a ", model.options$GBM$distribution," distribution with ",
                          model.options$GBM$n.trees, " trees, a maximum interaction depth of ", model.options$GBM$interaction.depth,
                          ", a minimum of ", model.options$GBM$n.minobsinnode," observation in the termal nodes of trees, a learning rate of ",
                          model.options$GBM$shrinkage,", a fraction of ", model.options$GBM$bag.fraction,
                          " of the training set observations randomly selected to propose the next tree in the expansion, a first fraction of ",
-                         model.options$GBM$train.fraction, " to fit the model and ",model.options$GBM$cv.folds," internal cross-vaidations, all other parameters was set as default")
+                         model.options$GBM$train.fraction, " to fit the model and ",model.options$GBM$cv.folds," internal cross-vaidations, all other parameters was set as default.")
       ToReturn <- c(ToReturn, 
                     sentence)
     }else{

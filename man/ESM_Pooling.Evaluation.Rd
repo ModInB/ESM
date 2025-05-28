@@ -43,11 +43,11 @@ For the use of this function, please refer to the manual of ESM_Modeling.
 \donttest{
 library(terra)
 #Loading test data
-data(ESM_species.env)
+data(ESM_Species.env)
 data(ESM_Env)
 #species occurrences
-xy <- ESM_species.env[,1:2]
-resp <- ESM_species.env[,3] #Tayloria_serrata
+xy <- ESM_Species.env[,1:2]
+resp <- ESM_Species.env[,3] #Tayloria_serrata
 env <- terra::unwrap(ESM_Env)
 ### Calibration of simple bivariate models
 ## Following Breiner et al 2015 and thus without 

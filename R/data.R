@@ -5,7 +5,7 @@
 #' Contains sampling of 3 bryophytes in 413 plots in the Western Swiss Alps with
 #' environmental values from Collart et al (2024)
 #'
-#' @format A data.frame with 413 plots and 10 variables:
+#' @format A data.frame with 413 plots and 9 variables:
 #' \describe{
 #' \item{x}{x coordinate in the CRS EPSG:2056}
 #' \item{y}{y coordinate in the CRS EPSG:2056}
@@ -98,9 +98,9 @@
 
 #' Environmental SpatRaster to perform ESM in Scandinavia
 #' 
-#' Contains stack of 4 predictors at ~20km resolution in Scandinavia at present time.
+#' Contains stack of 4 predictors at ~20km resolution in Scandinavia at present time and 3 in 2071-2100 .
 #'
-#' @format A SpatRaster with 4 layers:
+#' @format A SpatRaster with 5 layers:
 #' \describe{
 #' \item{bio1}{Annual Mean Temperature averaged between 1981-2010}
 #' \item{bio3}{Isothermalithy. It is equal to: Mean Diurnal 
@@ -109,6 +109,13 @@
 #' \item{bio5}{Max Temperature of Warmest Month averaged between 1981-2010}
 #' \item{northness}{Northness.close to 1 corresponds to a northern exposition on a 
 #' vertical slope, while a value close to -1 corresponds to a very steep southern slope}
+#' \item{bio1_UKESM585}{Annual Mean Temperature averaged between 2071-2100 under the GCM 
+#' UKESM 1-0-ll combined with the ssp 5-8.5}
+#' \item{bio3_UKESM585}{Isothermalithy. It is equal to: Mean Diurnal 
+#' Range/Temperature Annual Range * 100. The values have been averaged between 
+#' 2071 and 2100 under the GCM UKESM 1-0-ll combined with the ssp 5-8.5}
+#' \item{bio5_UKESM585}{Max Temperature of Warmest Month averaged between 2071-2100
+#' under the GCM UKESM 1-0-ll combined with the ssp 5-8.5}
 #' }
 #' @details
 #' Data were downloaded using get_Chelsa.Clim and get_Topography and aggregated to ~20km.
