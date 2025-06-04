@@ -814,7 +814,7 @@ ESM_Modeling <- function(resp,
                                                              "')",
                                                              collapse="+")))
         
-        tryCatch(expr={mod <- mgcv::gam(formula,
+        tryCatch(expr={mod <- spsUtil::quiet(mgcv::gam(formula,
                                         data = data,
                                         weights = w,
                                         family = models.options$GAM$family,
@@ -825,7 +825,7 @@ ESM_Modeling <- function(resp,
                                         select = models.options$GAM$select,
                                         gamma = models.options$GAM$gamma,
                                         knots = models.options$GAM$knots,
-                                        H = models.options$GAM$H)}, 
+                                        H = models.options$GAM$H))}, 
                  error=function(e){
                    cat(paste("\n model",models[j],nameRun,"failed"))
                    err <<-TRUE
@@ -835,7 +835,7 @@ ESM_Modeling <- function(resp,
           pred <- as.data.frame(rep(NA,nrow(env.var)))
           colnames(pred) = "GAM" 
         }else{
-          pred <- mgcv::predict.gam(mod,newdata = env.var,type="response")
+          pred <- as.data.frame(mgcv::predict.gam(mod,newdata = env.var,type="response"))
           colnames(pred) = "GAM" 
           
         }

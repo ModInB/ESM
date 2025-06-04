@@ -109,7 +109,7 @@ ESM_Models.Options <- function(ANN = NULL,
                        select = FALSE,
                        gamma = 1,
                        knots = NULL,
-                       H = FALSE
+                       H = NULL
                        ),
               GLM = list(type = 'quadratic',
                          test = 'none',
