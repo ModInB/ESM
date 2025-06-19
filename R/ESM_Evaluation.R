@@ -816,7 +816,7 @@ Smooth_CBI <- function(pres,
 Max_MCC <- function(Pred, Sp.occ) # Pred: vector of predicted probabilities Sp.occ: vector of binary observations
 {
   MCC <- function(thresh, Pred, Sp.occ){
-    Pred.bin <- table(Pred >= thresh, Sp.occ)
+    Pred.bin <- as.numeric(table(Pred >= thresh, Sp.occ))
     if (nrow(Pred.bin) != 2) {
       return(0)
     }
