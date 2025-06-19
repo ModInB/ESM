@@ -826,7 +826,7 @@ Max_MCC <- function(Pred, Sp.occ) # Pred: vector of predicted probabilities Sp.o
       FN <- Pred.bin[3]
       TN <- Pred.bin[1]
       
-      mcc = ((TP*FN)-(FP+FN))/sqrt((TP+FP)*(TP+FN)*(TN+FP)*(TN+FN))
+      mcc = ((TP*TN)-(FP+FN))/sqrt((TP+FP)*(TP+FN)*(TN+FP)*(TN+FN))
       
       return(mcc)
     }
