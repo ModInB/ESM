@@ -817,7 +817,7 @@ Max_MCC <- function(Pred, Sp.occ) # Pred: vector of predicted probabilities Sp.o
 {
   MCC <- function(thresh, Pred, Sp.occ){
     Pred.bin <- as.numeric(table(Pred >= thresh, Sp.occ))
-    if (length(Pred.bin) != 2) {
+    if (length(Pred.bin) != 4) {
       return(0)
     }
     else {
