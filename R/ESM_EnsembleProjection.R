@@ -26,8 +26,20 @@ ESM_Ensemble.Projection <- function(ESM.proj,
                                     ESM.ensembleMod,
                                     chosen.models = "all",
                                     save.obj = TRUE){
+  
+  ##Take the needed objects
+  weights.algo <- ESM.ensembleMod$EF.algo$weights.algo
+  weights.EF <- ESM.ensembleMod$EF$weights.EF
+  projections <- do.call(c,ESM.proj$projection.path)
+  name.env <- ESM.proj$name.env
+  rounded <- ESM.proj$rounded
+  datatype <- ESM.proj$datatype
+  models <- ESM.ensembleMod$model.info$models
+  
   ## models check
-  models <- ESM.proj$model.info$models
+  if(length(models)>1){
+    models <- sub(".EF","",names(weights.EF)[weights.EF>0],fixed = TRUE) # Remove non projected models
+  }
   if(chosen.models != "all"){
     if(min(chosen.models %in% models)==0){
       stop(paste("chosen.models need to be a subset of",deparse(models)))
@@ -36,18 +48,13 @@ ESM_Ensemble.Projection <- function(ESM.proj,
     }
   }
   
+  
   ##Set the pathway
   iniwd <- getwd()
   on.exit(setwd(iniwd))
   setwd(paste0("ESM.output_",ESM.ensembleMod$data$sp.name))
   
-  ##Take the needed objects
-  weights.algo <- ESM.ensembleMod$EF.algo$weights.algo
-  weights.EF <- ESM.ensembleMod$EF$weights.EF
-  projections <- do.call(c,ESM.proj$projection.path)
-  name.env <- ESM.proj$name.env
-  rounded = ESM.proj$rounded
-  datatype = ESM.proj$datatype
+
   
   ## Make the projections----
   if(ESM.proj$proj.type == "data.frame"){

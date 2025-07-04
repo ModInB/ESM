@@ -9,7 +9,8 @@ ESM_Binarize(proj, thr)
 \arguments{
 \item{proj}{a \code{SpatRaster}, \code{data.frame}, \code{matrix}, or \code{numeric} containing the data to binarize.}
 
-\item{thr}{\code{numeric}. threshold to binarize the probabilities. \bold{must be a single value}.}
+\item{thr}{\code{numeric}. threshold to binarize the probabilities. \bold{must be a single value or or have the same 
+length as the number of layers/columns}.}
 }
 \value{
 An object of the same class as proj: \code{SpatRaster}, \code{data.frame}, \code{matrix}, or \code{numeric}.

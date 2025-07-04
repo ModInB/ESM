@@ -597,9 +597,7 @@ ESM_Response.Plot <- function (ESM.Mod,
                                                          })), max(sapply(proj.fixed.list, function(x) {
                                                            max(x[, -1])
                                                          }))), type = "l", lwd=2, col = "red",...)
-      graphics::legend("topleft", legend = c("ensemble", models), 
-             fill = c("red", ColModels[1:length(models)]), 
-             box.lty = 0)
+
       for (mod.i in models) {
         graphics::points(proj.fixed.list[[i]][, mod.i] ~ proj.fixed.list[[i]][, 
                                                                     1], col = ColModels[which(models == mod.i)], 
@@ -608,6 +606,11 @@ ESM_Response.Plot <- function (ESM.Mod,
       }
     }
   }
+  par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
+  plot(0, 0, type = 'l', bty = 'n', xaxt = 'n', yaxt = 'n')
+  graphics::legend("bottom", legend = c("Ensemble", models), 
+                   fill = c("red", ColModels[1:length(models)]), 
+                   bty= "n", xpd = TRUE, horiz = TRUE)
   
   unlink(paste0("ESM.output_", ESM.Mod$data$sp.name,"/data.fixed",1:ncol(data)), recursive = TRUE)
   

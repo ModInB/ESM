@@ -141,34 +141,47 @@ Bp_Sampling <- function(env,
     
     env.score.round.filt <- unique(env.score.round)
     
-    cell.pos <- terra::cellFromXY(grid.env, env.score.round.filt)
-    cell.env <- unique(cell.pos)
-    if(n.points<length(cell.env)){
-      cat("\nThere are more environmental classes than n.points. Thus,the number of background points will be equal to the number of classes")
-      n.ObsPerClass = 1
+    if(nrow(env.score.round.filt) <= n.points){
+      cat("Number of environmental values available is less than or equal to n.points. Please consider changing the values of 'digit.val.env' and/or 'res.grid.env'.")
+      ToKeep <- c(1:nrow(env.score.round.filt))
+      
     }else{
-      n.ObsPerClass <- ceiling(n.points/length(cell.env))
-    }
-    
-    ToKeep <- c()
-    ToPrint <- TRUE
-    
-    ##Sampling
-    for(i in 1:length(cell.env)){
-      pointVal <- which(cell.pos == cell.env[i])
-      if(length(pointVal) < n.ObsPerClass){
-        if(ToPrint){
-          cat("\nSome Classes have less observation than the number of observation per class. Thus, all the observations for these classes will be sampled. 
-              Note that the number of background points sampled will be less than asked.")
-        }
-        ToPrint <- FALSE
-        ToKeep <- c(ToKeep,pointVal)
+      cell.pos <- terra::cellFromXY(grid.env, env.score.round.filt)
+      cell.env <- unique(cell.pos)
+      
+      # test <- as.factor(cell.pos)
+      # test <- split(x=1:length(test),f=test)
+      # 
+      
+      if(n.points<length(cell.env)){
+        cat("\nThere are more environmental classes than n.points. Thus,the number of background points will be equal to the number of classes")
+        n.ObsPerClass = 1
       }else{
-        if(length(pointVal)==1){
+        n.ObsPerClass <- floor(n.points/length(cell.env))
+      }
+      
+      aa <- lapply(test, sample,size = 2)
+      
+      ToKeep <- c()
+      ToPrint <- TRUE
+      
+      ##Sampling
+      for(i in 1:length(cell.env)){
+        pointVal <- which(cell.pos == cell.env[i])
+        if(length(pointVal) < n.ObsPerClass){
+          if(ToPrint){
+            cat("\nSome Classes have less observation than the number of observation per class. Thus, all the observations for these classes will be sampled. 
+              Note that the number of background points sampled will be less than asked.")
+          }
+          ToPrint <- FALSE
           ToKeep <- c(ToKeep,pointVal)
         }else{
-          ToKeep <- c(ToKeep,sample(pointVal,n.ObsPerClass, replace = FALSE))
-          
+          if(length(pointVal)==1){
+            ToKeep <- c(ToKeep,pointVal)
+          }else{
+            ToKeep <- c(ToKeep,sample(pointVal,n.ObsPerClass, replace = FALSE))
+            
+          }
         }
       }
     }
@@ -384,7 +397,8 @@ ESM_Range.Shift <- function(proj.curr,
 #' @description This function binarizes probability values based on a specific threshold
 #' 
 #' @param proj a \code{SpatRaster}, \code{data.frame}, \code{matrix}, or \code{numeric} containing the data to binarize. 
-#' @param thr \code{numeric}. threshold to binarize the probabilities. \bold{must be a single value}. 
+#' @param thr \code{numeric}. threshold to binarize the probabilities. \bold{must be a single value or or have the same 
+#' length as the number of layers/columns}. 
 #' 
 #' @details
 #' \describe{
@@ -409,20 +423,46 @@ ESM_Range.Shift <- function(proj.curr,
 ESM_Binarize <- function(proj,
                          thr){
   
-  if(length(thr)>1 | !is.numeric(thr)){
-    stop("thr must contain a signle numeric")
-  }
   if(inherits(proj,"SpatRaster")){
+    nProj <- terra::nlyr(proj)
+    if(length(thr)>1 & nProj != length(thr)){
+      stop("thr must be a single numeric or have the same length as the number of layers.")
+    }
+    if(length(thr) == 1){
+      rclmat <- matrix(c(0, thr, 0,thr, Inf, 1),
+                       ncol=3, 
+                       byrow=TRUE)
+      
+      proj.bin <- terra::classify(proj, rclmat, include.lowest=TRUE, right = FALSE)
+    }else{
+      proj.bin <- list()
+      for(i in 1:nProj){
+        rclmat <- matrix(c(0, thr[i], 0,thr[i], Inf, 1),
+                         ncol=3, 
+                         byrow=TRUE)
+        
+        proj.bin[[i]] <- terra::classify(proj[[i]], rclmat, include.lowest=TRUE, right = FALSE)
+      }
+      proj.bin <- terra::rast(proj.bin)
+    }
+    names(proj.bin) = names(proj)
     
-    rclmat <- matrix(c(0, thr, 0,thr, Inf, 1),
-                     ncol=3, 
-                     byrow=TRUE)
-    
-    proj.bin <- terra::classify(proj, rclmat, include.lowest=TRUE, right = FALSE)
     
   }else if(is.data.frame(proj) | is.matrix(proj) | is.numeric(proj)){
-    
-    proj.bin <- sapply(proj, FUN = function(x,thr){as.integer(x>=thr)}, thr = thr)
+    if(length(thr)==1){
+      proj.bin <- sapply(proj, FUN = function(x,thr){as.integer(x>=thr)}, thr = thr)
+    }else{
+      if(length(thr) != ncol(proj)){
+        stop("thr must be a single numeric or have the same length as the number of columns.")
+      }
+      proj.bin <- proj
+      for(i in 1:ncol(proj)){
+        proj.bin[,i] <- sapply(proj[,i], FUN = function(x,thr){as.integer(x>=thr)}, thr = thr[i])
+        
+      }
+
+    }
+   
     
   }else{
     stop("proj must be either a SpatRaster, a data.frame, a matrix, or a numeric")

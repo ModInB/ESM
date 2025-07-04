@@ -5,10 +5,12 @@
 #' @description Model and evaluate species distribution based on the method Ensemble of Small Models (ESM).
 #' 
 #' @param resp \code{numeric} of 0-1. 0 when the species is absent and 1 when present.
-#' @param xy \code{matrix} or \code{data.frame} containing the X and Y coordinate of the species.
 #' @param env \code{matrix}, \code{data.frame} or \code{SpatRaster} of the species predictors.
+#' @param xy \code{matrix} or \code{data.frame} containing the X and Y coordinate of the species. Only Needed when 
+#' env is a \code{SpatRaster}. \emph{Default}: \code{NULL}.
 #' @param sp.name \code{character}. Name of the species (To generate of ESM folder with this name).
-#' @param models  \code{character} of the wanted algorithm methods. Can be c("ANN","CTA","GAM","GLM","GBM","MAXNET) or a subset of these 5 techniques.
+#' @param models  \code{character} of the wanted algorithm methods. Can be c("ANN","CTA","GAM","GLM","GBM","MAXNET) 
+#' or a subset of these 5 techniques.
 #' @param models.options \code{NULL} or the output from \code{\link{ESM_Models.Options}}
 #' @param prevalence \code{NULL} or a \code{numeric} comprised between 0-1. Prevalence value is used to build 
 #' 'weighted response weights'. The default is 0.5 (weighting presences equally to the absences). 
@@ -84,16 +86,16 @@
 #' @examples \donttest{
 #' library(terra)
 #' #Loading test data
-#' data(ESM_Species.env)
+#' data(ESM_Species.Env)
 #' data(ESM_Env)
 #' #species occurrences
-#' xy <- ESM_Species.env[,1:2]
-#' resp <- ESM_Species.env[,3] #Tayloria_serrata
+#' xy <- ESM_Species.Env[,1:2]
+#' resp <- ESM_Species.Env[,3] #Tayloria_serrata
 #' env <- terra::unwrap(ESM_Env)
 #' ### Calibration of simple bivariate models
 #' my.ESM <- ESM_Modeling(resp = resp,
-#'                        xy=xy,
 #'                        env=env,
+#'                        xy=xy,
 #'                        sp.name = "test",
 #'                        models = c("GLM"),
 #'                        models.options = NULL,
@@ -162,8 +164,8 @@
 #' @importFrom mgcv s
 #### ESM_Modeling----
 ESM_Modeling <- function(resp,
-                          xy,
                           env,
+                          xy = NULL,
                           sp.name,
                           models,
                           models.options = NULL,
@@ -184,10 +186,7 @@ ESM_Modeling <- function(resp,
                           save.obj = TRUE,
                           verbose = TRUE){
   
-  ## Check resp, XY, sp.name and prevalence----
-  if(length(resp) != nrow(xy)){
-    stop("resp and xy must have the same length")
-  }
+  ## Check resp, sp.name and prevalence----
   
   if(anyNA(resp)){
     
@@ -203,9 +202,7 @@ ESM_Modeling <- function(resp,
   if(!all(sort(unique(resp)) == c(0,1))){
     stop("resp should only contain 0 and 1")
   }
-  if(ncol(xy)!=2){
-    stop("xy should be a two-column matrix or data.frame")
-  }
+
   if(is.null(sp.name) | !(is.character(sp.name))){
     stop("sp.name should be a character object")
   }
@@ -234,14 +231,21 @@ ESM_Modeling <- function(resp,
   ## Check env and extract values if SpatRaster----
   env.info <- list()
   if(is.data.frame(env)){
-    if(length(resp) != nrow(env) | nrow(env) != nrow(xy)){
-      stop("resp, xy and env must have the same length")
+    if(length(resp) != nrow(env)){
+      stop("resp and env must have the same length")
     }else{
       env.var <- env
       env.info$type = "data.frame"
     }
     
   }else if(inherits(env,"SpatRaster")){
+    if(length(resp) != nrow(xy)){
+      stop("resp and xy must have the same length")
+    }
+    if(ncol(xy)!=2){
+      stop("When env is a spatRaster, xy should be a two-column matrix or data.frame")
+    }
+    
     xy <- as.matrix(xy)
     env.var <- terra::extract(env,xy)
     env.info$type = "SpatRaster"
@@ -303,7 +307,10 @@ ESM_Modeling <- function(resp,
     n.presAbs.new <- c(n.presAbs.new["1"],n.presAbs.new["0"])
     change.n <- n.presAbs - n.presAbs.new 
     warning(paste("\nNAs were found in env and were thus removed.\n",change.n["0"],"absences",change.n["1"], "presences were removed"))
-    xy <- xy[!(is.thereNAs),]
+    if(inherits(env,"SpatRaster")){
+      xy <- xy[!(is.thereNAs),]
+      }
+    
     env.var = stats::na.omit(env.var)
   }
   # Check if presences and absences are present even after removing possible NAs----
@@ -394,7 +401,7 @@ ESM_Modeling <- function(resp,
                         SBI = SBI)
     biva.calib <- lapply(biva.mods.filt,.pooling.ESM.Mod,
                         resp=resp, models=models,
-                        cv.split.table=!(cv.split.table[,-ncol(cv.split.table)]),
+                        cv.split.table=(!(cv.split.table[,-ncol(cv.split.table)])),
                         SBI = SBI)
   }else{
     ## Evaluation----
@@ -406,7 +413,7 @@ ESM_Modeling <- function(resp,
     
     biva.calib <- lapply(biva.mods.filt,.bivaEvaluation,
                          resp=resp, models=models,
-                         cv.split.table=!(cv.split.table),
+                         cv.split.table=(!(cv.split.table)),
                          SBI = SBI,
                          validation = FALSE)
   }

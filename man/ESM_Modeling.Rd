@@ -6,8 +6,8 @@
 \usage{
 ESM_Modeling(
   resp,
-  xy,
   env,
+  xy = NULL,
   sp.name,
   models,
   models.options = NULL,
@@ -32,13 +32,15 @@ ESM_Modeling(
 \arguments{
 \item{resp}{\code{numeric} of 0-1. 0 when the species is absent and 1 when present.}
 
-\item{xy}{\code{matrix} or \code{data.frame} containing the X and Y coordinate of the species.}
-
 \item{env}{\code{matrix}, \code{data.frame} or \code{SpatRaster} of the species predictors.}
+
+\item{xy}{\code{matrix} or \code{data.frame} containing the X and Y coordinate of the species. Only Needed when 
+env is a \code{SpatRaster}. \emph{Default}: \code{NULL}.}
 
 \item{sp.name}{\code{character}. Name of the species (To generate of ESM folder with this name).}
 
-\item{models}{\code{character} of the wanted algorithm methods. Can be c("ANN","CTA","GAM","GLM","GBM","MAXNET) or a subset of these 5 techniques.}
+\item{models}{\code{character} of the wanted algorithm methods. Can be c("ANN","CTA","GAM","GLM","GBM","MAXNET) 
+or a subset of these 5 techniques.}
 
 \item{models.options}{\code{NULL} or the output from \code{\link{ESM_Models.Options}}}
 
@@ -125,16 +127,16 @@ This allows to run different biva splits on different computers. However, it is 
 \donttest{
 library(terra)
 #Loading test data
-data(ESM_Species.env)
+data(ESM_Species.Env)
 data(ESM_Env)
 #species occurrences
-xy <- ESM_Species.env[,1:2]
-resp <- ESM_Species.env[,3] #Tayloria_serrata
+xy <- ESM_Species.Env[,1:2]
+resp <- ESM_Species.Env[,3] #Tayloria_serrata
 env <- terra::unwrap(ESM_Env)
 ### Calibration of simple bivariate models
 my.ESM <- ESM_Modeling(resp = resp,
-                       xy=xy,
                        env=env,
+                       xy=xy,
                        sp.name = "test",
                        models = c("GLM"),
                        models.options = NULL,
