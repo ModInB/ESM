@@ -83,7 +83,7 @@ Bp <- Bp_Sampling(env = env,
 Bp <- Bp_Sampling(env = env,
                   n.points = 1000,
                   method = "strat.geo",
-                  aggr.fact.geo = 2,
+                  aggr.fact.geo = 100,
                   To.plot = FALSE)
                        
 # Selection full random in the environmental space                     
