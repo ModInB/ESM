@@ -5,10 +5,12 @@
 #' @description Model and evaluate species distribution based on the method Ensemble of Small Models (ESM).
 #' 
 #' @param resp \code{numeric} of 0-1. 0 when the species is absent and 1 when present.
-#' @param xy \code{matrix} or \code{data.frame} containing the X and Y coordinate of the species.
 #' @param env \code{matrix}, \code{data.frame} or \code{SpatRaster} of the species predictors.
+#' @param xy \code{matrix} or \code{data.frame} containing the X and Y coordinate of the species. Only Needed when 
+#' env is a \code{SpatRaster}. \emph{Default}: \code{NULL}.
 #' @param sp.name \code{character}. Name of the species (To generate of ESM folder with this name).
-#' @param models  \code{character} of the wanted algorithm methods. Can be c("ANN","CTA","GLM","GBM","MAXNET) or a subset of these 5 techniques.
+#' @param models  \code{character} of the wanted algorithm methods. Can be c("ANN","CTA","GAM","GLM","GBM","MAXNET) 
+#' or a subset of these 5 techniques.
 #' @param models.options \code{NULL} or the output from \code{\link{ESM_Models.Options}}
 #' @param prevalence \code{NULL} or a \code{numeric} comprised between 0-1. Prevalence value is used to build 
 #' 'weighted response weights'. The default is 0.5 (weighting presences equally to the absences). 
@@ -24,6 +26,7 @@
 #' @param cv.split.table a \code{matrix} or a \code{data.frame} filled with TRUE/FALSE to specify which part of data must be used for models calibration (TRUE) 
 #' and for models validation (FALSE). Each column corresponds to a 'RUN' and should be named "RUNX" where X correspond to the number of the run. 
 #' The last column should be filled with only TRUE and named "Full" to make a full model used for the future projection. Only applicable when cv.method="custom".
+#' @param pooling \code{logical}. Should the models be evaluated via the pooling method? \emph{Default = TRUE}. See \code{\link{ESM_Pooling.Evaluation}} for more information.
 #' @param SBI \code{logical}. Should the model evaluated with the Smooth Boyce Index (SBI=TRUE) or the regular Boyce Index (SBI=FALSE)? If TRUE, the SBI will be
 #' computed with the function \code{\link{Smooth_CBI}} and resulted from the ensemble of 5 smoothing techniques. \emph{Default: TRUE. Note that
 #' computing SBI instead of the regular Boyce Index usually increases computation time.}
@@ -43,8 +46,9 @@
 #' for example all possible bivariate models (i.e. models that contain only two predictors at a time out of a larger set of predictors), 
 #' and then combine all possible bivariate models into an ensemble (Lomba et al. 2010; Breiner et al. 2015).
 #' 
-#' The ESM set of functions could be used to build ESMs using simple bivariate models which are averaged using weights based on model performances. 
-#' They provide full functionality of the approach described in Breiner et al. (2015).
+#' The ESM set of functions could be used to build ESMs using simple bivariate models which are averaged using weights based on model performances 
+#' as described in Breiner et al. (2015). Note that if 'pooling = TRUE', the weights will be computed via the pooling evaluation (as recommended in
+#' Collart & Guisan, 2023) and will thus change from the approach of Breiner et al (2015).
 #' 
 #' The argument which.biva allows to split model runs, e.g. if which.biva is 1:3, only the three first bivariate variable combinations will be modeled. 
 #' This allows to run different biva splits on different computers. However, it is better not to use this option if all models are run on a single computer.
@@ -55,7 +59,8 @@
 #' \item{data}: a \code{list} with the object resp, xy, env.var and sp.name. env.var is = to the data supplied in the argument env. 
 #' If env, was a SpatRaster, it corresponds to the extracted values of these rasters.
 #' \item{model.info}: a \code{list} of the models used (models), their options (model.options), the combination of bivariate models (which.biva), 
-#' the failed models (failed.mod), the modeling ID (modeling.id), the prevalence argument and, the path to the folder where are the stored the models (biva.path).
+#' the failed models (failed.mod), the modeling ID (modeling.id), the prevalence argument, the path to the folder where are the stored the models (biva.path),
+#' and (pooling = TRUE or FALSE) if the pooling method  was applied or not to evaluate models (results in biva.evaluations and biva.calibration).
 #' \item{cv.split.table}: a \code{matrix} used to train and test models. See explanation of the argument cv.split.table.
 #' \item{cv.method }: a \code{character} corresponding to the used cross-validation method.
 #' \item{biva.predictions}: a \code{list} of the predictions of all the runs for each bivariate models.
@@ -73,22 +78,24 @@
 #' 
 #' Breiner F.T., Nobis M.P., Bergamini A., Guisan A. 2018. Optimizing ensembles of small models for predicting the distribution of species with few occurrences. \emph{Methods in Ecology and Evolution}. \doi{10.1111/2041-210X.12957}
 #' 
+#' Collart, F., & Guisan, A. (2023). Small to train, small to test: Dealing with low sample size in model evaluation. \emph{Ecological Informatics}. \bold{75}, 102106. \doi{10.1016/j.ecoinf.2023.102106}.
+#' 
 #' @seealso \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Modeling}},   \code{\link{ESM_Ensemble.Projection}}, 
 #' \code{\link{ESM_Pooling.Evaluation}}
 #' 
 #' @examples \donttest{
 #' library(terra)
 #' #Loading test data
-#' data(ESM_species.env)
+#' data(ESM_Species.Env)
 #' data(ESM_Env)
 #' #species occurrences
-#' xy <- ESM_species.env[,1:2]
-#' resp <- ESM_species.env[,3] #Tayloria_serrata
+#' xy <- ESM_Species.Env[,1:2]
+#' resp <- ESM_Species.Env[,3] #Campylophyllum halleri 
 #' env <- terra::unwrap(ESM_Env)
 #' ### Calibration of simple bivariate models
 #' my.ESM <- ESM_Modeling(resp = resp,
-#'                        xy=xy,
 #'                        env=env,
+#'                        xy=xy,
 #'                        sp.name = "test",
 #'                        models = c("GLM"),
 #'                        models.options = NULL,
@@ -96,13 +103,14 @@
 #'                        cv.method = "split-sampling",
 #'                        cv.rep = 2,
 #'                        cv.ratio = 0.7,
+#'                        pooling = TRUE,
 #'                        SBI = FALSE,
 #'                        parallel = FALSE,
 #'                        save.models = FALSE,
 #'                        save.obj = FALSE,
 #'                        verbose = FALSE)
 #'                        
-#' # Performances of each bivariate model
+#' # Performances of each bivariate model based on the pooling method
 #' my.ESM$biva.evaluations
 #' 
 #' ### Ensemble models using a weighted mean based on maxTSS
@@ -111,19 +119,10 @@
 #'                                    threshold=0,
 #'                                    save.obj = FALSE)
 #'                                    
-#' ## Performances of the ensemble across the replicates
-#' ## The full model evaluation corresponds to the mean value across the replicates
+#' ## Performances of the ensemble across the replicates based 
+#' # on the pooling method
 #' my.ESM_EF$evaluations
 #' 
-#' ### Evaluation of the ensemble models based on the pooling procedure 
-#' ### as recommended in Collart & Guisan (2023)
-#' eval <- ESM_Pooling.Evaluation(ESM.Mod = my.ESM,
-#'                                ESM.ensembleMod = my.ESM_EF,
-#'                                EachSmallModels = FALSE)
-#'                                
-#' ## Performances of the ensemble
-#' eval$ESM.evaluations
-#'
 #' ### Predictions of each bivariate model into a new space
 #' proj <- ESM_Projection(ESM.Mod = my.ESM,
 #'                        new.env = env,
@@ -142,8 +141,7 @@
 #'
 #'
 #' ### Binary Projection based on max TSS of calibrated ESMs into new space                                                
-#' my.ESM_EFproj_current_binary <- (Ens.proj > 
-#'                                 (my.ESM_thresholds$TSS.th*1000))*1
+#' my.ESM_EFproj_current_binary <- ESM_Binarize(Ens.proj, my.ESM_thresholds$TSS.th*1000)
 #'
 #' ### get the variable contributions of ESMs
 #' ESM_Variable.Contributions(my.ESM,my.ESM_EF) 
@@ -152,6 +150,7 @@
 #' my.ESM_responsePlot<- ESM_Response.Plot(my.ESM,
 #'                                         my.ESM_EF,
 #'                                         fixed.var.metric = 'mean')
+#'                                         
 #' ### Generate an ODMAP table. Note that you still have to fill the other 
 #' # sections and check the prefilled ones
 #'  ODMAP_Table <- ESM_Generate.ODMAP(ESM.Mod = my.ESM,
@@ -162,10 +161,11 @@
 #' unlink("ESM.output_test", recursive = TRUE)
 #' }
 #' @export
+#' @importFrom mgcv s
 #### ESM_Modeling----
 ESM_Modeling <- function(resp,
-                          xy,
                           env,
+                          xy = NULL,
                           sp.name,
                           models,
                           models.options = NULL,
@@ -175,6 +175,7 @@ ESM_Modeling <- function(resp,
                           cv.ratio = 0.7,
                           cv.n.blocks = NULL,
                           cv.split.table = NULL,
+                          pooling = TRUE,
                           SBI = TRUE,
                           which.biva = NULL,
                           parallel = FALSE,
@@ -185,10 +186,7 @@ ESM_Modeling <- function(resp,
                           save.obj = TRUE,
                           verbose = TRUE){
   
-  ## Check resp, XY, sp.name and prevalence----
-  if(length(resp) != nrow(xy)){
-    stop("resp and xy must have the same length")
-  }
+  ## Check resp, sp.name and prevalence----
   
   if(anyNA(resp)){
     
@@ -204,9 +202,7 @@ ESM_Modeling <- function(resp,
   if(!all(sort(unique(resp)) == c(0,1))){
     stop("resp should only contain 0 and 1")
   }
-  if(ncol(xy)!=2){
-    stop("xy should be a two-column matrix or data.frame")
-  }
+
   if(is.null(sp.name) | !(is.character(sp.name))){
     stop("sp.name should be a character object")
   }
@@ -219,15 +215,15 @@ ESM_Modeling <- function(resp,
   
   ## Check model names ----
   
-  if(any(!(models  %in% c("GLM","GBM","MAXNET","ANN", "CTA")))){
-    stop("models must be = to ANN, CTA, GLM, GBM, and/or MAXNET")
+  if(any(!(models  %in% c("GAM","GLM","GBM","MAXNET","ANN", "CTA")))){
+    stop("models must be = to ANN, CTA, GLM, GAM, GBM, and/or MAXNET")
   }
   
   ## Check model options----
   if(is.null(models.options)){
     models.options = ESM_Models.Options()
   }else{
-    if(!is.list(models.options) | deparse(names(models.options))!= deparse(c("ANN", "CTA","GLM","GBM"))){
+    if(!is.list(models.options) | deparse(names(models.options))!= deparse(c("ANN", "CTA","GAM","GLM","GBM"))){
      stop("models.options must be null or formatted via ESM_Models.Options()") 
     }
   }
@@ -235,14 +231,21 @@ ESM_Modeling <- function(resp,
   ## Check env and extract values if SpatRaster----
   env.info <- list()
   if(is.data.frame(env)){
-    if(length(resp) != nrow(env) | nrow(env) != nrow(xy)){
-      stop("resp, xy and env must have the same length")
+    if(length(resp) != nrow(env)){
+      stop("resp and env must have the same length")
     }else{
       env.var <- env
       env.info$type = "data.frame"
     }
     
   }else if(inherits(env,"SpatRaster")){
+    if(length(resp) != nrow(xy)){
+      stop("resp and xy must have the same length")
+    }
+    if(ncol(xy)!=2){
+      stop("When env is a spatRaster, xy should be a two-column matrix or data.frame")
+    }
+    
     xy <- as.matrix(xy)
     env.var <- terra::extract(env,xy)
     env.info$type = "SpatRaster"
@@ -304,7 +307,10 @@ ESM_Modeling <- function(resp,
     n.presAbs.new <- c(n.presAbs.new["1"],n.presAbs.new["0"])
     change.n <- n.presAbs - n.presAbs.new 
     warning(paste("\nNAs were found in env and were thus removed.\n",change.n["0"],"absences",change.n["1"], "presences were removed"))
-    xy <- xy[!(is.thereNAs),]
+    if(inherits(env,"SpatRaster")){
+      xy <- xy[!(is.thereNAs),]
+      }
+    
     env.var = stats::na.omit(env.var)
   }
   # Check if presences and absences are present even after removing possible NAs----
@@ -324,7 +330,7 @@ ESM_Modeling <- function(resp,
   # Generate all the possible combination variables
   combinations <- utils::combn(colnames(env.var), 2)
   
-  if (is.null(which.biva)) {
+  if(is.null(which.biva)) {
     which.biva <- 1:ncol(combinations)
   }else if(sum(!(which.biva %in% (1:ncol(combinations))))>0){ ## Error check
     stop(paste("which.biva must be an integer vector with values inside", deparse(as.character(1:ncol(combinations)))))
@@ -375,31 +381,45 @@ ESM_Modeling <- function(resp,
   }
   
 
-  failed.mods <- lapply(biva.mods,.checkFailedMods)
+  failed.mods <- lapply(biva.mods,
+                        .checkFailedMods)
   biva.mods.filt <- lapply(1:length(biva.mods), .PutNAsFailed, 
                            biva.mods,failed.mods)
   names(biva.mods.filt) = names(biva.mods)
-  lapply(1:length(biva.mods), .PrintFailedMods, 
-         biva.mods,failed.mods)
-  if(verbose){
+
+  if(verbose){  
+    lapply(1:length(biva.mods), .PrintFailedMods,
+           biva.mods,failed.mods)
       cat("\n############### Start evaluations ###############")
 
   }
-  
-  
-  ## Evaluation----
-  biva.eval <- lapply(biva.mods.filt,.bivaEvaluation,
-                      resp=resp, models=models,
-                      cv.split.table=cv.split.table,
-                      SBI = SBI,
-                      validation = TRUE) #If the full Model failed Next
-  
-  biva.calib <- lapply(biva.mods.filt,.bivaEvaluation,
-                       resp=resp, models=models,
-                       cv.split.table=!(cv.split.table),
-                       SBI = SBI,
-                       validation = FALSE)
 
+  if(pooling){
+    biva.eval <- lapply(biva.mods.filt,.pooling.ESM.Mod,
+                        resp=resp, models=models,
+                        cv.split.table=cv.split.table[,-ncol(cv.split.table)],
+                        SBI = SBI)
+    biva.calib <- lapply(biva.mods.filt,.pooling.ESM.Mod,
+                        resp=resp, models=models,
+                        cv.split.table=(!(cv.split.table[,-ncol(cv.split.table)])),
+                        SBI = SBI)
+  }else{
+    ## Evaluation----
+    biva.eval <- lapply(biva.mods.filt,.bivaEvaluation,
+                        resp=resp, models=models,
+                        cv.split.table=cv.split.table,
+                        SBI = SBI,
+                        validation = TRUE) #If the full Model failed Next
+    
+    biva.calib <- lapply(biva.mods.filt,.bivaEvaluation,
+                         resp=resp, models=models,
+                         cv.split.table=(!(cv.split.table)),
+                         SBI = SBI,
+                         validation = FALSE)
+  }
+  
+  
+  cv.ratio = 0.7
   ## Return outputs ----
   obj <- list(data = list(sp.name= sp.name,
                           resp = resp,
@@ -413,9 +433,12 @@ ESM_Modeling <- function(resp,
                                 failed.mod = failed.mods,
                                 modeling.id = modeling.id,
                                 prevalence = prevalence,
-                                biva.path = newwd),
+                                biva.path = newwd,
+                                pooling = pooling,
+                                cv.method = cv.method,
+                                cv.ratio = cv.ratio,
+                                cv.n.blocks = cv.n.blocks),
               cv.split.table = cv.split.table,
-              cv.method = cv.method,
               biva.predictions = biva.mods.filt,
               biva.calibration = biva.calib,
               biva.evaluations = biva.eval
@@ -534,7 +557,6 @@ ESM_Modeling <- function(resp,
     ratio.Pres.Abs <- table(data$resp)/nrow(data)
     ratio.Pres.Abs["1"] <- prevalence/ratio.Pres.Abs["1"]
     ratio.Pres.Abs["0"] <- (1-prevalence)/ratio.Pres.Abs["0"]
-    ratio.Pres.Abs <- round(ratio.Pres.Abs/min(ratio.Pres.Abs)) #so that the min weight is 1
     w <- data$resp
     w[data$resp==1] = ratio.Pres.Abs["1"]
     w[data$resp==0] = ratio.Pres.Abs["0"]
@@ -641,90 +663,56 @@ ESM_Modeling <- function(resp,
         if(verbose){
           cat(paste("\nGLM", nameRun))
         }
-        
-        if(is.null(models.options$GLM$myFormula)){
-          if(models.options$GLM$test == "none"){
-            
-            formula <- .makeGLMFormula(env.var,
-                                       models.options$GLM)
-            tryCatch(expr={mod <-   spsUtil::quiet(stats::glm(formula = formula,
-                       family = models.options$GLM$family,
-                       weights = w,
-                       data = data))}, error=function(e){
-                         cat(paste("\n model",models[j],nameRun,"failed"))
-                         err <<-TRUE
-                       })
-            if(err){
-              pred <- as.data.frame(rep(NA,nrow(env.var)))
-              colnames(pred) = "GLM" 
-            }else{
-              pred <- as.data.frame(predict(mod,newdata = env.var,type = "response"))
-              colnames(pred) = "GLM" 
-            }
-            
-            if(save.obj & !(err)){
-              save(mod,file=paste("ESM",nameRun,
-                                  colnames(env.var)[1],
-                                  colnames(env.var)[2],
-                                  models[j],"model.out",
-                                  sep="_"))
-            }else if(nameRun == "Full" & !(err)){
-              save(mod,file=paste("ESM",nameRun,
-                                  colnames(env.var)[1],
-                                  colnames(env.var)[2],
-                                  models[j],"model.out",
-                                  sep="_"))
-            }
-            
-          }else if(models.options$GLM$test == "AIC"){
-            formula <- .makeGLMFormula(env.var,
-                                       models.options$GLM)
-            mod.full<-   spsUtil::quiet(stats::glm(formula = formula,
-                           family = models.options$GLM$family,
-                           weights = w,
-                           data = data))
-            tryCatch(expr={
-              mod <-   spsUtil::quiet(stats::step(mod.full,
-                        scope = "resp~1",
-                        direction = "both",
-                        trace=F))
-            if(verbose){cat(paste0("\n\tBest Formula:",deparse(mod$formula)))}
-              }, error=function(e){
-                          cat(paste("\n model",models[j],nameRun,"failed"))
-                          err <<-TRUE
-                        })
-            
-            if(err){
-              pred <- as.data.frame(rep(NA,nrow(env.var)))
-              colnames(pred) = "GLM" 
-            }else{
-              pred <- as.data.frame(predict(mod,newdata = env.var,type = "response"))
-              colnames(pred) = "GLM" 
-            }
-            
-            if(save.obj & !(err)){
-              save(mod,file=paste("ESM",nameRun,
-                                  colnames(env.var)[1],
-                                  colnames(env.var)[2],
-                                  models[j],"model.out",
-                                  sep="_"))
-            }else if(nameRun == "Full" & !(err)){
-              save(mod,file=paste("ESM",nameRun,
-                                  colnames(env.var)[1],
-                                  colnames(env.var)[2],
-                                  models[j],"model.out",
-                                  sep="_"))
-            }
-          } 
+        if(models.options$GLM$test == "none"){
           
-        }else{
-         tryCatch(expr={mod <-   spsUtil::quiet(stats::glm(formula = models.options$GLM$myFormula,
-                     family = models.options$GLM$family,
-                     weights = w,
-                     data = data))}, error=function(e){
-                       cat(paste("\n model",models[j],nameRun,"failed"))
-                       err <<-TRUE
-                     })
+          formula <- .makeGLMFormula(env.var,
+                                     models.options$GLM)
+          tryCatch(expr={mod <-   spsUtil::quiet(stats::glm(formula = formula,
+                                                            family = models.options$GLM$family,
+                                                            weights = w,
+                                                            data = data))}, error=function(e){
+                                                              cat(paste("\n model",models[j],nameRun,"failed"))
+                                                              err <<-TRUE
+                                                            })
+          if(err){
+            pred <- as.data.frame(rep(NA,nrow(env.var)))
+            colnames(pred) = "GLM" 
+          }else{
+            pred <- as.data.frame(predict(mod,newdata = env.var,type = "response"))
+            colnames(pred) = "GLM" 
+          }
+          
+          if(save.obj & !(err)){
+            save(mod,file=paste("ESM",nameRun,
+                                colnames(env.var)[1],
+                                colnames(env.var)[2],
+                                models[j],"model.out",
+                                sep="_"))
+          }else if(nameRun == "Full" & !(err)){
+            save(mod,file=paste("ESM",nameRun,
+                                colnames(env.var)[1],
+                                colnames(env.var)[2],
+                                models[j],"model.out",
+                                sep="_"))
+          }
+          
+        }else if(models.options$GLM$test == "AIC"){
+          formula <- .makeGLMFormula(env.var,
+                                     models.options$GLM)
+          mod.full<-   spsUtil::quiet(stats::glm(formula = formula,
+                                                 family = models.options$GLM$family,
+                                                 weights = w,
+                                                 data = data))
+          tryCatch(expr={
+            mod <-   spsUtil::quiet(stats::step(mod.full,
+                                                scope = "resp~1",
+                                                direction = "both",
+                                                trace=F))
+            if(verbose){cat(paste0("\n\tBest Formula:",deparse(mod$formula)))}
+          }, error=function(e){
+            cat(paste("\n model",models[j],nameRun,"failed"))
+            err <<-TRUE
+          })
           
           if(err){
             pred <- as.data.frame(rep(NA,nrow(env.var)))
@@ -740,15 +728,14 @@ ESM_Modeling <- function(resp,
                                 colnames(env.var)[2],
                                 models[j],"model.out",
                                 sep="_"))
-          }else if(nameRun == "Full"& !(err)){
+          }else if(nameRun == "Full" & !(err)){
             save(mod,file=paste("ESM",nameRun,
                                 colnames(env.var)[1],
                                 colnames(env.var)[2],
                                 models[j],"model.out",
                                 sep="_"))
           }
-        }
-      
+        } 
       }
       if(models[j]=="GBM"){
         if(verbose){
@@ -825,6 +812,59 @@ ESM_Modeling <- function(resp,
         }
       }
       
+      if(models[j] == "GAM"){
+        if(verbose){
+          cat(paste("\nGAM", nameRun,"\n"))
+        }
+        formula <- stats::as.formula(paste0("resp ~ ",paste0("s(",
+                                                             colnames(env.var),
+                                                             ", k = ",models.options$GAM$smooth.k,
+                                                             ", bs = '",models.options$GAM$smooth.bs,
+                                                             "')",
+                                                             collapse="+")))
+        
+        tryCatch(expr={mod <- spsUtil::quiet(mgcv::gam(formula,
+                                        data = data,
+                                        weights = w,
+                                        family = models.options$GAM$family,
+                                        method = models.options$GAM$method,
+                                        optimizer = models.options$GAM$optimizer,
+                                        scale = models.options$GAM$scale,
+                                        control = models.options$GAM$control,
+                                        select = models.options$GAM$select,
+                                        gamma = models.options$GAM$gamma,
+                                        knots = models.options$GAM$knots,
+                                        H = models.options$GAM$H))}, 
+                 error=function(e){
+                   cat(paste("\n model",models[j],nameRun,"failed"))
+                   err <<-TRUE
+                 })
+        
+        if(err){
+          pred <- as.data.frame(rep(NA,nrow(env.var)))
+          colnames(pred) = "GAM" 
+        }else{
+          pred <- as.data.frame(mgcv::predict.gam(mod,newdata = env.var,type="response"))
+          colnames(pred) = "GAM" 
+          
+        }
+        
+        if(save.obj & !(err)){
+          save(mod,file=paste("ESM",nameRun,
+                              colnames(env.var)[1],
+                              colnames(env.var)[2],
+                              models[j],"model.out",
+                              sep="_"))
+        }else if(nameRun == "Full"& !(err)){
+          save(mod,file=paste("ESM",nameRun,
+                              colnames(env.var)[1],
+                              colnames(env.var)[2],
+                              models[j],"model.out",
+                              sep="_"))
+        }
+        
+      }
+      
       
       
       if(j == 1){
@@ -855,25 +895,42 @@ ESM_Modeling <- function(resp,
   return(stats::as.formula(formula))
   
 }
+
+
+
 ## .checkFailedMods----
 # Check Failed Mods
 .checkFailedMods <- function(biva.mod){
+  
   IsNa <- apply(biva.mod, 2, anyNA)
   IsFlat <- apply(biva.mod, 2, stats::sd) == 0
+  IsOverfit <- apply(biva.mod, 2, unique)
+  if(is.data.frame(IsOverfit)| is.matrix(IsOverfit)){
+    IsOverfit <- apply(IsOverfit,2, length) < 3
+  }else{
+    IsOverfit <- sapply(IsOverfit, length) < 3
+  }
   
-  Failed <- IsNa | IsFlat
+  Failed <- IsNa | IsFlat | IsOverfit
+
   return(Failed)
+  
 }
 ##.PutNAsFailed ----
 # Transform Failed models into NAs
 .PutNAsFailed <- function(biva,biva.mods,failed.mods){
+  
   biva.mods[[biva]][failed.mods[[biva]]] = NA
+  
   return(biva.mods[[biva]])
+  
 }
 ## .PrintFailedMods----
-# Print Failed Mods
+# Print Failed Models
 .PrintFailedMods <- function(biva,biva.mods,failed.mods){
+  
   if(sum(failed.mods[[biva]])>0){
     cat(paste("\nFailed Models for combination",names(biva.mods)[biva],":",colnames(biva.mods[[biva]])[failed.mods[[biva]]] ))
   }
+  
 }

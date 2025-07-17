@@ -36,6 +36,45 @@
 #' \item{ESM.fit.bivariate.models}: a \code{list} containing a matrix of of predicted values resulting from the pooling procedure 
 #' for each bivariate models (generated only if EachSmallModels = T).
 #' }
+#' @examples \donttest{
+#' # #Loading test data
+#' # data(ESM_Species.env)
+#' # #species occurrences
+#' # xy <- ESM_Species.env[,1:2]
+#' # resp <- ESM_Species.env[,3] 
+#' # env <- ESM_Species.env[,6:9]
+#' # ### Calibration of simple bivariate models
+#' # my.ESM <- ESM_Modeling(resp = resp,
+#' #                        xy = xy,
+#' #                        env = env,
+#' #                        sp.name = "test",
+#' #                        models = c("GLM"),
+#' #                        models.options = NULL,
+#' #                        prevalence = 0.5,
+#' #                        cv.method = "split-sampling",
+#' #                        cv.rep = 2,
+#' #                        cv.ratio = 0.7,
+#' #                        pooling = FALSE,
+#' #                        SBI = FALSE,
+#' #                        parallel = FALSE,
+#' #                        save.models = FALSE,
+#' #                        save.obj = FALSE,
+#' #                        verbose = FALSE)
+#' #                        
+#' # ### Ensemble models using a weighted mean based on maxTSS
+#' # my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
+#' #                                    weighting.score=c("MaxTSS"),
+#' #                                    threshold=0,
+#' #                                    save.obj = FALSE)
+#' # 
+#' # ### Evaluation of the ensemble models based on the pooling procedure 
+#' # ### as recommended in Collart & Guisan (2023)
+#' # eval <- ESM_Pooling.Evaluation(ESM.Mod = my.ESM,
+#' #                                ESM.ensembleMod = my.ESM_EF,
+#' #                                EachSmallModels = FALSE)
+#' # eval
+#' }
+#' 
 #' 
 #' @references 
 #' Collart, F., & Guisan, A. (2023). Small to train, small to test: Dealing with low sample size in model evaluation. 
@@ -69,7 +108,7 @@ ESM_Pooling.Evaluation <- function (ESM.Mod,
     fitMod <- fit[, grep(modelling.techniques[d], colnames(fit))]
     fitMod <- fitMod[, -c(grep("Full", colnames(fitMod)))]
     fitMod <- cbind(resp,fitMod)
-    Pred <- .ecospat.pooling(calib = calib, models.prediction = fitMod)
+    Pred <- .pooling(calib = calib, models.prediction = fitMod)
     
     if (d == 1) {
       PredFin <- cbind(PredFin, Pred)
@@ -106,21 +145,38 @@ ESM_Pooling.Evaluation <- function (ESM.Mod,
       for (d in 1:length(modelling.techniques)) {
         models.prediction <- IndivMod[[i]]
         models.prediction <- models.prediction[, grep(modelling.techniques[d], colnames(models.prediction))]
-        models.prediction <- models.prediction[, -c(grep("Full", colnames(models.prediction)))]
-        models.prediction <- cbind.data.frame(resp = resp, 
-                                              models.prediction)
-        Pred <- .ecospat.pooling(calib = calib, 
-                                 models.prediction = models.prediction)
-        
-        PredBiva <- cbind(PredBiva, Pred)
-        Pred <- stats::na.omit(Pred)
-        colnames(PredBiva)[ncol(PredBiva)] = paste0("Fit_", 
-                                                    modelling.techniques[d])
-        evalInter <- .evaluationScores(Pred = Pred[,-1], 
-                                       resp=Pred[,1],
-                                       SBI = SBI)
+        if(anyNA(models.prediction[,grep("Full", colnames(models.prediction))])){
+          evalInter <- as.data.frame(matrix(NA, ncol = 4, nrow = 1))
+          if(SBI){
+            colnames(evalInter) = c("AUC","SomersD","SBI","MaxTSS")
+          }else{
+            colnames(evalInter) = c("AUC","SomersD","Boyce","MaxTSS")
+          }
+          rownames(evalInter) = modelling.techniques[d]
+ 
+          Pred = as.numeric(rep(NA,nrow(models.prediction)))
+          PredBiva <- cbind(PredBiva, Pred)
+          colnames(PredBiva)[ncol(PredBiva)] = paste0("Fit_", 
+                                                      modelling.techniques[d])
+        }else{
+          models.prediction <- models.prediction[, -c(grep("Full", colnames(models.prediction)))]
+          models.prediction <- cbind.data.frame(resp = resp, 
+                                                models.prediction)
+          Pred <- .pooling(calib = calib, 
+                           models.prediction = models.prediction)
+          
+          PredBiva <- cbind(PredBiva, Pred)
+          Pred <- stats::na.omit(Pred)
+          colnames(PredBiva)[ncol(PredBiva)] = paste0("Fit_", 
+                                                      modelling.techniques[d])
+          evalInter <- .evaluationScores(Pred = Pred[,-1], 
+                                         resp=Pred[,1],
+                                         SBI = SBI)
+
+          }
         evalBiva <- rbind(evalBiva, evalInter)
         rownames(evalBiva)[nrow(evalBiva)] = modelling.techniques[d]
+       
       }
       evalBivaFin[[i]] = evalBiva
       PredBivaFin[[i]] = PredBiva
@@ -144,10 +200,11 @@ ESM_Pooling.Evaluation <- function (ESM.Mod,
 #' These models are performed following the same methodology as for the ESM (same model parameters, same number of cross-validations and 
 #' same threshold for the ensemble). The pooling evaluation can also be combined with these null models with the option pooling = TRUE 
 #' (as recommended in Collart & Guisan, 2023). In addition to the pvalue, the observed evaluation metrics are then readjusted using the 
-#' value of the evaluation metric at a certain quantile following the methodology developed in Verdon et al (2024). 
+#' value of the evaluation metric at a certain quantile following the methodology developed in Verdon et al (2024). Note that the adjustement
+#' formula is based for metric comprised between -1 and 1. Thus, the adjusted AUC is recomputed from SomersD: adjusted AUC = (adjusted SomersD -1)/2
 #' For the use of this function, please refer to the manual of ESM_Modeling.
 #' 
-#' @param  ESM.Mod The object returned by \code{ESM_Modeling}.
+#' @param ESM.Mod The object returned by \code{ESM_Modeling}.
 #' @param ESM.ensembleMod The object returned by \code{\link{ESM_Ensemble.Modeling}}.
 #' @param n.rep \code{integer}. The number of null models. \emph{Default: 99}.
 #' @param pooling \code{logical}. Should the pooling evaluation be performed? \emph{Default: FALSE}.
@@ -165,7 +222,47 @@ ESM_Pooling.Evaluation <- function (ESM.Mod,
 #' \item{adj.evaluation}: \code{numeric}. Adjusted evaluation metrics for the ESM based on a certain quantile from the null distribution.
 #' \item{evaluations}: \code{matrix}. Observed and null values for each metrics.
 #' }
-#' 
+#' @examples \donttest{
+#' # #Loading test data
+#' # data(ESM_Species.env)
+#' # #species occurrences
+#' # xy <- ESM_Species.env[,1:2]
+#' # resp <- ESM_Species.env[,3] 
+#' # env <- ESM_Species.env[,6:9]
+#' # ### Calibration of simple bivariate models
+#' # my.ESM <- ESM_Modeling(resp = resp,
+#' #                        xy = xy,
+#' #                        env = env,
+#' #                        sp.name = "test",
+#' #                        models = c("GLM"),
+#' #                        models.options = NULL,
+#' #                        prevalence = 0.5,
+#' #                        cv.method = "split-sampling",
+#' #                        cv.rep = 2,
+#' #                        cv.ratio = 0.7,
+#' #                        pooling = FALSE,
+#' #                        SBI = FALSE,
+#' #                        parallel = FALSE,
+#' #                        save.models = FALSE,
+#' #                        save.obj = FALSE,
+#' #                        verbose = FALSE)
+#' #                        
+#' # ### Ensemble models using a weighted mean based on maxTSS
+#' # my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
+#' #                                    weighting.score=c("MaxTSS"),
+#' #                                    threshold=0,
+#' #                                    save.obj = FALSE)
+#' #                                    
+#' # ## Performances of the ensemble across the replicates
+#' # ## The full model evaluation corresponds to the mean value across the replicates
+#' # my.ESM_EF$evaluations
+#' # 
+#' # ### Evaluation of using null models as recommended in Collart & Guisan (2023)
+#' # eval <- ESM_Null.Models(my.ESM,
+#' #                         my.ESM_EF,
+#' #                         n.rep = 10)
+#' # eval
+#' }
 #' @references 
 #' Collart, F., & Guisan, A. 2023. Small to train, small to test: Dealing with low sample size in model evaluation. 
 #' \emph{Ecological Informatics}. \bold{75}, 102106. \doi{10.1016/j.ecoinf.2023.102106}.
@@ -182,7 +279,7 @@ ESM_Pooling.Evaluation <- function (ESM.Mod,
 ESM_Null.Models <- function(ESM.Mod,
                             ESM.ensembleMod,
                             n.rep = 99,
-                            quant = 95,
+                            quant = 0.95,
                             pooling = FALSE,
                             hist.plot = FALSE,
                             parallel = FALSE,
@@ -191,12 +288,11 @@ ESM_Null.Models <- function(ESM.Mod,
                             save.obj = FALSE){
   
   ## check info
-  cv.method <- ESM.Mod$cv.method
+  cv.method <- ESM.Mod$model.info$cv.method
   if(cv.method == "custom"){
     stop("Null models are not implemented when custom cross-validations are used to model the species")
   }else if(cv.method == "split-sampling"){
-    cv.ratio <- round(sum(ESM.Mod$cv.split.table[,1])/length(ESM.Mod$cv.split.table[,1]),1)
-    cat(paste("\ncv.ratio has been estimated to be:", cv.ratio))
+    cv.ratio <- ESM.Mod$model.info$cv.ratio
   }
   
   if((n.rep%%1) !=0){
@@ -220,6 +316,8 @@ ESM_Null.Models <- function(ESM.Mod,
   
   ##Create a check for quantile
   models <- ESM.Mod$model.info$models
+  pooling.int <- ESM.Mod$model.info$pooling
+  
   if(parallel){
     cl <- parallel::makeCluster(n.cores)
     eval.nullModel <- parallel::parSapply(cl, 1:n.rep, 
@@ -241,7 +339,7 @@ ESM_Null.Models <- function(ESM.Mod,
     )
   }
   
-  if(pooling){
+  if(pooling & !(pooling.int)){
     ESM.pool <- ESM_Pooling.Evaluation(ESM.Mod = ESM.Mod,
                                        ESM.ensembleMod = ESM.ensembleMod)
     
@@ -266,8 +364,8 @@ ESM_Null.Models <- function(ESM.Mod,
   adj.evaluation <- (eval.nullModel[,1] - val.quantile)/ (1-val.quantile)
   names(adj.evaluation) = paste0("Adjusted_",names(adj.evaluation))
   
-  pval <- pval[-2]
-  adj.evaluation <- adj.evaluation[-2]
+  pval <- pval
+  adj.evaluation[1] <- (adj.evaluation[2]+1)/2 # Change the AUC value based on SomersD
   if(!save.obj){
     unlink(paste0(pathToSaveObject,"/ESM.output_",ESM.Mod$data$sp.name,".Null"),recursive = T, force = T)
   }
@@ -278,19 +376,27 @@ ESM_Null.Models <- function(ESM.Mod,
     on.exit(graphics::par(old.par))
     graphics::par(mfrow = c(2, 2))
     for(i in 1:4){
-      hist.data <- graphics::hist(eval.nullModel[i,-1],xlim = c(min(eval.nullModel[i,],na.rm=T),
-                                                                max(eval.nullModel[i,],na.rm=T)+0.05),
-                                  main = rownames(eval.nullModel)[i],
-                                  xlab = paste(rownames(eval.nullModel)[i]), "Null")
-      graphics::segments(x0=eval.nullModel[i,1], x1= eval.nullModel[i,1], y0=0,y1=max(hist.data$counts),col = "red")
-      graphics::points(x = eval.nullModel[i,1], y = max(hist.data$counts), col = "red",pch = 19)
+      hist.data <- graphics::hist(eval.nullModel[i,-1],plot = FALSE)
+      xmaxLim <- max(hist.data$breaks)
+      xminLim <- min(hist.data$breaks)
+      if(xmaxLim<max(eval.nullModel[i,])){
+        xmaxLim = max(eval.nullModel[i,])+0.05
+      }
+      
+      graphics::hist(eval.nullModel[i,-1],
+                     xlim = c(xminLim,xmaxLim),
+                     ylim = c(0, max(hist.data$counts)+1),
+                     main = rownames(eval.nullModel)[i], 
+                     xlab = paste(rownames(eval.nullModel)[i], "Null"))
+      graphics::segments(x0=eval.nullModel[i,1], x1= eval.nullModel[i,1], y0=0,y1= max(hist.data$counts)+1,col = "red")
+      graphics::points(x = eval.nullModel[i,1], y = max(hist.data$counts)+1, col = "red",pch = 19)
     }
   }
   
   
   obj <- list(pval = pval,
               adj.evaluation = adj.evaluation,
-              evaluations = eval.nullModel[-2,])
+              evaluations = eval.nullModel)
   return(obj)
 }
 
@@ -303,13 +409,14 @@ ESM_Null.Models <- function(ESM.Mod,
 #' @param ESM.ensembleMod The object returned by \code{\link{ESM_Ensemble.Modeling}}.
 #' @details 
 #' This function provides diverse thresholds which can be used to convert suitability 
-#' maps into binary maps. Various thresholds are provided: TSS (where sensitivity and specificity are maximized), MPA 1.0 (where all presences 
-#' are predicted positive), MPA 0.95 (where 95\% of all presences are predicted positive), MPA 0.90 (where 90\% of all presences are predicted positive), 
-#' Boyce.th.min (the lowest suitability value where the predicted/expected ratio is >1) and Boyce.th.max (the highest suitability value where the 
-#' predicted/expected ratio is =1). 
+#' maps into binary maps. Various thresholds are provided: TSS (where sensitivity and specificity are maximized) MCC (where the MCC is maximized), 
+#' MPA 1.0 (where all presences are predicted positive), MPA 0.95 (where 95\% of all presences are predicted positive), MPA 0.90 (where 90\% of all 
+#' presences are predicted positive), Boyce.th.min (the lowest suitability value where the predicted/expected ratio is >1) and Boyce.th.max (the highest
+#' suitability value where the predicted/expected ratio is =1). 
 #' For the use of this function, please refer to the manual of ESM_Modeling.
 #' @return 
 #' A \code{data.frame} with diverse threshold values.
+#' 
 #' @references 
 #' Hirzel, Alexandre H., et al. Evaluating the ability of habitat suitability models to predict species presences. 
 #' \emph{Ecological modelling}, \bold{199.2} (2006): 142-152.
@@ -319,6 +426,10 @@ ESM_Null.Models <- function(ESM.Mod,
 #' 
 #' Fielding, Alan H., and John F. Bell. A review of methods for the assessment of prediction errors in conservation presence/absence models. 
 #' \emph{Environmental conservation}, \bold{24.1} (1997): 38-49.
+#' 
+#' Hellegers, M., van Hinsberg, A., Lenoir, J., Dengler, J., Huijbregts, M.A.J. and Schipper, A.M. (2025), Multiple Threshold-Selection Methods 
+#' Are Needed to Binarise Species Distribution Model Predictions. \emph{Divers Distrib}, 31: e70019. \doi{10.1111/ddi.70019}.
+#' 
 #' @seealso \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}
 #' @export
 
@@ -344,15 +455,16 @@ ESM_Threshold <- function (ESM.ensembleMod){
 
     TSS <- ecospat::ecospat.max.tss(Pred = Full.models[, i],Sp.occ = resp)
     TSS.th <- TSS$max.threshold
-    TSS <- TSS$max.TSS
-    
-    boyce <- ecospat::ecospat.boyce(fit = Full.models[, i],
-                           obs = Full.models[resp==1, i], PEplot = FALSE)
     
     MPA1.0 <- ecospat::ecospat.mpa(Full.models[resp==1, i], perc = 1)
     MPA0.95 <- ecospat::ecospat.mpa(Full.models[resp==1, i], perc = 0.95)
     MPA0.90 <- ecospat::ecospat.mpa(Full.models[resp==1, i], perc = 0.90)
     
+    MCC.th <- Max_MCC(Pred = Full.models[, i],
+                      Sp.occ = resp)$max.threshold
+    
+    boyce <- ecospat::ecospat.boyce(fit = Full.models[, i],
+                           obs = Full.models[resp==1, i], PEplot = FALSE)
     pos.F <- which(boyce$F.ratio > 1)
     neg.F <- which(boyce$F.ratio <= 1)
     if (max(neg.F) < min(pos.F)) {
@@ -365,8 +477,10 @@ ESM_Threshold <- function (ESM.ensembleMod){
                                       min(pos.F) - 1)])
     }
     
-    EVAL1 <- cbind.data.frame(model = colnames(Full.models)[i], Boyce.th.min, Boyce.th.max,
-                              MPA1.0, MPA0.95, MPA0.90, TSS.th)
+    EVAL1 <- cbind.data.frame(model = colnames(Full.models)[i], 
+                              Boyce.th.min, Boyce.th.max,
+                              MPA1.0, MPA0.95, MPA0.90, 
+                              TSS.th, MCC.th)
     rownames(EVAL1) = NULL
     
     EVAL <- rbind(EVAL, EVAL1)
@@ -390,7 +504,7 @@ ESM_Threshold <- function (ESM.ensembleMod){
 #' with or without the variable of interest. 
 #' 
 #' This ratio gives an indication on the proportional contribution of the variable in the final ensemble model. A value of higher than 1 
-#' indicate that the focal variable has a higher contribution than average.
+#' indicates that the focal variable has a higher contribution than average.
 #' 
 #' In the case of multiple methods (e.g., GLM,...), the contributions are counted per method. For ensemble model, the contributions 
 #' are then weighted means (based on the weighting score as chosen in \code{\link{ESM_Ensemble.Modeling}} of single methods.
@@ -443,10 +557,12 @@ ESM_Variable.Contributions <- function (ESM.Mod,
 #' @param ESM.ensembleMod The object returned by \code{\link{ESM_Ensemble.Modeling}}.
 #' @param fixed.var.metric Either 'median' (\emph{Default}), 'mean', 'min' or 'max' specifying the statistic used 
 #' to fix as constant the remaining variables when the predicted response is estimated for one of the variables.
-#' 
+#' @param ... other graphical parameters for plot function.	
+#'
 #' @details 
 #' This function plots the response curves of a model for each variable, while keeping the remaining variables constant. 
-#' This is an adaptation of the Evaluation Strip method proposed by Elith et al.(2005).
+#' This is an adaptation of the Evaluation Strip method proposed by Elith et al.(2005). Additionnal arguments for plot function
+#' can be provided and won't be checked by this function.
 #' For the use of this function, please refer to the manual of ESM_Modeling.
 #' 
 #' @return 
@@ -462,11 +578,10 @@ ESM_Variable.Contributions <- function (ESM.Mod,
 
 ESM_Response.Plot <- function (ESM.Mod, 
                                ESM.ensembleMod, 
-                               fixed.var.metric = "median"){
+                               fixed.var.metric = "median",
+                               ...){
   
   models <- ESM.Mod$model.info$models
-  weights <- ESM.ensembleMod$EF.algo$weights.algo
-  weights.EF <- ESM.ensembleMod$EF$weights.EF
   resp <- ESM.Mod$data$resp
   data <- ESM.Mod$data$env.var
   min.data <- apply(data, 2, min)
@@ -481,7 +596,11 @@ ESM_Response.Plot <- function (ESM.Mod,
                                                         min.data[i])/999)
     proj.fixed <- ESM_Projection(ESM.Mod,
                                  new.env = data.fixed,
-                                 name.env = paste0("data.fixed",i))
+                                 name.env = paste0("data.fixed",i),
+                                 rounded = FALSE,
+                                 pred.multiplier = 1,
+                                 save.obj = FALSE,
+                                 verbose = FALSE)
     proj.fixed.list[[i]] <- ESM_Ensemble.Projection(ESM.proj = proj.fixed,
                                                     ESM.ensembleMod = ESM.ensembleMod,
                                                     save.obj = FALSE)
@@ -505,7 +624,7 @@ ESM_Response.Plot <- function (ESM.Mod,
                                                            min(x[, -1])
                                                          })), max(sapply(proj.fixed.list, function(x) {
                                                            max(x[, -1])
-                                                         }))), type = "n", las = TRUE)
+                                                         }))), type = "n", las = TRUE,...)
       graphics::points(proj.fixed.list[[i]][, 2] ~ proj.fixed.list[[i]][, 
                                                               1], xlab = names(proj.fixed.list)[i], col = "red", 
              lwd = 2, type = "l")
@@ -518,10 +637,8 @@ ESM_Response.Plot <- function (ESM.Mod,
                                                            min(x[, -1])
                                                          })), max(sapply(proj.fixed.list, function(x) {
                                                            max(x[, -1])
-                                                         }))), type = "l", lwd=2, col = "red")
-      graphics::legend("topleft", legend = c("ensemble", models), 
-             fill = c("red", ColModels[1:length(models)]), 
-             box.lty = 0)
+                                                         }))), type = "l", lwd=2, col = "red",...)
+
       for (mod.i in models) {
         graphics::points(proj.fixed.list[[i]][, mod.i] ~ proj.fixed.list[[i]][, 
                                                                     1], col = ColModels[which(models == mod.i)], 
@@ -530,6 +647,11 @@ ESM_Response.Plot <- function (ESM.Mod,
       }
     }
   }
+  par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
+  plot(0, 0, type = 'l', bty = 'n', xaxt = 'n', yaxt = 'n')
+  graphics::legend("bottom", legend = c("Ensemble", models), 
+                   fill = c("red", ColModels[1:length(models)]), 
+                   bty= "n", xpd = TRUE, horiz = TRUE)
   
   unlink(paste0("ESM.output_", ESM.Mod$data$sp.name,"/data.fixed",1:ncol(data)), recursive = TRUE)
   
@@ -582,15 +704,10 @@ ESM_Response.Plot <- function (ESM.Mod,
 #' Liu, C., Newell, G., White, M. and Machunter, J. (2024), Improving the estimation of the Boyce index using statistical smoothing methods for evaluating species distribution models with presence-only data. \emph{Ecography}, e07218. \doi{10.1111/ecog.07218}
 #' 
 #' @examples 
-#' library(ecospat)
-#' data <- ecospat::ecospat.testData 
+#' data(ESM_Species.Env)
 #' SBI <- Smooth_CBI(
-#' pres = data$glm_Saxifraga_oppositifolia[which(data$Saxifraga_oppositifolia==1)],
-#' abs = data$glm_Saxifraga_oppositifolia[which(data$Saxifraga_oppositifolia==0)],
-#' ktry = 10,
-#' method = 'all',
-#' mean.CBI = TRUE,
-#' cor.method = 'spearman'
+#' pres = ESM_Species.Env$ESM_Campylophyllum_halleri[ESM_Species.Env$Campylophyllum_halleri==1],
+#' abs = ESM_Species.Env$ESM_Campylophyllum_halleri[ESM_Species.Env$Campylophyllum_halleri==0],
 #' )
 #' SBI$SBI
 #' 
@@ -696,6 +813,70 @@ Smooth_CBI <- function(pres,
               pred.CBI = cbind(prd,pred.CBI)))
 }
 
+
+#' @name Max_MCC
+#' @title Compute the maximum value of Matthew’s Correlation Coefficient
+#' @author Flavien Collart \email{flaviencollart@hotmail.com}.
+#' @description 
+#' This function computes the Smooth continuous Boyce Index of Liu et al (2024) using 5 smoothing techniques and make an ensemble.
+#' 
+#' @param Pred \code{numeric}. A vector of predicted probabilities.
+#' @param Sp.occ \code{numeric}. A vector of speceis observations (1 = presence, 0 = absence)
+#' @details 
+#' This function calculates the Matthews Correlation Coefficient (MCC) along different thresholds, between 0.01 and 1 with a 0.01 increment, and return the maximum values.
+#' MCC is a metric particularly useful for imbalanced datasets. Unlike other performance measures, MCC is derived from the contingency matrix and represents the Pearson product-moment 
+#' correlation between observed and predicted classifications. It is unique among binary classification metrics in that it yields a high 
+#' score only when the model accurately predicts both the majority of positive and negative instances. MCC values range from −1 to +1, 
+#' where +1 indicates perfect classification, −1 indicates total misclassification, and 0 corresponds to random guessing, as with a coin toss.
+#' 
+#' @return 
+#' a \code{list} containing:
+#' \itemize{
+#' \item{table}. \code{matrix} containing the computed MCC for different threshold.
+#' \item{max.MCC}. \code{numeric}. The maximum value of MCC.
+#' \item{max.threshold}. \code{numeric}. The threshold that maximizes the MCC
+#' }
+#' @references 
+#' Chicco, D., Jurman, G. The advantages of the Matthews correlation coefficient (MCC) over F1 score and accuracy in binary classification evaluation. BMC Genomics 21, 6 (2020). https://doi.org/10.1186/s12864-019-6413-7
+#' 
+#' @examples 
+#' data(ESM_Species.Env)
+#' MCC <- Max_MCC(
+#' Pred = ESM_Species.Env$ESM_Campylophyllum_halleri,
+#' Sp.occ = ESM_Species.Env$Campylophyllum_halleri
+#' )
+#' MCC$max.MCC
+#' 
+#' @seealso \code{\link{ESM_Threshold}}
+#' @export
+
+Max_MCC <- function(Pred, Sp.occ) # Pred: vector of predicted probabilities Sp.occ: vector of binary observations
+{
+  MCC <- function(thresh, Pred, Sp.occ){
+    Pred.bin <- as.numeric(table(Pred >= thresh, Sp.occ))
+    if (length(Pred.bin) != 4) {
+      return(0)
+    }
+    else {
+      TP <- Pred.bin[4]
+      FP <- Pred.bin[2]
+      FN <- Pred.bin[3]
+      TN <- Pred.bin[1]
+      
+      mcc = ((TP*TN)-(FP*FN))/sqrt((TP+FP)*(TP+FN)*(TN+FP)*(TN+FN))
+      
+      return(mcc)
+    }
+  }
+  threshold<-(1:100)/100
+  
+  mcc <- spsUtil::quiet(sapply(threshold, MCC, Pred = Pred,Sp.occ=Sp.occ))
+  table <-data.frame(cbind(threshold,MCC=mcc))
+  max.MCC <- max(table$MCC,na.rm = TRUE)
+  max.threshold <- table$threshold[which.max(table$MCC)][1]
+  return(list(table=table,max.MCC=max.MCC,max.threshold=max.threshold))
+
+}
 
 ########################################################################
 ## The dark side of the moon: the hidden functions
@@ -814,8 +995,57 @@ Smooth_CBI <- function(pres,
   }
   return(evalBiva)
 }
+
+## Perform the pooling evaluation for ESM_Modeling
+.pooling.ESM.Mod <- function(Indiv,
+                             resp,
+                             cv.split.table,
+                             models,
+                             SBI){
+  evalBiva <- NULL
+  for(i in 1:length(models)){
+    models.prediction <- Indiv[, grep(models[i], colnames(Indiv))]
+    if(anyNA(models.prediction[,grep("Full", colnames(models.prediction))])){
+      evalInter <- matrix(as.numeric(NA), ncol = 4, nrow = 1)
+      if(SBI){
+        colnames(evalInter) = c("AUC","SomersD","SBI","MaxTSS")
+      }else{
+        colnames(evalInter) = c("AUC","SomersD","Boyce","MaxTSS")
+      }
+      rownames(evalInter) = paste0("Full.",models[i])
+      
+    }else{
+      models.prediction <- models.prediction[, -c(grep("Full", colnames(models.prediction)))]
+      models.prediction <- cbind.data.frame(resp = resp, 
+                                            models.prediction)
+      Pred <- .pooling(calib = cv.split.table, 
+                               models.prediction = models.prediction)
+      Pred <- stats::na.omit(Pred)
+      if(length(Pred)==0){
+        evalInter <- matrix(as.numeric(NA), ncol = 4, nrow = 1)
+        if(SBI){
+          colnames(evalInter) = c("AUC","SomersD","SBI","MaxTSS")
+        }else{
+          colnames(evalInter) = c("AUC","SomersD","Boyce","MaxTSS")
+        }
+      }else{
+        evalInter <- .evaluationScores(Pred = Pred[,-1], 
+                                       resp=Pred[,1],
+                                       SBI = SBI)
+      }
+    }
+    
+    evalBiva <- rbind(evalBiva, evalInter)
+    rownames(evalBiva)[nrow(evalBiva)] = paste0("Full.",models[i])
+  }
+  return(evalBiva)
+}
+
+
+
+
 ## Perform the pooling 
-.ecospat.pooling<-function (calib, models.prediction) 
+.pooling<-function (calib, models.prediction) 
 {
   Pred <- NULL
   for (k in 1:nrow(calib)) {
@@ -842,13 +1072,13 @@ Smooth_CBI <- function(pres,
   models.options <- ESM.Mod$model.info$models.options
   which.biva <- ESM.Mod$model.info$which.biva
   prevalence <- ESM.Mod$model.info$prevalence
-  cv.method <- ESM.Mod$cv.method
+  cv.method <- ESM.Mod$model.info$cv.method
   if(cv.method == "split-sampling"){
     cv.rep <- ncol(ESM.Mod$cv.split.table)-1
-    cv.ratio <- round(sum(ESM.Mod$cv.split.table[,1])/length(ESM.Mod$cv.split.table[,1]),1)
+    cv.ratio <- ESM.Mod$model.info$cv.ratio
     cv.n.blocks = NULL
   }else{
-    cv.n.blocks <- ncol(ESM.Mod$cv.split.table)-1
+    cv.n.blocks <- ESM.Mod$model.info$cv.n.blocks
     cv.rep = NULL
     cv.ratio = NULL
   }
@@ -859,6 +1089,7 @@ Smooth_CBI <- function(pres,
   sp.name <- ESM.Mod$data$sp.name
   xy <- ESM.Mod$data$xy
   SBI <- ESM.Mod$data$SBI
+  pooling.int <- ESM.Mod$model.info$pooling
   ## Ensemble information
   weighting.score <- ESM.ensembleMod$weighting.score
   threshold  <- ESM.ensembleMod$threshold
@@ -873,6 +1104,7 @@ Smooth_CBI <- function(pres,
                                               cv.method = cv.method,
                                               cv.rep = cv.rep,
                                               cv.n.blocks = cv.n.blocks,
+                                              pooling = pooling.int,
                                               SBI = SBI,
                                               which.biva = which.biva,
                                               parallel = FALSE,
@@ -881,17 +1113,18 @@ Smooth_CBI <- function(pres,
                                               save.models = F,
                                               save.obj = F)
   )
+  
   ESM.ensembleMod.Null  <-  spsUtil::quiet(ESM_Ensemble.Modeling(ESM.Mod = ESM.Mod.Null,
                                                                  weighting.score = weighting.score,
                                                                  threshold = threshold,
-                                                                 save.obj = F
+                                                                 save.obj = F)
   )
-  )
+  
   if(!save.obj){
     unlink(paste0(pathToSaveObject,"/ESM.output_",sp.name,".Null/NullModel",x),recursive = T, force = T)
   }
   
-  if(pooling){
+  if(pooling & !(pooling.int)){
     ESM.pool.NULL <- ESM_Pooling.Evaluation(ESM.Mod = ESM.Mod.Null,
                                             ESM.ensembleMod = ESM.ensembleMod.Null)
     if(length(models)==1){
@@ -908,4 +1141,5 @@ Smooth_CBI <- function(pres,
     }
   }
 }
+
 

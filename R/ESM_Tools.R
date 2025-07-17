@@ -9,6 +9,8 @@
 #' @param method \code{character}. one of: "rand.geo", "strat.geo", "rand.env" or "strat.env". \emph{see Details}. \emph{Default: "rand.geo"}.
 #' @param digit.val.env \code{integer}. The number of digit to keep to remove too similar environmental values.
 #' Only needed when method = "rand.env". \emph{Default: 1}.
+#' @param res.grid.env \code{numeric}. Number of rows and columns to generate the grid (see Details). Only needed
+#' when method = "rand.env". \emph{see Details}. \emph{Default: 100}.
 #' @param aggr.fact.geo \code{integer}. The aggregating factor to generate the checkerboard. Only needed 
 #' when method = "strat.geo". \emph{see Details}. \emph{Default: 5}.
 #' @param n.strat.env \code{integer}. The number of classes to create for each environmental layer. Only needed
@@ -25,7 +27,8 @@
 #' background points are randomly selected to reach the value of \emph{n.points}. Selecting background points can also 
 #' be performed in the environmental space (see Steen et al, 2024). The first method is the full random background
 #' point selection (method = "rand.env"). To do so, a PCA is first performed and the two fist axes are kept to 
-#' reflect the environmental space. Then, a grid of 100*100 pixel is created. To reduce too similar points, 
+#' reflect the environmental space. Then, a grid of res.grid.env*res.grid.env (default 100\*100) pixel is created. Note that 
+#' increasing this value will strongly increase computation time. To reduce too similar points, 
 #' the PCA scores of each observation are rounded at a certain digit (argument digit.val.env) and only 
 #' one observation among the similar ones is kept. Several points are then randomly selected in each pixel of this grid.
 #' By doing this, the entire environmental is captured avoiding the over-abundance of some common environment. The
@@ -41,6 +44,7 @@
 #' or environmental classes (named "BigClass) to which the observation belongs (only for method = "strat.geo" or "strat.env")
 #'  
 #' @examples 
+#' \donttest{
 #' library(terra)
 #' env <- terra::unwrap(ESM_Env)
 #' # Selection full random in the geographic space
@@ -53,7 +57,7 @@
 #' Bp <- Bp_Sampling(env = env,
 #'                   n.points = 1000,
 #'                   method = "strat.geo",
-#'                   aggr.fact.geo = 2,
+#'                   aggr.fact.geo = 100,
 #'                   To.plot = FALSE)
 #'                        
 #' # Selection full random in the environmental space                     
@@ -61,6 +65,7 @@
 #'                   n.points = 1000,
 #'                   method = "rand.env",
 #'                   digit.val.env = 2,
+#'                   res.grid.env = 100,
 #'                   To.plot = FALSE)       
 #'                                         
 #' # Selection stratified in the environmental space                     
@@ -68,7 +73,8 @@
 #'                   n.points = 1000,
 #'                   method = "strat.env",
 #'                   n.strat.env = 3,
-#'                   To.plot = FALSE)                          
+#'                   To.plot = FALSE)       
+#' }               
 #' @references 
 #' Steen,B., Broennimann, O., Maiorano, L., Guisan, . 2024. How sensitive are species distribution models to different background point 
 #' selection strategies? A test with species at various equilibrium levels. 
@@ -80,6 +86,7 @@ Bp_Sampling <- function(env,
                         n.points = 10000,
                         method = "rand.geo",
                         digit.val.env = 1,
+                        res.grid.env = 100,
                         aggr.fact.geo = 5,
                         n.strat.env = 3,
                         To.plot = FALSE,
@@ -112,7 +119,7 @@ Bp_Sampling <- function(env,
   }else if(method == "rand.env"){
     
     if(terra::nlyr(env)<2){
-      stop("when method == rand.env or strat.env, a minimum of 2 environnmental layers is needed in env.")
+      stop("when method == 'rand.env' or 'strat.env', a minimum of 2 environnmental layers is needed in env.")
     }
     if(digit.val.env %%1 !=0 | digit.val.env < 0){
       stop("digit.val.env must be an integer greater than 0")
@@ -129,44 +136,57 @@ Bp_Sampling <- function(env,
     # bb <- lapply(aa, function(x){do.call(cbind,x)[,c(2:3)]})
     # cc <- terra::vect(bb,type = "polygons",crs="")
     # cc<-terra::aggregate(cc)
-    grid.env <- terra::rast(terra::ext(apply(env.score.round,2, range)), ncols = 100, nrows = 100,crs="") #vals = 1:(100*100)
+    grid.env <- terra::rast(terra::ext(apply(env.score.round,2, range)), ncols = res.grid.env, nrows = res.grid.env,crs="") #vals = 1:(100*100)
     # ee <- terra::mask(vide,cc)
     
     env.score.round.filt <- unique(env.score.round)
     
-    cell.pos <- terra::cellFromXY(grid.env, env.score.round.filt)
-    cell.env <- unique(cell.pos)
-    if(n.points<length(cell.env)){
-      cat("\nThere are more environmental classes than n.points. Thus,the number of background points will be equal to the number of classes")
-      n.ObsPerClass = 1
+    if(nrow(env.score.round.filt) <= n.points){
+      cat("Number of environmental values available is less than or equal to n.points. Please consider changing the values of 'digit.val.env' and/or 'res.grid.env'.")
+      ToKeep <- c(1:nrow(env.score.round.filt))
+      
     }else{
-      n.ObsPerClass <- ceiling(n.points/length(cell.env))
-    }
-    
-    ToKeep <- c()
-    ToPrint <- TRUE
-    
-    ##Sampling
-    for(i in 1:length(cell.env)){
-      pointVal <- which(cell.pos == cell.env[i])
-      if(length(pointVal) < n.ObsPerClass){
-        if(ToPrint){
-          cat("\nSome Classes have less observation than the number of observation per class. Thus, all the observations for these classes will be sampled. 
-              Note that the number of background points sampled will be less than asked.")
-        }
-        ToPrint <- FALSE
-        ToKeep <- c(ToKeep,pointVal)
+      cell.pos <- terra::cellFromXY(grid.env, env.score.round.filt)
+      cell.env <- unique(cell.pos)
+      
+      # test <- as.factor(cell.pos)
+      # test <- split(x=1:length(test),f=test)
+      # 
+      
+      if(n.points<length(cell.env)){
+        cat("\nThere are more environmental classes than n.points. Thus,the number of background points will be equal to the number of classes")
+        n.ObsPerClass = 1
       }else{
-        if(length(pointVal)==1){
+        n.ObsPerClass <- floor(n.points/length(cell.env))
+      }
+      
+      #aa <- lapply(test, sample,size = 2)
+      
+      ToKeep <- c()
+      ToPrint <- TRUE
+      
+      ##Sampling
+      for(i in 1:length(cell.env)){
+        pointVal <- which(cell.pos == cell.env[i])
+        if(length(pointVal) < n.ObsPerClass){
+          if(ToPrint){
+            cat("\nSome Classes have less observation than the number of observation per class. Thus, all the observations for these classes will be sampled. 
+              Note that the number of background points sampled will be less than asked.")
+          }
+          ToPrint <- FALSE
           ToKeep <- c(ToKeep,pointVal)
         }else{
-          ToKeep <- c(ToKeep,sample(pointVal,n.ObsPerClass, replace = FALSE))
-          
+          if(length(pointVal)==1){
+            ToKeep <- c(ToKeep,pointVal)
+          }else{
+            ToKeep <- c(ToKeep,sample(pointVal,n.ObsPerClass, replace = FALSE))
+            
+          }
         }
       }
     }
     
-    
+
     bp <- env.dat[rownames(env.score.round.filt)[ToKeep],]
     
     
@@ -377,7 +397,8 @@ ESM_Range.Shift <- function(proj.curr,
 #' @description This function binarizes probability values based on a specific threshold
 #' 
 #' @param proj a \code{SpatRaster}, \code{data.frame}, \code{matrix}, or \code{numeric} containing the data to binarize. 
-#' @param thr \code{numeric}. threshold to binarize the probabilities. \bold{must be a single value}. 
+#' @param thr \code{numeric}. threshold to binarize the probabilities. \bold{must be a single value or or have the same 
+#' length as the number of layers/columns}. 
 #' 
 #' @details
 #' \describe{
@@ -396,26 +417,53 @@ ESM_Range.Shift <- function(proj.curr,
 #' proj <- seq(0,1000, by = 100)
 #' # Binraization of the vector
 #' ESM_Binarize(proj = proj, thr = 400)
+#' # To see another example, see in ?ESM_Modeling
 #' 
 #' @export
 
 ESM_Binarize <- function(proj,
                          thr){
   
-  if(length(thr)>1 | !is.numeric(thr)){
-    stop("thr must contain a signle numeric")
-  }
   if(inherits(proj,"SpatRaster")){
+    nProj <- terra::nlyr(proj)
+    if(length(thr)>1 & nProj != length(thr)){
+      stop("thr must be a single numeric or have the same length as the number of layers.")
+    }
+    if(length(thr) == 1){
+      rclmat <- matrix(c(0, thr, 0,thr, Inf, 1),
+                       ncol=3, 
+                       byrow=TRUE)
+      
+      proj.bin <- terra::classify(proj, rclmat, include.lowest=TRUE, right = FALSE)
+    }else{
+      proj.bin <- list()
+      for(i in 1:nProj){
+        rclmat <- matrix(c(0, thr[i], 0,thr[i], Inf, 1),
+                         ncol=3, 
+                         byrow=TRUE)
+        
+        proj.bin[[i]] <- terra::classify(proj[[i]], rclmat, include.lowest=TRUE, right = FALSE)
+      }
+      proj.bin <- terra::rast(proj.bin)
+    }
+    names(proj.bin) = names(proj)
     
-    rclmat <- matrix(c(0, thr, 0,thr, Inf, 1),
-                     ncol=3, 
-                     byrow=TRUE)
-    
-    proj.bin <- terra::classify(proj, rclmat, include.lowest=TRUE, right = FALSE)
     
   }else if(is.data.frame(proj) | is.matrix(proj) | is.numeric(proj)){
-    
-    proj.bin <- sapply(proj, FUN = function(x,thr){as.integer(x>=thr)}, thr = thr)
+    if(length(thr)==1){
+      proj.bin <- sapply(proj, FUN = function(x,thr){as.integer(x>=thr)}, thr = thr)
+    }else{
+      if(length(thr) != ncol(proj)){
+        stop("thr must be a single numeric or have the same length as the number of columns.")
+      }
+      proj.bin <- proj
+      for(i in 1:ncol(proj)){
+        proj.bin[,i] <- sapply(proj[,i], FUN = function(x,thr){as.integer(x>=thr)}, thr = thr[i])
+        
+      }
+
+    }
+   
     
   }else{
     stop("proj must be either a SpatRaster, a data.frame, a matrix, or a numeric")
@@ -600,21 +648,26 @@ ESM_Generate.ODMAP <- function(ESM.Mod = NULL,
     if(ESM.Mod$data$env.info$type == "SpatRaster"){
       ODMAP$Value[c(9,43)] = paste(names(as.vector(ESM.Mod$data$env.info$extent)),as.vector(ESM.Mod$data$env.info$extent), sep =" = ",collapse = ", ")
       ODMAP$Value[c(10,44)] = paste(c("xres = ", "yres = "),ESM.Mod$data$env.info$res, collapse = ", ")
-      EPSG <- terra::crs(ESM.Mod$data$env.info$proj,describe=TRUE)[,c("authority","code")]
+      EPSG <- na.omit(as.character(terra::crs(ESM.Mod$data$env.info$proj,describe=TRUE)[,c("authority","code")]))
+      if(length(EPSG)==0){
+        EPSG <- terra::crs(ESM.Mod$data$env.info$proj,describe=TRUE)[,"name"]
+      }
       proj4String <- terra::crs(ESM.Mod$data$env.info$proj,proj=TRUE)
       ODMAP$Value[45] = paste(paste0(EPSG,collapse = ":"),
                               "; PROJ-string = ",proj4String)
     }
     ODMAP$Value[60] = .printModelParameters(model.options = ESM.Mod$model.info$models.options,models = ESM.Mod$model.info$models)
-    cv.method <- ESM.Mod$cv.method
+    cv.method <- ESM.Mod$model.info$cv.method
     if(cv.method=="block"){
       cv.method <- "-fold"
     }
     ODMAP$Value[38] = paste("All bivariate models were evaluated using", ncol(ESM.Mod$cv.split.table)-1,ESM.Mod$cv.method,
                             "cross-validation.")
     if(cv.method == "split-sampling"){
-      cv.ratio = round(sum(ESM.Mod$cv.split.table[,1])/nrow(ESM.Mod$cv.split.table),2)
-      ODMAP$Value[38] = paste(ODMAP$Value[38],100*cv.ratio, "% were employed to calibrate the model and the remaining to evaluate it.")
+      ODMAP$Value[38] = paste(ODMAP$Value[38],100*ESM.Mod$model.info$cv.ratio, "% were employed to calibrate the model and the remaining to evaluate it.")
+    }
+    if(ESM.Mod$model.info$pooling){
+      ODMAP$Value[38] = paste(ODMAP$Value[38], "The pooling method as described in Collart & Guisan (2023. Ecol Inform) was afterwards applied to evaluate each model.")
     }
     ODMAP$Value[39] = ODMAP$Value[38]
     
@@ -859,13 +912,20 @@ ESM_Generate.ODMAP <- function(ESM.Mod = NULL,
       ToReturn <- c(ToReturn, 
                     sentence)
       
+    }else if(models[i] == "GAM"){
+      sentence <- paste0("GAMs were performed under a ", model.options$GAM$family," distribution with ",
+                         model.options$GAM$smooth.k, " dimension(s) used to represent the smooth term, ", model.options$GaM$smooth.bs,
+                         " as a penalized smoothing basis, ", paste(model.options$GaM$optimizer,collapse = " and "), 
+                         " as the optimization method(s) to use to optimize the smoothing parameter estimation criterion, all other parameters were set as default.")
+      ToReturn <- c(ToReturn, 
+                    sentence)
     }else if(models[i] == "GBM"){
       sentence <- paste0("GBMs were performed under a ", model.options$GBM$distribution," distribution with ",
                          model.options$GBM$n.trees, " trees, a maximum interaction depth of ", model.options$GBM$interaction.depth,
                          ", a minimum of ", model.options$GBM$n.minobsinnode," observation in the termal nodes of trees, a learning rate of ",
                          model.options$GBM$shrinkage,", a fraction of ", model.options$GBM$bag.fraction,
                          " of the training set observations randomly selected to propose the next tree in the expansion, a first fraction of ",
-                         model.options$GBM$train.fraction, " to fit the model and ",model.options$GBM$cv.folds," internal cross-vaidations, all other parameters was set as default")
+                         model.options$GBM$train.fraction, " to fit the model and ",model.options$GBM$cv.folds," internal cross-vaidations, all other parameters was set as default.")
       ToReturn <- c(ToReturn, 
                     sentence)
     }else{

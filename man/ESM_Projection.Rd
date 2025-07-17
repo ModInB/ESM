@@ -8,9 +8,13 @@ ESM_Projection(
   ESM.Mod,
   new.env,
   name.env,
+  rounded = TRUE,
+  pred.multiplier = 1000,
   parallel = FALSE,
   n.cores = 1,
-  save.obj = T
+  datatype = "INT2U",
+  save.obj = T,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -21,11 +25,21 @@ should be projected. Note that the colnames or the names of the predictors shoul
 
 \item{name.env}{a \code{character} which will be used to generate a folder to save the individual projections.}
 
+\item{rounded}{\code{logical}. Should the prediction be rounded to become an integer? \emph{Default:} TRUE.}
+
+\item{pred.multiplier}{\code{numeric}. The factor to multiply the predictions before rounding them (must be a power of 10). 
+Only needed when rounded = FALSE. \emph{Default:} 1000.}
+
 \item{parallel}{\code{logical}. Allows or not parallel job using the functions makeCluster.}
 
 \item{n.cores}{\code{integer}. Number of CPU cores used to make the models.}
 
-\item{save.obj}{\code{logical}. Allows or not the final output.}
+\item{datatype}{a \code{character} When new.env is a  \code{SpatRaster}, which datatype should be used to save the files? \emph{Default:} 'INT2U' if rounded = TRUE 
+and 'FLT4S' if rounded = FALSE.}
+
+\item{save.obj}{\code{logical}. Allows or not to save the final output into a '.out file'.}
+
+\item{verbose}{\code{logical}. Allows or not message.}
 }
 \value{
 a \code{list} containing: 
@@ -42,8 +56,10 @@ Project bivariate models
 }
 \details{
 \describe{
-Each bivariate models are geographically projected into the new.env area. Note that the projected maps are multiplied 
-by 1000 and rounded to reduce storage space.
+Each bivariate models are geographically projected into the new.env area. 
+Note that if new.env is a SpatRaster, the projected maps are by default multiplied by 1000 and 
+rounded to reduce storage space. They are also store in compress tif file (with these parameters: "COMPRESS=DEFLATE","PREDICTOR=2").
+If the argument 'rounded' is set to FALSE and datatype is left default, the datatype will be changed to 'FLT4S' to keep decimals.
 For the use of this function, please refer to the manual of ESM_Modeling.
 }
 }

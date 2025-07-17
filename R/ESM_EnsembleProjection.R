@@ -26,8 +26,20 @@ ESM_Ensemble.Projection <- function(ESM.proj,
                                     ESM.ensembleMod,
                                     chosen.models = "all",
                                     save.obj = TRUE){
+  
+  ##Take the needed objects
+  weights.algo <- ESM.ensembleMod$EF.algo$weights.algo
+  weights.EF <- ESM.ensembleMod$EF$weights.EF
+  projections <- do.call(c,ESM.proj$projection.path)
+  name.env <- ESM.proj$name.env
+  rounded <- ESM.proj$rounded
+  datatype <- ESM.proj$datatype
+  models <- ESM.ensembleMod$model.info$models
+  
   ## models check
-  models <- ESM.proj$model.info$models
+  if(length(models)>1){
+    models <- sub(".EF","",names(weights.EF)[weights.EF>0],fixed = TRUE) # Remove non projected models
+  }
   if(chosen.models != "all"){
     if(min(chosen.models %in% models)==0){
       stop(paste("chosen.models need to be a subset of",deparse(models)))
@@ -36,16 +48,13 @@ ESM_Ensemble.Projection <- function(ESM.proj,
     }
   }
   
+  
   ##Set the pathway
   iniwd <- getwd()
   on.exit(setwd(iniwd))
   setwd(paste0("ESM.output_",ESM.ensembleMod$data$sp.name))
   
-  ##Take the needed objects
-  weights.algo <- ESM.ensembleMod$EF.algo$weights.algo
-  weights.EF <- ESM.ensembleMod$EF$weights.EF
-  projections <- do.call(c,ESM.proj$projection.path)
-  name.env <- ESM.proj$name.env
+
   
   ## Make the projections----
   if(ESM.proj$proj.type == "data.frame"){
@@ -66,6 +75,9 @@ ESM_Ensemble.Projection <- function(ESM.proj,
       w <- w[w>0]
       ## Make the ensemble for each algo
       EF.algo <- apply(algo.proj, 1, stats::weighted.mean,w=w)
+      if(rounded){
+        EF.algo <- round(EF.algo)
+      }
       if(j==1){
         EF.toMerge <- as.data.frame(EF.algo)
       }else{
@@ -77,6 +89,9 @@ ESM_Ensemble.Projection <- function(ESM.proj,
     ## Make the ensemble between algo
     if(length(models)>1){
       EF <- apply(EF.toMerge,1,stats::weighted.mean,w=weights.EF[paste0(models,".EF")])
+      if(rounded){
+        EF <- round(EF)
+      }
       EF <- cbind.data.frame(EF.toMerge,EF)
     }else{
       EF <- EF.toMerge
@@ -103,6 +118,9 @@ ESM_Ensemble.Projection <- function(ESM.proj,
       
       ## Make the ensemble for each algo----
       EF.algo <- terra::weighted.mean(algo.proj,w=as.numeric(w))
+      if(rounded){
+        EF.algo <- round(EF.algo)
+      }
       names(EF.algo) = models[j]
       if(j==1){
         EF.toMerge <- EF.algo 
@@ -113,6 +131,9 @@ ESM_Ensemble.Projection <- function(ESM.proj,
     ## Make the ensemble across the algo----
     if(length(models)>1){
       EF <- terra::weighted.mean(EF.toMerge,w=weights.EF[paste0(models,".EF")])
+      if(rounded){
+        EF <- round(EF)
+      }
       names(EF) = "EF"
       EF <- c(EF.toMerge,EF)
     }else{
@@ -120,7 +141,8 @@ ESM_Ensemble.Projection <- function(ESM.proj,
     }
     EF <- round(EF)
     if(save.obj){
-      terra::writeRaster(EF,paste0("ESM_Ensemble_",name.env,".tif"),gdal=c("COMPRESS=DEFLATE","PREDICTOR=2"), datatype = "INT2U",overwrite=TRUE)
+      terra::writeRaster(EF,paste0("ESM_Ensemble_",name.env,".tif"),gdal=c("COMPRESS=DEFLATE","PREDICTOR=2"), 
+                         datatype = datatype,overwrite=TRUE)
       
     }
   }

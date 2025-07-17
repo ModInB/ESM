@@ -4,25 +4,41 @@
 \alias{ESM_Models.Options}
 \title{Model parameters for ESMs}
 \usage{
-ESM_Models.Options(ANN = NULL, CTA = NULL, GLM = NULL, GBM = NULL)
+ESM_Models.Options(ANN = NULL, CTA = NULL, GAM = NULL, GLM = NULL, GBM = NULL)
 }
 \arguments{
 \item{ANN}{a \code{list}. with the objects:
 \itemize{
-\item{size} an \code{integer}. The numer of units in the hidden layers. \emph{Default}: 8.
-\item{decay} a \code{numeric}. The weight decay. \emph{Default}: 0.001.
-\item{rang} a \code{numeric}. Initial random weights. \emph{Default}: 0.1.
-\item{maxit} an \code{integer}.The maximal number of iterations. \emph{Default}: 200.
+\item{size}: an \code{integer}. The numer of units in the hidden layers. \emph{Default}: 8.
+\item{decay}: a \code{numeric}. The weight decay. \emph{Default}: 0.001.
+\item{rang}: a \code{numeric}. Initial random weights. \emph{Default}: 0.1.
+\item{maxit}: an \code{integer}.The maximal number of iterations. \emph{Default}: 200.
 }}
 
 \item{CTA}{a \code{list}. with the objects:
 \itemize{
-\item{na.action} The default action to remove observations with NA in the response variable. \emph{Default}: \code{\link[rpart]{na.rpart}}
-\item{method} a \code{character}. Only "class" is available
-\item{x} a \code{logical}. Keep a copy of the x matrix. \emph{Default}: FALSE.
-\item{y} a \code{logical}. Keep a copy of the y matrix. \emph{Default}: TRUE.
-\item{model} a \code{logical}. Keep a copy of the model frame. \emph{Default}: FALSE.
-\item{control} a \code{list}. a list of options obtained with \code{\link[rpart]{rpart.control}}. \emph{Default}: $xval = 5, minbucket = 5, minsplit = 5, cp = 0, maxdepth =25. for the other parameters see \code{\link[rpart]{rpart.control}} 
+\item{na.action}: The default action to remove observations with NA in the response variable. \emph{Default}: \code{\link[rpart]{na.rpart}}
+\item{method}: a \code{character}. Only "class" is available
+\item{x}: a \code{logical}. Keep a copy of the x matrix. \emph{Default}: FALSE.
+\item{y}: a \code{logical}. Keep a copy of the y matrix. \emph{Default}: TRUE.
+\item{model}: a \code{logical}. Keep a copy of the model frame. \emph{Default}: FALSE.
+\item{control}: a \code{list}. a list of options obtained with \code{\link[rpart]{rpart.control}}. \emph{Default}: $xval = 5, minbucket = 5, minsplit = 5, cp = 0, maxdepth =25. for the other parameters see \code{\link[rpart]{rpart.control}} 
+}}
+
+\item{GAM}{a \code{list}. with the objects:
+\itemize{
+\item{smooth.k}: \code{integer}. The dimension of the basis used to represent the smooth term. \emph{Default}: 4.
+\item{smooth.bs}: \code{character}. The (penalized) smoothing basis to use.  \emph{Default}: 'tp'. see \code{\link[mgcv]{smooth.terms}}.
+\item{method}: \code{character}. The smoothing parameter estimation method.  \emph{Default}: 'GCV.Cp'.
+\item{optimizer}: \code{character}. An array specifying the numerical optimization method to use to optimize the smoothing parameter estimation criterion. \emph{Default}: c('outer','newton').
+\item{family}: error distribution family. Only \code{stats}[binomial(link = 'logit')] was tested thus we discourage to change this parameter to another distribution family.
+\item{control}: a \code{list}. a list of options obtained with \code{\link[mgcv]{gam.control}}.
+\item{scale}: \code{numeric}. scale parameter. \emph{Default}: 0. If negative, it means that the scale parameter is unknown. 0 means 
+that the scale is equal to 1 for a binomial distribution.
+\item{select}: \code{logical}. should gam add an extra penalty to each term so that it can be penalized to zero? Use \emph{gamma} to increase level of penalization. \emph{Default}: FALSE.
+\item{gamma}: \code{numerical}. Increasing this number produce smoother models (but could also produce overfitting issues). \emph{Default}: 1.
+\item{knots}: \code{list}. knot values to be used for basis construction. \emph{Default}: \code{NULL}.
+\item{H}: Fixed quadratic penalty on the parameters. \emph{Default}: \code{NULL}.
 }}
 
 \item{GLM}{a \code{list}. with the objects:
@@ -52,7 +68,7 @@ a \code{list} of parameters for ESM.
 Generate a list of model parameters
 }
 \details{
-For the arguments of each modeling technique, please refer to the manual of \code{\link[nnet]{nnet}}, \code{\link[rpart]{rpart}}, \code{\link[stats]{glm}}, and \code{\link[gbm]{gbm}}.
+For the arguments of each modeling technique, please refer to the manual of \code{\link[nnet]{nnet}}, \code{\link[rpart]{rpart}}, \code{\link[mgcv]{gam}}, \code{\link[stats]{glm}}, and \code{\link[gbm]{gbm}}.
 }
 \examples{
 ## Perform a GLM with step AIC to select the best structure 

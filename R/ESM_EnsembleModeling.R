@@ -16,7 +16,10 @@
 #' \item{model.info}: a \code{list} of the models used, their options, the combination of bivariate models (which.biva), the modeling ID, 
 #' the path to the folder where are the stored the models (biva.path), and the failed models
 #' \item{cv.split.table}: a \code{matrix} used to train and test models. See explanation of the argument cv.split.table
+#' \item{pooling}: a \code{logical}. Does the pooling method to evaluate the models was performed?
 #' \item{evaluations}: a \code{matrix} The evaluation of the ensemble based on 4 metrics: the AUC, the Somer's D (=2*AUC-1),
+#' maxTSS, and the smooth Boyce Index (SBI, if SBI = TRUE in ESM_Modeling) or the regular Boyce Index (if SBI = FALSE).
+#' \item{calibrations}: a \code{matrix} The calibration power of the ensemble based on 4 metrics: the AUC, the Somer's D (=2*AUC-1),
 #' maxTSS, and the smooth Boyce Index (SBI, if SBI = TRUE in ESM_Modeling) or the regular Boyce Index (if SBI = FALSE).
 #' \item{EF.algo}: a \code{list} containing \code{pred.EF.algo} which is a \code{matrix} of ensemble predictions for each run 
 #' and modeling techniques; and \code{weights.algo} a \code{matrix} of weights used to generate the ensemble at the level of the algorithm.
@@ -25,15 +28,21 @@
 #' \code{EF} will be exactly the same as \code{EF.algo}.
 #' }
 #' @details
+#' If the pooling evaluation was selected in \code{ESM_Modeling}, the different weights will result from 
+#' this evaluation. In addition, the final ensemble will also be evaluated using the pooling method (see Collart & Guisan 2023).
+#' 
 #' For the use of this function, please refer to the manual of ESM_Modeling.
 #' 
 #' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Projection}} and  \code{\link{ESM_Ensemble.Projection}}
-#' @references Lomba, A., L. Pellissier, C.F. Randin, J. Vicente, F. Moreira, J. Honrado and A. Guisan. 2010. Overcoming the rare species 
+#' @references 
+#' Lomba, A., L. Pellissier, C.F. Randin, J. Vicente, F. Moreira, J. Honrado and A. Guisan. 2010. Overcoming the rare species 
 #' modelling paradox: A novel hierarchical framework applied to an Iberian endemic plant. \emph{Biological Conservation}, \bold{143},2647-2657.
 #' 
 #' Breiner F.T., A. Guisan, A. Bergamini and M.P. Nobis. 2015. Overcoming limitations of modelling rare species by using ensembles of small models. \emph{Methods in Ecology and Evolution}, \bold{6},1210-1218.
 #' 
 #' Breiner F.T., Nobis M.P., Bergamini A., Guisan A. 2018. Optimizing ensembles of small models for predicting the distribution of species with few occurrences. \emph{Methods in Ecology and Evolution}. \doi{10.1111/2041-210X.12957}
+#' 
+#' Collart, F., & Guisan, A. (2023). Small to train, small to test: Dealing with low sample size in model evaluation. \emph{Ecological Informatics}. \bold{75}, 102106. \doi{10.1016/j.ecoinf.2023.102106}.
 #' 
 #' @export
 
@@ -81,6 +90,7 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
   cv.split.table <-ESM.Mod$cv.split.table
   run.names <- colnames(cv.split.table)
   resp <- ESM.Mod$data$resp
+  pooling <- ESM.Mod$model.info$pooling
   
   for(i in 1:length(models)){
     ##Get the weights of the full model (which is = to mean across the cv)----
@@ -89,16 +99,24 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
     },model = models[i],ws=weighting.score))
     row.names(w) = models[i]
     w[w<threshold | is.na(w)] = 0
+    
     if(i == 1){
       weights.algo <- w
     }else{
       weights.algo <- rbind(weights.algo,w)
     }
+    
+    if(length(w)==sum(w==0)){
+      warning(paste("All weights for models based on",models[i],"are below the threshold consider changing the threshold."))
+      pred.EF.algo <- as.data.frame(matrix(as.numeric(NA),nrow = nrow(cv.split.table), ncol = ncol(cv.split.table)))
+      colnames(pred.EF.algo) = paste(colnames(cv.split.table),models[i],sep=".")
+    }else{
+      ## Then make the ensemble----
+      pred.EF.algo <- sapply(run.names,.bivaToEnsemble,model = models[i],
+                             w = w,biva.pred = biva.pred) 
+      pred.EF.algo <- do.call(cbind.data.frame,pred.EF.algo)
+    }
 
-    ## Then make the ensemble----
-    pred.EF.algo <- sapply(run.names,.bivaToEnsemble,model = models[i],
-                           w = w,biva.pred = biva.pred) 
-    pred.EF.algo <- do.call(cbind.data.frame,pred.EF.algo)
     if(i==1){
       pred.EF <- pred.EF.algo
     }else{
@@ -107,12 +125,33 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
     }
     
   }
-  ## Evaluate the ensembles per Run + extract w.scores----
-  EF.algo.eval <- .bivaEvaluation(biva = pred.EF,
-                                  resp=resp, models=models,
-                                  cv.split.table=cv.split.table,
-                                  SBI = SBI)
+  if(pooling){
+    EF.algo.eval <- .pooling.ESM.Mod(pred.EF,
+                                    resp=resp, 
+                                    models=models,
+                                    cv.split.table=cv.split.table[,-ncol(cv.split.table)],
+                                    SBI = SBI)
+    EF.algo.calib <- .pooling.ESM.Mod(pred.EF,
+                                     resp=resp, 
+                                     models=models,
+                                     cv.split.table=(!cv.split.table[,-ncol(cv.split.table)]),
+                                     SBI = SBI)
+  }else{
+    ## Evaluate the ensembles per Run + extract w.scores----
+    EF.algo.eval <- .bivaEvaluation(biva = pred.EF,
+                                    resp=resp, models=models,
+                                    cv.split.table=cv.split.table,
+                                    SBI = SBI)
+    EF.algo.calib <- .bivaEvaluation(biva = pred.EF,
+                                    resp=resp, models=models,
+                                    cv.split.table=(!cv.split.table),
+                                    SBI = SBI,
+                                    validation = FALSE)
+    
+  }
   rownames(EF.algo.eval) = paste0(rownames(EF.algo.eval),".EF")
+  rownames(EF.algo.calib) = paste0(rownames(EF.algo.calib),".EF")
+  
 
   ### Make the ensemble across the modeling techniques----
   if(length(models)>1){
@@ -125,15 +164,34 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
     colnames(EF) = paste0(colnames(EF),".EF")
     
     ##Evaluate the model for each run----
-    EF.eval <- .bivaEvaluation(biva = EF,
-                               resp=resp, models="EF",
-                               cv.split.table=cv.split.table,
-                               SBI = SBI)
+    if(pooling){
+      EF.eval <- .pooling.ESM.Mod(EF,
+                                 resp=resp, models="EF",
+                                 cv.split.table=cv.split.table[,-ncol(cv.split.table)],
+                                 SBI = SBI)
+      EF.calib <- .pooling.ESM.Mod(EF,
+                                  resp=resp, models="EF",
+                                  cv.split.table=(!cv.split.table[,-ncol(cv.split.table)]),
+                                  SBI = SBI)
+    }else{
+      EF.eval <- .bivaEvaluation(biva = EF,
+                                 resp=resp, models="EF",
+                                 cv.split.table=cv.split.table,
+                                 SBI = SBI)
+      EF.calib <- .bivaEvaluation(biva = EF,
+                                 resp=resp, models="EF",
+                                 cv.split.table=(!cv.split.table),
+                                 SBI = SBI,
+                                 validation = FALSE)
+    }
+    
     EF.eval <- rbind(EF.algo.eval,EF.eval)
+    EF.calib <- rbind(EF.algo.calib,EF.calib)
     
   }else{
     EF <- pred.EF
     EF.eval <- EF.algo.eval
+    EF.calib <- EF.algo.calib
     weights.EF <- weights.algo
   }
   
@@ -141,7 +199,9 @@ ESM_Ensemble.Modeling <- function(ESM.Mod,
   obj <- list(data=ESM.Mod$data,
               model.info = ESM.Mod$model.info,
               cv.split.table = cv.split.table,
+              pooling = pooling,
               evaluations = EF.eval,
+              calibration = EF.calib,
               weighting.score = weighting.score,
               threshold = threshold,
               EF.algo = list(pred.EF.algo = pred.EF,

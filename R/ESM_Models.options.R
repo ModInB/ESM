@@ -1,23 +1,42 @@
 #' @name ESM_Models.Options
 #' @author Flavien Collart from the code of biomod2::BIOMOD_ModelingOptions
+#' 
 #' @title Model parameters for ESMs
+#' 
 #' @description Generate a list of model parameters
+#' 
 #' @param ANN a \code{list}. with the objects:
 #' \itemize{
-#' \item{size} an \code{integer}. The numer of units in the hidden layers. \emph{Default}: 8.
-#' \item{decay} a \code{numeric}. The weight decay. \emph{Default}: 0.001.
-#' \item{rang} a \code{numeric}. Initial random weights. \emph{Default}: 0.1.
-#' \item{maxit} an \code{integer}.The maximal number of iterations. \emph{Default}: 200.
+#' \item{size}: an \code{integer}. The numer of units in the hidden layers. \emph{Default}: 8.
+#' \item{decay}: a \code{numeric}. The weight decay. \emph{Default}: 0.001.
+#' \item{rang}: a \code{numeric}. Initial random weights. \emph{Default}: 0.1.
+#' \item{maxit}: an \code{integer}.The maximal number of iterations. \emph{Default}: 200.
 #' }
 #' 
 #' @param CTA a \code{list}. with the objects:
 #' \itemize{
-#' \item{na.action} The default action to remove observations with NA in the response variable. \emph{Default}: \code{\link[rpart]{na.rpart}}
-#' \item{method} a \code{character}. Only "class" is available
-#' \item{x} a \code{logical}. Keep a copy of the x matrix. \emph{Default}: FALSE.
-#' \item{y} a \code{logical}. Keep a copy of the y matrix. \emph{Default}: TRUE.
-#' \item{model} a \code{logical}. Keep a copy of the model frame. \emph{Default}: FALSE.
-#' \item{control} a \code{list}. a list of options obtained with \code{\link[rpart]{rpart.control}}. \emph{Default}: $xval = 5, minbucket = 5, minsplit = 5, cp = 0, maxdepth =25. for the other parameters see \code{\link[rpart]{rpart.control}} 
+#' \item{na.action}: The default action to remove observations with NA in the response variable. \emph{Default}: \code{\link[rpart]{na.rpart}}
+#' \item{method}: a \code{character}. Only "class" is available
+#' \item{x}: a \code{logical}. Keep a copy of the x matrix. \emph{Default}: FALSE.
+#' \item{y}: a \code{logical}. Keep a copy of the y matrix. \emph{Default}: TRUE.
+#' \item{model}: a \code{logical}. Keep a copy of the model frame. \emph{Default}: FALSE.
+#' \item{control}: a \code{list}. a list of options obtained with \code{\link[rpart]{rpart.control}}. \emph{Default}: $xval = 5, minbucket = 5, minsplit = 5, cp = 0, maxdepth =25. for the other parameters see \code{\link[rpart]{rpart.control}} 
+#' }
+#' 
+#' @param GAM a \code{list}. with the objects:
+#' \itemize{
+#' \item{smooth.k}: \code{integer}. The dimension of the basis used to represent the smooth term. \emph{Default}: 4.
+#' \item{smooth.bs}: \code{character}. The (penalized) smoothing basis to use.  \emph{Default}: 'tp'. see \code{\link[mgcv]{smooth.terms}}.
+#' \item{method}: \code{character}. The smoothing parameter estimation method.  \emph{Default}: 'GCV.Cp'.
+#' \item{optimizer}: \code{character}. An array specifying the numerical optimization method to use to optimize the smoothing parameter estimation criterion. \emph{Default}: c('outer','newton').
+#' \item{family}: error distribution family. Only \code{stats}[binomial(link = 'logit')] was tested thus we discourage to change this parameter to another distribution family.
+#' \item{control}: a \code{list}. a list of options obtained with \code{\link[mgcv]{gam.control}}.
+#' \item{scale}: \code{numeric}. scale parameter. \emph{Default}: 0. If negative, it means that the scale parameter is unknown. 0 means 
+#' that the scale is equal to 1 for a binomial distribution.
+#' \item{select}: \code{logical}. should gam add an extra penalty to each term so that it can be penalized to zero? Use \emph{gamma} to increase level of penalization. \emph{Default}: FALSE.
+#' \item{gamma}: \code{numerical}. Increasing this number produce smoother models (but could also produce overfitting issues). \emph{Default}: 1.
+#' \item{knots}: \code{list}. knot values to be used for basis construction. \emph{Default}: \code{NULL}.
+#' \item{H}: Fixed quadratic penalty on the parameters. \emph{Default}: \code{NULL}.
 #' }
 #' 
 #' @param GLM a \code{list}. with the objects:
@@ -40,7 +59,7 @@
 #' \item{n.cores}: \code{logical}. Number of CPU cores to use. \emph{Default}: \code{NULL}.
 #' }
 #' 
-#' @details For the arguments of each modeling technique, please refer to the manual of \code{\link[nnet]{nnet}}, \code{\link[rpart]{rpart}}, \code{\link[stats]{glm}}, and \code{\link[gbm]{gbm}}.
+#' @details For the arguments of each modeling technique, please refer to the manual of \code{\link[nnet]{nnet}}, \code{\link[rpart]{rpart}}, \code{\link[mgcv]{gam}}, \code{\link[stats]{glm}}, and \code{\link[gbm]{gbm}}.
 #' @return a \code{list} of parameters for ESM.
 #' @examples 
 #' ## Perform a GLM with step AIC to select the best structure 
@@ -51,13 +70,14 @@
 #' models.options = ESM_Models.Options(GLM=list(test="none",type="quadratic"))
 #' 
 #' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}
+#' 
 #' @export
 
 ESM_Models.Options <- function(ANN = NULL,
                                CTA = NULL,
+                               GAM = NULL,
                                GLM = NULL,
-                               GBM = NULL
-                               ){
+                               GBM = NULL){
   ## Default options
   opt <- list(ANN = list(size = 8,
                          decay = 0.001,
@@ -79,6 +99,18 @@ ESM_Models.Options <- function(ANN = NULL,
                                         usesurrogate = 2,
                                         surrogatestyle = 0)
                          ),
+              GAM=list(smooth.k = 4,
+                       smooth.bs = "tp",
+                       method = "GCV.Cp",
+                       optimizer = c('outer','newton'),
+                       family = stats::binomial(link = 'logit'),
+                       control = mgcv::gam.control(),
+                       scale = 0,
+                       select = FALSE,
+                       gamma = 1,
+                       knots = NULL,
+                       H = NULL
+                       ),
               GLM = list(type = 'quadratic',
                          test = 'none',
                          family = stats::binomial(link = 'logit')
@@ -95,7 +127,7 @@ ESM_Models.Options <- function(ANN = NULL,
                          n.cores = NULL
                           )
               )
-  
+
   ### Adapted Code from biomod2 4.2.4
   
   ## ANN ----
@@ -128,12 +160,13 @@ ESM_Models.Options <- function(ANN = NULL,
   ## CTA----
   if (!is.null(CTA)){
     if(!is.null(CTA$na.action)){
-      opt$CTA$na.action = CTA$na.actio
+      opt$CTA$na.action = CTA$na.action
     }
     if(!is.null(CTA$method)){
       if(CTA$method != "class"){
         stop("CTA$method should be 'class'.")
       }
+      opt$CTA$method = CTA$method
     }
     if(!is.null(CTA$x)){
       if(!is.logical(CTA$x)){
@@ -162,6 +195,82 @@ ESM_Models.Options <- function(ANN = NULL,
     }
   }
   
+  ## GAM ----
+  if(!is.null(GAM)){
+    if(!is.null(GAM$smooth.k)){
+      if(!is.numeric(GAM$smooth.k)){
+        stop("GAM$smooth.k should be an integer")
+      }
+      opt$GAM$smooth.k = GAM$smooth.k
+    }
+    if(!is.null(GAM$smooth.bs)){
+      if(!is.character(GAM$smooth.bs) | length(GAM$smooth.bs) > 1 | 
+         (!any(GAM$smooth.bs %in% c('tp', 'ts', 'ds', 'cr', 'cs',
+                                    'cc', 'sos','bs','ps','cp','re',
+                                    'mrf','gp','so','sf','sw', 'te',
+                                    'ti','t2','ad','sz', 'fs')
+               )
+                                                                     )
+         ){
+        stop("GAM$smooth.bs should be a character and must be either 'tp', 'ts', 'ds', 'cr', 'cs', 
+             'cc', 'sos','bs','ps','cp','re','mrf','gp','so','sf','sw', 'te','ti','t2','ad','sz' or 'fs'. ")
+      }
+      opt$GAM$smooth.bs = GAM$smooth.bs
+    }
+    if(!is.null(GAM$method)){
+      if(!is.character(GAM$method)| length(GAM$method) > 1 | 
+         (!any(GAM$method %in% c('GCV.Cp','GACV.Cp','NCV','QNCV','REML','P-REML','ML','P-ML')))
+         ){
+        stop("GAM$method must be a character and must be either 'GCV.Cp','GACV.Cp','NCV','QNCV','REML','P-REML','ML', or'P-ML'")
+      }
+      opt$GAM$method = GAM$method
+    }
+    if(!is.null(GAM$optimizer)){
+      if(!all(GAM$optimizer %in% c('outer','newton','bfgs','optim','nlm','efs'))){
+        stop("GAM$optimizer must be a character array from c('outer','newton','bfgs','optim','nlm','efs') ")
+      }
+      opt$GAM$optimizer = GAM$optimizer
+    }
+    if (!is.null(GAM$family)) {
+      opt$GAM$family <- GAM$family
+    }
+    if(!is.null(GAM$control)){
+      if(!is.list(GAM$control)){
+        stop("GAM$control must be a list. Please use the function mgcv::gam.control to generate this object")
+      }
+      cat("\n gam$control has been changed, Please note this parameter is not checked")
+      opt$GAM$control = GAM$control
+    }
+    if(!is.null(GAM$scale)){
+      if(!is.numeric(GAM$scale)){
+        stop("GAM$scale should be an integer")
+      }
+      opt$GAM$scale = GAM$scale
+    }
+    if(!is.null(GAM$select)){
+      if(!is.logical(GAM$select)){
+        stop("CTA$select must be logical")
+      }
+      opt$GAM$select = GAM$select 
+    }
+    if(!is.null(GAM$gamma)){
+      if(!is.numeric(GAM$gamma)){
+        stop("GAM$gamma must be a numeric")
+      }
+      opt$GAM$gamma = GAM$gamma
+    }
+    if(!is.null(GAM$knots)){
+      if(!is.list(GAM$knots)){
+        stop("GAM$knots must be a list")
+      }
+      opt$GAM$knots = GAM$knots
+    }
+    if(!is.null(GAM$H)){
+      opt$GAM$H = GAM$H
+    }
+    
+  }
+  
   ## GLM ----
   if (!is.null(GLM)) {
     if (!is.null(GLM$type)) {
@@ -170,8 +279,8 @@ ESM_Models.Options <- function(ANN = NULL,
       }
       opt$GLM$type <- GLM$type
     }
-    if (!is.null(GLM$myFormula)) {
-      opt$GLM$myFormula <- GLM$myFormula
+    if (!is.null(GLM$family)) {
+      opt$GLM$family <- GLM$family
     }
     if (!is.null(GLM$test)) {
       if(!(any(GLM$test %in% c("none","AIC")))){
@@ -182,6 +291,9 @@ ESM_Models.Options <- function(ANN = NULL,
   }
   ## GBM ----
   if (!is.null(GBM)) {
+    if (!is.null(GBM$distribution)) {
+      opt$GBM$distribution <- GBM$distribution
+    }
     if (!is.null(GBM$n.trees)) {
       if(!is.integer(GBM$n.trees)){
         stop("GBM$n.trees should be an integer")

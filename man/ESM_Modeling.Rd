@@ -6,8 +6,8 @@
 \usage{
 ESM_Modeling(
   resp,
-  xy,
   env,
+  xy = NULL,
   sp.name,
   models,
   models.options = NULL,
@@ -17,6 +17,7 @@ ESM_Modeling(
   cv.ratio = 0.7,
   cv.n.blocks = NULL,
   cv.split.table = NULL,
+  pooling = TRUE,
   SBI = TRUE,
   which.biva = NULL,
   parallel = FALSE,
@@ -31,13 +32,15 @@ ESM_Modeling(
 \arguments{
 \item{resp}{\code{numeric} of 0-1. 0 when the species is absent and 1 when present.}
 
-\item{xy}{\code{matrix} or \code{data.frame} containing the X and Y coordinate of the species.}
-
 \item{env}{\code{matrix}, \code{data.frame} or \code{SpatRaster} of the species predictors.}
+
+\item{xy}{\code{matrix} or \code{data.frame} containing the X and Y coordinate of the species. Only Needed when 
+env is a \code{SpatRaster}. \emph{Default}: \code{NULL}.}
 
 \item{sp.name}{\code{character}. Name of the species (To generate of ESM folder with this name).}
 
-\item{models}{\code{character} of the wanted algorithm methods. Can be c("ANN","CTA","GLM","GBM","MAXNET) or a subset of these 5 techniques.}
+\item{models}{\code{character} of the wanted algorithm methods. Can be c("ANN","CTA","GAM","GLM","GBM","MAXNET) 
+or a subset of these 5 techniques.}
 
 \item{models.options}{\code{NULL} or the output from \code{\link{ESM_Models.Options}}}
 
@@ -60,6 +63,8 @@ but where the presences (and absences) are equally split into the k blocks. If "
 \item{cv.split.table}{a \code{matrix} or a \code{data.frame} filled with TRUE/FALSE to specify which part of data must be used for models calibration (TRUE) 
 and for models validation (FALSE). Each column corresponds to a 'RUN' and should be named "RUNX" where X correspond to the number of the run. 
 The last column should be filled with only TRUE and named "Full" to make a full model used for the future projection. Only applicable when cv.method="custom".}
+
+\item{pooling}{\code{logical}. Should the models be evaluated via the pooling method? \emph{Default = TRUE}. See \code{\link{ESM_Pooling.Evaluation}} for more information.}
 
 \item{SBI}{\code{logical}. Should the model evaluated with the Smooth Boyce Index (SBI=TRUE) or the regular Boyce Index (SBI=FALSE)? If TRUE, the SBI will be
 computed with the function \code{\link{Smooth_CBI}} and resulted from the ensemble of 5 smoothing techniques. \emph{Default: TRUE. Note that
@@ -89,7 +94,8 @@ a \code{list} containing:
 \item{data}: a \code{list} with the object resp, xy, env.var and sp.name. env.var is = to the data supplied in the argument env. 
 If env, was a SpatRaster, it corresponds to the extracted values of these rasters.
 \item{model.info}: a \code{list} of the models used (models), their options (model.options), the combination of bivariate models (which.biva), 
-the failed models (failed.mod), the modeling ID (modeling.id), the prevalence argument and, the path to the folder where are the stored the models (biva.path).
+the failed models (failed.mod), the modeling ID (modeling.id), the prevalence argument, the path to the folder where are the stored the models (biva.path),
+and (pooling = TRUE or FALSE) if the pooling method  was applied or not to evaluate models (results in biva.evaluations and biva.calibration).
 \item{cv.split.table}: a \code{matrix} used to train and test models. See explanation of the argument cv.split.table.
 \item{cv.method }: a \code{character} corresponding to the used cross-validation method.
 \item{biva.predictions}: a \code{list} of the predictions of all the runs for each bivariate models.
@@ -109,8 +115,9 @@ The basic idea of ensemble of small models (ESMs) is to model a species distribu
 for example all possible bivariate models (i.e. models that contain only two predictors at a time out of a larger set of predictors), 
 and then combine all possible bivariate models into an ensemble (Lomba et al. 2010; Breiner et al. 2015).
 
-The ESM set of functions could be used to build ESMs using simple bivariate models which are averaged using weights based on model performances. 
-They provide full functionality of the approach described in Breiner et al. (2015).
+The ESM set of functions could be used to build ESMs using simple bivariate models which are averaged using weights based on model performances 
+as described in Breiner et al. (2015). Note that if 'pooling = TRUE', the weights will be computed via the pooling evaluation (as recommended in
+Collart & Guisan, 2023) and will thus change from the approach of Breiner et al (2015).
 
 The argument which.biva allows to split model runs, e.g. if which.biva is 1:3, only the three first bivariate variable combinations will be modeled. 
 This allows to run different biva splits on different computers. However, it is better not to use this option if all models are run on a single computer.
@@ -120,16 +127,16 @@ This allows to run different biva splits on different computers. However, it is 
 \donttest{
 library(terra)
 #Loading test data
-data(ESM_species.env)
+data(ESM_Species.Env)
 data(ESM_Env)
 #species occurrences
-xy <- ESM_species.env[,1:2]
-resp <- ESM_species.env[,3] #Tayloria_serrata
+xy <- ESM_Species.Env[,1:2]
+resp <- ESM_Species.Env[,3] #Campylophyllum halleri 
 env <- terra::unwrap(ESM_Env)
 ### Calibration of simple bivariate models
 my.ESM <- ESM_Modeling(resp = resp,
-                       xy=xy,
                        env=env,
+                       xy=xy,
                        sp.name = "test",
                        models = c("GLM"),
                        models.options = NULL,
@@ -137,13 +144,14 @@ my.ESM <- ESM_Modeling(resp = resp,
                        cv.method = "split-sampling",
                        cv.rep = 2,
                        cv.ratio = 0.7,
+                       pooling = TRUE,
                        SBI = FALSE,
                        parallel = FALSE,
                        save.models = FALSE,
                        save.obj = FALSE,
                        verbose = FALSE)
                        
-# Performances of each bivariate model
+# Performances of each bivariate model based on the pooling method
 my.ESM$biva.evaluations
 
 ### Ensemble models using a weighted mean based on maxTSS
@@ -152,18 +160,9 @@ my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
                                    threshold=0,
                                    save.obj = FALSE)
                                    
-## Performances of the ensemble across the replicates
-## The full model evaluation corresponds to the mean value across the replicates
+## Performances of the ensemble across the replicates based 
+# on the pooling method
 my.ESM_EF$evaluations
-
-### Evaluation of the ensemble models based on the pooling procedure 
-### as recommended in Collart & Guisan (2023)
-eval <- ESM_Pooling.Evaluation(ESM.Mod = my.ESM,
-                               ESM.ensembleMod = my.ESM_EF,
-                               EachSmallModels = FALSE)
-                               
-## Performances of the ensemble
-eval$ESM.evaluations
 
 ### Predictions of each bivariate model into a new space
 proj <- ESM_Projection(ESM.Mod = my.ESM,
@@ -183,8 +182,7 @@ my.ESM_thresholds <- ESM_Threshold(my.ESM_EF)
 
 
 ### Binary Projection based on max TSS of calibrated ESMs into new space                                                
-my.ESM_EFproj_current_binary <- (Ens.proj > 
-                                (my.ESM_thresholds$TSS.th*1000))*1
+my.ESM_EFproj_current_binary <- ESM_Binarize(Ens.proj, my.ESM_thresholds$TSS.th*1000)
 
 ### get the variable contributions of ESMs
 ESM_Variable.Contributions(my.ESM,my.ESM_EF) 
@@ -193,6 +191,7 @@ ESM_Variable.Contributions(my.ESM,my.ESM_EF)
 my.ESM_responsePlot<- ESM_Response.Plot(my.ESM,
                                         my.ESM_EF,
                                         fixed.var.metric = 'mean')
+                                        
 ### Generate an ODMAP table. Note that you still have to fill the other 
 # sections and check the prefilled ones
  ODMAP_Table <- ESM_Generate.ODMAP(ESM.Mod = my.ESM,
@@ -210,6 +209,8 @@ modelling paradox: A novel hierarchical framework applied to an Iberian endemic 
 Breiner F.T., A. Guisan, A. Bergamini and M.P. Nobis. 2015. Overcoming limitations of modelling rare species by using ensembles of small models. \emph{Methods in Ecology and Evolution}, \bold{6},1210-1218.
 
 Breiner F.T., Nobis M.P., Bergamini A., Guisan A. 2018. Optimizing ensembles of small models for predicting the distribution of species with few occurrences. \emph{Methods in Ecology and Evolution}. \doi{10.1111/2041-210X.12957}
+
+Collart, F., & Guisan, A. (2023). Small to train, small to test: Dealing with low sample size in model evaluation. \emph{Ecological Informatics}. \bold{75}, 102106. \doi{10.1016/j.ecoinf.2023.102106}.
 }
 \seealso{
 \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Modeling}},   \code{\link{ESM_Ensemble.Projection}}, 

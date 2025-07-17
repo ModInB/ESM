@@ -8,7 +8,7 @@ ESM_Null.Models(
   ESM.Mod,
   ESM.ensembleMod,
   n.rep = 99,
-  quant = 95,
+  quant = 0.95,
   pooling = FALSE,
   hist.plot = FALSE,
   parallel = FALSE,
@@ -55,8 +55,52 @@ It consists of running a series of null models, randomly shuffling the presences
 These models are performed following the same methodology as for the ESM (same model parameters, same number of cross-validations and 
 same threshold for the ensemble). The pooling evaluation can also be combined with these null models with the option pooling = TRUE 
 (as recommended in Collart & Guisan, 2023). In addition to the pvalue, the observed evaluation metrics are then readjusted using the 
-value of the evaluation metric at a certain quantile following the methodology developed in Verdon et al (2024). 
+value of the evaluation metric at a certain quantile following the methodology developed in Verdon et al (2024). Note that the adjustement
+formula is based for metric comprised between -1 and 1. Thus, the adjusted AUC is recomputed from SomersD: adjusted AUC = (adjusted SomersD -1)/2
 For the use of this function, please refer to the manual of ESM_Modeling.
+}
+\examples{
+\donttest{
+# #Loading test data
+# data(ESM_Species.env)
+# #species occurrences
+# xy <- ESM_Species.env[,1:2]
+# resp <- ESM_Species.env[,3] 
+# env <- ESM_Species.env[,6:9]
+# ### Calibration of simple bivariate models
+# my.ESM <- ESM_Modeling(resp = resp,
+#                        xy = xy,
+#                        env = env,
+#                        sp.name = "test",
+#                        models = c("GLM"),
+#                        models.options = NULL,
+#                        prevalence = 0.5,
+#                        cv.method = "split-sampling",
+#                        cv.rep = 2,
+#                        cv.ratio = 0.7,
+#                        pooling = FALSE,
+#                        SBI = FALSE,
+#                        parallel = FALSE,
+#                        save.models = FALSE,
+#                        save.obj = FALSE,
+#                        verbose = FALSE)
+#                        
+# ### Ensemble models using a weighted mean based on maxTSS
+# my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
+#                                    weighting.score=c("MaxTSS"),
+#                                    threshold=0,
+#                                    save.obj = FALSE)
+#                                    
+# ## Performances of the ensemble across the replicates
+# ## The full model evaluation corresponds to the mean value across the replicates
+# my.ESM_EF$evaluations
+# 
+# ### Evaluation of using null models as recommended in Collart & Guisan (2023)
+# eval <- ESM_Null.Models(my.ESM,
+#                         my.ESM_EF,
+#                         n.rep = 10)
+# eval
+}
 }
 \references{
 Collart, F., & Guisan, A. 2023. Small to train, small to test: Dealing with low sample size in model evaluation. 

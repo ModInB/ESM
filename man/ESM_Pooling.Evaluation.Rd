@@ -39,6 +39,48 @@ replicates where they were sampled. This procedure generates a series of indepen
 equal (as some data points may not have been sampled by chance in any of the \emph{n} replicates) to that of the number of data point.
 For the use of this function, please refer to the manual of ESM_Modeling.
 }
+\examples{
+\donttest{
+# #Loading test data
+# data(ESM_Species.env)
+# #species occurrences
+# xy <- ESM_Species.env[,1:2]
+# resp <- ESM_Species.env[,3] 
+# env <- ESM_Species.env[,6:9]
+# ### Calibration of simple bivariate models
+# my.ESM <- ESM_Modeling(resp = resp,
+#                        xy = xy,
+#                        env = env,
+#                        sp.name = "test",
+#                        models = c("GLM"),
+#                        models.options = NULL,
+#                        prevalence = 0.5,
+#                        cv.method = "split-sampling",
+#                        cv.rep = 2,
+#                        cv.ratio = 0.7,
+#                        pooling = FALSE,
+#                        SBI = FALSE,
+#                        parallel = FALSE,
+#                        save.models = FALSE,
+#                        save.obj = FALSE,
+#                        verbose = FALSE)
+#                        
+# ### Ensemble models using a weighted mean based on maxTSS
+# my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
+#                                    weighting.score=c("MaxTSS"),
+#                                    threshold=0,
+#                                    save.obj = FALSE)
+# 
+# ### Evaluation of the ensemble models based on the pooling procedure 
+# ### as recommended in Collart & Guisan (2023)
+# eval <- ESM_Pooling.Evaluation(ESM.Mod = my.ESM,
+#                                ESM.ensembleMod = my.ESM_EF,
+#                                EachSmallModels = FALSE)
+# eval
+}
+
+
+}
 \references{
 Collart, F., & Guisan, A. (2023). Small to train, small to test: Dealing with low sample size in model evaluation. 
 \emph{Ecological Informatics}. \bold{75}, 102106. \doi{10.1016/j.ecoinf.2023.102106}.
