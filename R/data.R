@@ -5,7 +5,7 @@
 #' Contains sampling of 3 bryophytes in 413 plots in the Western Swiss Alps with
 #' environmental values from Collart et al (2024)
 #'
-#' @format A data.frame with 413 plots and 9 variables:
+#' @format A data.frame with 413 plots and 12 variables:
 #' \describe{
 #' \item{x}{x coordinate in the CRS EPSG:2056}
 #' \item{y}{y coordinate in the CRS EPSG:2056}
@@ -21,6 +21,9 @@
 #' \item{bio15_ps_8110_LV95}{Precipitation Seasonality. Computed using the 
 #' coefficient of variation among monthly precipitation and averaged between
 #' 1981-2010.}
+#' \item{ESM_Campylophyllum_halleri}{Habitat suitability of \emph{Campylophyllum halleri}}
+#' \item{ESM_Dicranella_subulata}{Habitat suitability of \emph{Dicranella subulata}}
+#' \item{ESMSolenostoma_gracillimum}{Habitat suitability of \emph{Solenostoma gracillimum}}
 #' }
 #' 
 #' @author Flavien Collart

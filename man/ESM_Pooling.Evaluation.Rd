@@ -41,50 +41,42 @@ For the use of this function, please refer to the manual of ESM_Modeling.
 }
 \examples{
 \donttest{
-library(terra)
-#Loading test data
-data(ESM_Species.env)
-data(ESM_Env)
-#species occurrences
-xy <- ESM_Species.env[,1:2]
-resp <- ESM_Species.env[,3] #Tayloria_serrata
-env <- terra::unwrap(ESM_Env)
-### Calibration of simple bivariate models
-## Following Breiner et al 2015 and thus without 
-## the pooling method to ensemble the bivariate
-## models
-my.ESM <- ESM_Modeling(resp = resp,
-                       xy=xy,
-                       env=env,
-                       sp.name = "test",
-                       models = c("GLM"),
-                       models.options = NULL,
-                       prevalence = 0.5,
-                       cv.method = "split-sampling",
-                       cv.rep = 2,
-                       cv.ratio = 0.7,
-                       pooling = FALSE,
-                       SBI = FALSE,
-                       parallel = FALSE,
-                       save.models = FALSE,
-                       save.obj = FALSE,
-                       verbose = FALSE)
-                       
-### Ensemble models using a weighted mean based on maxTSS
-my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
-                                   weighting.score=c("MaxTSS"),
-                                   threshold=0,
-                                   save.obj = FALSE)
-                                   
-## Performances of the ensemble across the replicates
-## The full model evaluation corresponds to the mean value across the replicates
-my.ESM_EF$evaluations
-
-### Evaluation of the ensemble models based on the pooling procedure 
-### as recommended in Collart & Guisan (2023)
-eval <- ESM_Pooling.Evaluation(ESM.Mod = my.ESM,
-                               ESM.ensembleMod = my.ESM_EF,
-                               EachSmallModels = FALSE)
+# #Loading test data
+# data(ESM_Species.env)
+# #species occurrences
+# xy <- ESM_Species.env[,1:2]
+# resp <- ESM_Species.env[,3] 
+# env <- ESM_Species.env[,6:9]
+# ### Calibration of simple bivariate models
+# my.ESM <- ESM_Modeling(resp = resp,
+#                        xy = xy,
+#                        env = env,
+#                        sp.name = "test",
+#                        models = c("GLM"),
+#                        models.options = NULL,
+#                        prevalence = 0.5,
+#                        cv.method = "split-sampling",
+#                        cv.rep = 2,
+#                        cv.ratio = 0.7,
+#                        pooling = FALSE,
+#                        SBI = FALSE,
+#                        parallel = FALSE,
+#                        save.models = FALSE,
+#                        save.obj = FALSE,
+#                        verbose = FALSE)
+#                        
+# ### Ensemble models using a weighted mean based on maxTSS
+# my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
+#                                    weighting.score=c("MaxTSS"),
+#                                    threshold=0,
+#                                    save.obj = FALSE)
+# 
+# ### Evaluation of the ensemble models based on the pooling procedure 
+# ### as recommended in Collart & Guisan (2023)
+# eval <- ESM_Pooling.Evaluation(ESM.Mod = my.ESM,
+#                                ESM.ensembleMod = my.ESM_EF,
+#                                EachSmallModels = FALSE)
+# eval
 }
 
 

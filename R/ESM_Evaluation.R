@@ -37,50 +37,42 @@
 #' for each bivariate models (generated only if EachSmallModels = T).
 #' }
 #' @examples \donttest{
-#' library(terra)
-#' #Loading test data
-#' data(ESM_Species.env)
-#' data(ESM_Env)
-#' #species occurrences
-#' xy <- ESM_Species.env[,1:2]
-#' resp <- ESM_Species.env[,3] #Tayloria_serrata
-#' env <- terra::unwrap(ESM_Env)
-#' ### Calibration of simple bivariate models
-#' ## Following Breiner et al 2015 and thus without 
-#' ## the pooling method to ensemble the bivariate
-#' ## models
-#' my.ESM <- ESM_Modeling(resp = resp,
-#'                        xy=xy,
-#'                        env=env,
-#'                        sp.name = "test",
-#'                        models = c("GLM"),
-#'                        models.options = NULL,
-#'                        prevalence = 0.5,
-#'                        cv.method = "split-sampling",
-#'                        cv.rep = 2,
-#'                        cv.ratio = 0.7,
-#'                        pooling = FALSE,
-#'                        SBI = FALSE,
-#'                        parallel = FALSE,
-#'                        save.models = FALSE,
-#'                        save.obj = FALSE,
-#'                        verbose = FALSE)
-#'                        
-#' ### Ensemble models using a weighted mean based on maxTSS
-#' my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
-#'                                    weighting.score=c("MaxTSS"),
-#'                                    threshold=0,
-#'                                    save.obj = FALSE)
-#'                                    
-#' ## Performances of the ensemble across the replicates
-#' ## The full model evaluation corresponds to the mean value across the replicates
-#' my.ESM_EF$evaluations
-#' 
-#' ### Evaluation of the ensemble models based on the pooling procedure 
-#' ### as recommended in Collart & Guisan (2023)
-#' eval <- ESM_Pooling.Evaluation(ESM.Mod = my.ESM,
-#'                                ESM.ensembleMod = my.ESM_EF,
-#'                                EachSmallModels = FALSE)
+#' # #Loading test data
+#' # data(ESM_Species.env)
+#' # #species occurrences
+#' # xy <- ESM_Species.env[,1:2]
+#' # resp <- ESM_Species.env[,3] 
+#' # env <- ESM_Species.env[,6:9]
+#' # ### Calibration of simple bivariate models
+#' # my.ESM <- ESM_Modeling(resp = resp,
+#' #                        xy = xy,
+#' #                        env = env,
+#' #                        sp.name = "test",
+#' #                        models = c("GLM"),
+#' #                        models.options = NULL,
+#' #                        prevalence = 0.5,
+#' #                        cv.method = "split-sampling",
+#' #                        cv.rep = 2,
+#' #                        cv.ratio = 0.7,
+#' #                        pooling = FALSE,
+#' #                        SBI = FALSE,
+#' #                        parallel = FALSE,
+#' #                        save.models = FALSE,
+#' #                        save.obj = FALSE,
+#' #                        verbose = FALSE)
+#' #                        
+#' # ### Ensemble models using a weighted mean based on maxTSS
+#' # my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
+#' #                                    weighting.score=c("MaxTSS"),
+#' #                                    threshold=0,
+#' #                                    save.obj = FALSE)
+#' # 
+#' # ### Evaluation of the ensemble models based on the pooling procedure 
+#' # ### as recommended in Collart & Guisan (2023)
+#' # eval <- ESM_Pooling.Evaluation(ESM.Mod = my.ESM,
+#' #                                ESM.ensembleMod = my.ESM_EF,
+#' #                                EachSmallModels = FALSE)
+#' # eval
 #' }
 #' 
 #' 
@@ -208,10 +200,11 @@ ESM_Pooling.Evaluation <- function (ESM.Mod,
 #' These models are performed following the same methodology as for the ESM (same model parameters, same number of cross-validations and 
 #' same threshold for the ensemble). The pooling evaluation can also be combined with these null models with the option pooling = TRUE 
 #' (as recommended in Collart & Guisan, 2023). In addition to the pvalue, the observed evaluation metrics are then readjusted using the 
-#' value of the evaluation metric at a certain quantile following the methodology developed in Verdon et al (2024). 
+#' value of the evaluation metric at a certain quantile following the methodology developed in Verdon et al (2024). Note that the adjustement
+#' formula is based for metric comprised between -1 and 1. Thus, the adjusted AUC is recomputed from SomersD: adjusted AUC = (adjusted SomersD -1)/2
 #' For the use of this function, please refer to the manual of ESM_Modeling.
 #' 
-#' @param  ESM.Mod The object returned by \code{ESM_Modeling}.
+#' @param ESM.Mod The object returned by \code{ESM_Modeling}.
 #' @param ESM.ensembleMod The object returned by \code{\link{ESM_Ensemble.Modeling}}.
 #' @param n.rep \code{integer}. The number of null models. \emph{Default: 99}.
 #' @param pooling \code{logical}. Should the pooling evaluation be performed? \emph{Default: FALSE}.
@@ -229,7 +222,47 @@ ESM_Pooling.Evaluation <- function (ESM.Mod,
 #' \item{adj.evaluation}: \code{numeric}. Adjusted evaluation metrics for the ESM based on a certain quantile from the null distribution.
 #' \item{evaluations}: \code{matrix}. Observed and null values for each metrics.
 #' }
-#' 
+#' @examples \donttest{
+#' # #Loading test data
+#' # data(ESM_Species.env)
+#' # #species occurrences
+#' # xy <- ESM_Species.env[,1:2]
+#' # resp <- ESM_Species.env[,3] 
+#' # env <- ESM_Species.env[,6:9]
+#' # ### Calibration of simple bivariate models
+#' # my.ESM <- ESM_Modeling(resp = resp,
+#' #                        xy = xy,
+#' #                        env = env,
+#' #                        sp.name = "test",
+#' #                        models = c("GLM"),
+#' #                        models.options = NULL,
+#' #                        prevalence = 0.5,
+#' #                        cv.method = "split-sampling",
+#' #                        cv.rep = 2,
+#' #                        cv.ratio = 0.7,
+#' #                        pooling = FALSE,
+#' #                        SBI = FALSE,
+#' #                        parallel = FALSE,
+#' #                        save.models = FALSE,
+#' #                        save.obj = FALSE,
+#' #                        verbose = FALSE)
+#' #                        
+#' # ### Ensemble models using a weighted mean based on maxTSS
+#' # my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
+#' #                                    weighting.score=c("MaxTSS"),
+#' #                                    threshold=0,
+#' #                                    save.obj = FALSE)
+#' #                                    
+#' # ## Performances of the ensemble across the replicates
+#' # ## The full model evaluation corresponds to the mean value across the replicates
+#' # my.ESM_EF$evaluations
+#' # 
+#' # ### Evaluation of using null models as recommended in Collart & Guisan (2023)
+#' # eval <- ESM_Null.Models(my.ESM,
+#' #                         my.ESM_EF,
+#' #                         n.rep = 10)
+#' # eval
+#' }
 #' @references 
 #' Collart, F., & Guisan, A. 2023. Small to train, small to test: Dealing with low sample size in model evaluation. 
 #' \emph{Ecological Informatics}. \bold{75}, 102106. \doi{10.1016/j.ecoinf.2023.102106}.
@@ -255,12 +288,11 @@ ESM_Null.Models <- function(ESM.Mod,
                             save.obj = FALSE){
   
   ## check info
-  cv.method <- ESM.Mod$cv.method
+  cv.method <- ESM.Mod$model.info$cv.method
   if(cv.method == "custom"){
     stop("Null models are not implemented when custom cross-validations are used to model the species")
   }else if(cv.method == "split-sampling"){
-    cv.ratio <- round(sum(ESM.Mod$cv.split.table[,1])/length(ESM.Mod$cv.split.table[,1]),1)
-    cat(paste("\ncv.ratio has been estimated to be:", cv.ratio))
+    cv.ratio <- ESM.Mod$model.info$cv.ratio
   }
   
   if((n.rep%%1) !=0){
@@ -332,8 +364,8 @@ ESM_Null.Models <- function(ESM.Mod,
   adj.evaluation <- (eval.nullModel[,1] - val.quantile)/ (1-val.quantile)
   names(adj.evaluation) = paste0("Adjusted_",names(adj.evaluation))
   
-  pval <- pval[-2]
-  adj.evaluation <- adj.evaluation[-2]
+  pval <- pval
+  adj.evaluation[1] <- (adj.evaluation[2]+1)/2 # Change the AUC value based on SomersD
   if(!save.obj){
     unlink(paste0(pathToSaveObject,"/ESM.output_",ESM.Mod$data$sp.name,".Null"),recursive = T, force = T)
   }
@@ -343,20 +375,28 @@ ESM_Null.Models <- function(ESM.Mod,
     old.par <- graphics::par(no.readonly = TRUE)
     on.exit(graphics::par(old.par))
     graphics::par(mfrow = c(2, 2))
-    for(i in c(1,3,4)){
-      hist.data <- graphics::hist(eval.nullModel[i,-1],xlim = c(min(eval.nullModel[i,],na.rm=T),
-                                                                max(eval.nullModel[i,],na.rm=T)+0.05),
-                                  main = rownames(eval.nullModel)[i],
-                                  xlab = paste(rownames(eval.nullModel)[i], "Null"))
-      graphics::segments(x0=eval.nullModel[i,1], x1= eval.nullModel[i,1], y0=0,y1=max(hist.data$counts),col = "red")
-      graphics::points(x = eval.nullModel[i,1], y = max(hist.data$counts), col = "red",pch = 19)
+    for(i in 1:4){
+      hist.data <- graphics::hist(eval.nullModel[i,-1],plot = FALSE)
+      xmaxLim <- max(hist.data$breaks)
+      xminLim <- min(hist.data$breaks)
+      if(xmaxLim<max(eval.nullModel[i,])){
+        xmaxLim = max(eval.nullModel[i,])+0.05
+      }
+      
+      graphics::hist(eval.nullModel[i,-1],
+                     xlim = c(xminLim,xmaxLim),
+                     ylim = c(0, max(hist.data$counts)+1),
+                     main = rownames(eval.nullModel)[i], 
+                     xlab = paste(rownames(eval.nullModel)[i], "Null"))
+      graphics::segments(x0=eval.nullModel[i,1], x1= eval.nullModel[i,1], y0=0,y1= max(hist.data$counts)+1,col = "red")
+      graphics::points(x = eval.nullModel[i,1], y = max(hist.data$counts)+1, col = "red",pch = 19)
     }
   }
   
   
   obj <- list(pval = pval,
               adj.evaluation = adj.evaluation,
-              evaluations = eval.nullModel[-2,])
+              evaluations = eval.nullModel)
   return(obj)
 }
 
@@ -376,6 +416,7 @@ ESM_Null.Models <- function(ESM.Mod,
 #' For the use of this function, please refer to the manual of ESM_Modeling.
 #' @return 
 #' A \code{data.frame} with diverse threshold values.
+#' 
 #' @references 
 #' Hirzel, Alexandre H., et al. Evaluating the ability of habitat suitability models to predict species presences. 
 #' \emph{Ecological modelling}, \bold{199.2} (2006): 142-152.
@@ -663,15 +704,10 @@ ESM_Response.Plot <- function (ESM.Mod,
 #' Liu, C., Newell, G., White, M. and Machunter, J. (2024), Improving the estimation of the Boyce index using statistical smoothing methods for evaluating species distribution models with presence-only data. \emph{Ecography}, e07218. \doi{10.1111/ecog.07218}
 #' 
 #' @examples 
-#' library(ecospat)
-#' data <- ecospat::ecospat.testData 
+#' data(ESM_Species.Env)
 #' SBI <- Smooth_CBI(
-#' pres = data$glm_Saxifraga_oppositifolia[which(data$Saxifraga_oppositifolia==1)],
-#' abs = data$glm_Saxifraga_oppositifolia[which(data$Saxifraga_oppositifolia==0)],
-#' ktry = 10,
-#' method = 'all',
-#' mean.CBI = TRUE,
-#' cor.method = 'spearman'
+#' pres = ESM_Species.Env$ESM_Campylophyllum_halleri[ESM_Species.Env$Campylophyllum_halleri==1],
+#' abs = ESM_Species.Env$ESM_Campylophyllum_halleri[ESM_Species.Env$Campylophyllum_halleri==0],
 #' )
 #' SBI$SBI
 #' 
@@ -800,16 +836,14 @@ Smooth_CBI <- function(pres,
 #' \item{max.MCC}. \code{numeric}. The maximum value of MCC.
 #' \item{max.threshold}. \code{numeric}. The threshold that maximizes the MCC
 #' }
-#' 
 #' @references 
 #' Chicco, D., Jurman, G. The advantages of the Matthews correlation coefficient (MCC) over F1 score and accuracy in binary classification evaluation. BMC Genomics 21, 6 (2020). https://doi.org/10.1186/s12864-019-6413-7
 #' 
 #' @examples 
-#' library(ecospat)
-#' data <- ecospat::ecospat.testData 
+#' data(ESM_Species.Env)
 #' MCC <- Max_MCC(
-#' Pred = data$glm_Saxifraga_oppositifolia,
-#' Sp.occ = data$Saxifraga_oppositifolia
+#' Pred = ESM_Species.Env$ESM_Campylophyllum_halleri,
+#' Sp.occ = ESM_Species.Env$Campylophyllum_halleri
 #' )
 #' MCC$max.MCC
 #' 
@@ -1038,13 +1072,13 @@ Max_MCC <- function(Pred, Sp.occ) # Pred: vector of predicted probabilities Sp.o
   models.options <- ESM.Mod$model.info$models.options
   which.biva <- ESM.Mod$model.info$which.biva
   prevalence <- ESM.Mod$model.info$prevalence
-  cv.method <- ESM.Mod$cv.method
+  cv.method <- ESM.Mod$model.info$cv.method
   if(cv.method == "split-sampling"){
     cv.rep <- ncol(ESM.Mod$cv.split.table)-1
-    cv.ratio <- round(sum(ESM.Mod$cv.split.table[,1])/length(ESM.Mod$cv.split.table[,1]),1)
+    cv.ratio <- ESM.Mod$model.info$cv.ratio
     cv.n.blocks = NULL
   }else{
-    cv.n.blocks <- ncol(ESM.Mod$cv.split.table)-1
+    cv.n.blocks <- ESM.Mod$model.info$cv.n.blocks
     cv.rep = NULL
     cv.ratio = NULL
   }

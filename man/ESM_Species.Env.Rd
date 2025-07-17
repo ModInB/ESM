@@ -5,7 +5,7 @@
 \alias{ESM_Species.Env}
 \title{Species and environmental data to perform ESM with the ESM package}
 \format{
-A data.frame with 413 plots and 9 variables:
+A data.frame with 413 plots and 12 variables:
 \describe{
 \item{x}{x coordinate in the CRS EPSG:2056}
 \item{y}{y coordinate in the CRS EPSG:2056}
@@ -21,6 +21,9 @@ Range/Temperature Annual Range * 100. The values have been averaged between
 \item{bio15_ps_8110_LV95}{Precipitation Seasonality. Computed using the 
 coefficient of variation among monthly precipitation and averaged between
 1981-2010.}
+\item{ESM_Campylophyllum_halleri}{Habitat suitability of \emph{Campylophyllum halleri}}
+\item{ESM_Dicranella_subulata}{Habitat suitability of \emph{Dicranella subulata}}
+\item{ESMSolenostoma_gracillimum}{Habitat suitability of \emph{Solenostoma gracillimum}}
 }
 }
 \usage{

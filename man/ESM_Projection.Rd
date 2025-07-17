@@ -27,17 +27,17 @@ should be projected. Note that the colnames or the names of the predictors shoul
 
 \item{rounded}{\code{logical}. Should the prediction be rounded to become an integer? \emph{Default:} TRUE.}
 
-\item{pred.multiplier}{\code{numeric}. The factor to multiply the predictions before rounding them (must be a power of 10). \emph{Default:} 1000. 
-if round = FALSE, pred.multiplier can be set to 1.}
+\item{pred.multiplier}{\code{numeric}. The factor to multiply the predictions before rounding them (must be a power of 10). 
+Only needed when rounded = FALSE. \emph{Default:} 1000.}
 
 \item{parallel}{\code{logical}. Allows or not parallel job using the functions makeCluster.}
 
 \item{n.cores}{\code{integer}. Number of CPU cores used to make the models.}
 
-\item{datatype}{a \code{character} When new.env is a  \code{SpatRaster}, which datatype should be used to save the files? \emph{Default:} 'INT2U'.
-Note that if round = FALSE, datatype must be changed to a float (e.g., 'FLT4S' or 'FLT8S'.)}
+\item{datatype}{a \code{character} When new.env is a  \code{SpatRaster}, which datatype should be used to save the files? \emph{Default:} 'INT2U' if rounded = TRUE 
+and 'FLT4S' if rounded = FALSE.}
 
-\item{save.obj}{\code{logical}. Allows or not the final output.}
+\item{save.obj}{\code{logical}. Allows or not to save the final output into a '.out file'.}
 
 \item{verbose}{\code{logical}. Allows or not message.}
 }
@@ -59,8 +59,7 @@ Project bivariate models
 Each bivariate models are geographically projected into the new.env area. 
 Note that if new.env is a SpatRaster, the projected maps are by default multiplied by 1000 and 
 rounded to reduce storage space. They are also store in compress tif file (with these parameters: "COMPRESS=DEFLATE","PREDICTOR=2").
-If the argument 'round' is changed to FALSE, please change datatype to 'FLT4S' or 'FLT8S' to keep decimals as by default maps will
-be stored with integer ('INT2U').
+If the argument 'rounded' is set to FALSE and datatype is left default, the datatype will be changed to 'FLT4S' to keep decimals.
 For the use of this function, please refer to the manual of ESM_Modeling.
 }
 }

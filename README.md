@@ -1,4 +1,4 @@
-[![Github Version](https://img.shields.io/badge/dev%20version-0.7-53AA93.svg)](https://github.com/ModInB/ESM)
+[![Github Version](https://img.shields.io/badge/dev%20version-0.7.2-53AA93.svg)](https://github.com/ModInB/ESM)
 [![Last Commit](https://img.shields.io/github/last-commit/ModInB/ESM.svg)](https://github.com/ModInB/ESM/commits/main)
 [![R-CMD-check](https://github.com/ModInB/ESM/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ModInB/ESM/actions/workflows/R-CMD-check.yaml)
 
@@ -16,7 +16,7 @@
 
 
 
-- **Development version** [![v](https://img.shields.io/badge/dev%20version-0.7-53AA93.svg)](https://github.com/ModInB/ESM)
+- **Development version** [![v](https://img.shields.io/badge/dev%20version-0.7.2-53AA93.svg)](https://github.com/ModInB/ESM)
 ```R
 library(devtools)
 devtools::install_github("ModInB/ESM", dependencies = TRUE)
@@ -30,7 +30,7 @@ Functions to perform and evaluate Ensemble of small models. These functions are 
 
 | Category      	| Function      	| Description                                  	|
 |:-----------------:|:-------------------:|:-----------------:|
-| Data preparation	| Bp_Sampling	| Samples background point using 4 different methods. The 4 methods are fully random or stratified in the geographic space (“rand.geo”, “strat.geo”) and in the environmental space (“rand.env”, “strat.env”).|
+| Data preparation	| Bp_Sampling	| Samples background point using 4 different methods. The 4 methods are fully random or stratified in the geographic space (“rand.geo”, “strat.geo”) and in the environmental space (“rand.env”, “strat.env”)|
 |		| ESM_Models.Options	| Generates a list of model parameters|
 |		| get_Chesla.Clim	| Download climatic grids from CHELSA v 2.1|
 |		| get_Topography	| Download topographic grids from Amatulli et al (2017)|
@@ -39,7 +39,7 @@ Functions to perform and evaluate Ensemble of small models. These functions are 
 |		| ESM_Ensemble.Modeling	| Generates and evaluates an ensemble model (called “ESM”) |
 |		| ESM_Ensemble.Projection	| Generates the ESM in the geographical space |
 | Evaluation	| ESM_Pooling.Evaluation	| Evaluates each bivariate model and the ESM based on the pooling method |
-|		| ESM_Null.Models	| Tests the significance of the evaluation metrics of the ESM based on null models and recalibrate the evaluation metrics |
+|		| ESM_Null.Models	| Tests the significance of the evaluation metrics of the ESM based on null models and adjust the evaluation metrics |
 |		| ESM_Variable.Contributions	| Computes the contribution of each variable in the ESM |
 |		| ESM_Response.Plot	| Generates species response curve for each variable |
 |   | Max_MCC | Compute the maximum value of Matthew’s Correlation Coefficient  |
@@ -52,13 +52,17 @@ Functions to perform and evaluate Ensemble of small models. These functions are 
 | 	| ESM_Species.Env	| Species and environmental data to perform ESM with the ESM package |
 | 	| ESM_Splachnum.Data	| Species occurrence data to perform ESM |
 | 	| ESM_Splachnum.Env	| Environmental SpatRaster to perform ESM in Scandinavia |
+| Miscellaneous tools	| Load_ESM_Modelling	| load the ESM_Modelling object|
+|   | Load_ESM_Ensemble.Modelling	| load the ESM_Ensemble.Modelling object|
+|   | Load_ESM_Projection	| load the ESM_Projection object|
+
 
 
 ### Citation
 
 To cite this package, please use the following reference:
 
-<code> <i> Collart, F., Hotermans, A., Theunissen, K., Broennimann, O., Guisan, A. 2024. ESM: Ensemble of Small Models_. R package version 0.7.</code> </i>
+<code> <i> Collart, F., Hotermans, A., Theunissen, K., Broennimann, O., Guisan, A. 2024. ESM: Ensemble of Small Models_. R package version 0.7.2.</code> </i>
 
 ### References
 

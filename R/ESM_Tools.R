@@ -417,6 +417,7 @@ ESM_Range.Shift <- function(proj.curr,
 #' proj <- seq(0,1000, by = 100)
 #' # Binraization of the vector
 #' ESM_Binarize(proj = proj, thr = 400)
+#' # To see another example, see in ?ESM_Modeling
 #' 
 #' @export
 
@@ -647,21 +648,23 @@ ESM_Generate.ODMAP <- function(ESM.Mod = NULL,
     if(ESM.Mod$data$env.info$type == "SpatRaster"){
       ODMAP$Value[c(9,43)] = paste(names(as.vector(ESM.Mod$data$env.info$extent)),as.vector(ESM.Mod$data$env.info$extent), sep =" = ",collapse = ", ")
       ODMAP$Value[c(10,44)] = paste(c("xres = ", "yres = "),ESM.Mod$data$env.info$res, collapse = ", ")
-      EPSG <- terra::crs(ESM.Mod$data$env.info$proj,describe=TRUE)[,c("authority","code")]
+      EPSG <- na.omit(as.character(terra::crs(ESM.Mod$data$env.info$proj,describe=TRUE)[,c("authority","code")]))
+      if(length(EPSG)==0){
+        EPSG <- terra::crs(ESM.Mod$data$env.info$proj,describe=TRUE)[,"name"]
+      }
       proj4String <- terra::crs(ESM.Mod$data$env.info$proj,proj=TRUE)
       ODMAP$Value[45] = paste(paste0(EPSG,collapse = ":"),
                               "; PROJ-string = ",proj4String)
     }
     ODMAP$Value[60] = .printModelParameters(model.options = ESM.Mod$model.info$models.options,models = ESM.Mod$model.info$models)
-    cv.method <- ESM.Mod$cv.method
+    cv.method <- ESM.Mod$model.info$cv.method
     if(cv.method=="block"){
       cv.method <- "-fold"
     }
     ODMAP$Value[38] = paste("All bivariate models were evaluated using", ncol(ESM.Mod$cv.split.table)-1,ESM.Mod$cv.method,
                             "cross-validation.")
     if(cv.method == "split-sampling"){
-      cv.ratio = round(sum(ESM.Mod$cv.split.table[,1])/nrow(ESM.Mod$cv.split.table),2)
-      ODMAP$Value[38] = paste(ODMAP$Value[38],100*cv.ratio, "% were employed to calibrate the model and the remaining to evaluate it.")
+      ODMAP$Value[38] = paste(ODMAP$Value[38],100*ESM.Mod$model.info$cv.ratio, "% were employed to calibrate the model and the remaining to evaluate it.")
     }
     if(ESM.Mod$model.info$pooling){
       ODMAP$Value[38] = paste(ODMAP$Value[38], "The pooling method as described in Collart & Guisan (2023. Ecol Inform) was afterwards applied to evaluate each model.")

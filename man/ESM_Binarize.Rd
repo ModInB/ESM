@@ -30,6 +30,7 @@ equal to the threshold will be 1 (environementally suitable).
 proj <- seq(0,1000, by = 100)
 # Binraization of the vector
 ESM_Binarize(proj = proj, thr = 400)
+# To see another example, see in ?ESM_Modeling
 
 }
 \seealso{

@@ -61,15 +61,10 @@ mean.CBI = TRUE.
 }
 }
 \examples{
-library(ecospat)
-data <- ecospat::ecospat.testData 
+data(ESM_Species.Env)
 SBI <- Smooth_CBI(
-pres = data$glm_Saxifraga_oppositifolia[which(data$Saxifraga_oppositifolia==1)],
-abs = data$glm_Saxifraga_oppositifolia[which(data$Saxifraga_oppositifolia==0)],
-ktry = 10,
-method = 'all',
-mean.CBI = TRUE,
-cor.method = 'spearman'
+pres = ESM_Species.Env$ESM_Campylophyllum_halleri[ESM_Species.Env$Campylophyllum_halleri==1],
+abs = ESM_Species.Env$ESM_Campylophyllum_halleri[ESM_Species.Env$Campylophyllum_halleri==0],
 )
 SBI$SBI
 

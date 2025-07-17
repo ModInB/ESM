@@ -30,11 +30,10 @@ score only when the model accurately predicts both the majority of positive and 
 where +1 indicates perfect classification, −1 indicates total misclassification, and 0 corresponds to random guessing, as with a coin toss.
 }
 \examples{
-library(ecospat)
-data <- ecospat::ecospat.testData 
+data(ESM_Species.Env)
 MCC <- Max_MCC(
-Pred = data$glm_Saxifraga_oppositifolia,
-Sp.occ = data$Saxifraga_oppositifolia
+Pred = ESM_Species.Env$ESM_Campylophyllum_halleri,
+Sp.occ = ESM_Species.Env$Campylophyllum_halleri
 )
 MCC$max.MCC
 

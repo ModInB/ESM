@@ -90,7 +90,7 @@
 #' data(ESM_Env)
 #' #species occurrences
 #' xy <- ESM_Species.Env[,1:2]
-#' resp <- ESM_Species.Env[,3] #Tayloria_serrata
+#' resp <- ESM_Species.Env[,3] #Campylophyllum halleri 
 #' env <- terra::unwrap(ESM_Env)
 #' ### Calibration of simple bivariate models
 #' my.ESM <- ESM_Modeling(resp = resp,
@@ -141,8 +141,7 @@
 #'
 #'
 #' ### Binary Projection based on max TSS of calibrated ESMs into new space                                                
-#' my.ESM_EFproj_current_binary <- (Ens.proj > 
-#'                                 (my.ESM_thresholds$TSS.th*1000))*1
+#' my.ESM_EFproj_current_binary <- ESM_Binarize(Ens.proj, my.ESM_thresholds$TSS.th*1000)
 #'
 #' ### get the variable contributions of ESMs
 #' ESM_Variable.Contributions(my.ESM,my.ESM_EF) 
@@ -151,6 +150,7 @@
 #' my.ESM_responsePlot<- ESM_Response.Plot(my.ESM,
 #'                                         my.ESM_EF,
 #'                                         fixed.var.metric = 'mean')
+#'                                         
 #' ### Generate an ODMAP table. Note that you still have to fill the other 
 #' # sections and check the prefilled ones
 #'  ODMAP_Table <- ESM_Generate.ODMAP(ESM.Mod = my.ESM,
@@ -419,7 +419,7 @@ ESM_Modeling <- function(resp,
   }
   
   
-
+  cv.ratio = 0.7
   ## Return outputs ----
   obj <- list(data = list(sp.name= sp.name,
                           resp = resp,
@@ -434,9 +434,11 @@ ESM_Modeling <- function(resp,
                                 modeling.id = modeling.id,
                                 prevalence = prevalence,
                                 biva.path = newwd,
-                                pooling = pooling),
+                                pooling = pooling,
+                                cv.method = cv.method,
+                                cv.ratio = cv.ratio,
+                                cv.n.blocks = cv.n.blocks),
               cv.split.table = cv.split.table,
-              cv.method = cv.method,
               biva.predictions = biva.mods.filt,
               biva.calibration = biva.calib,
               biva.evaluations = biva.eval
