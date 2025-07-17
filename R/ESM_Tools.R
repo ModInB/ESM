@@ -160,7 +160,7 @@ Bp_Sampling <- function(env,
         n.ObsPerClass <- floor(n.points/length(cell.env))
       }
       
-      aa <- lapply(test, sample,size = 2)
+      #aa <- lapply(test, sample,size = 2)
       
       ToKeep <- c()
       ToPrint <- TRUE
