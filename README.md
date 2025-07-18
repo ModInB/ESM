@@ -2,7 +2,7 @@
 [![Last Commit](https://img.shields.io/github/last-commit/ModInB/ESM.svg)](https://github.com/ModInB/ESM/commits/main)
 [![R-CMD-check](https://github.com/ModInB/ESM/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ModInB/ESM/actions/workflows/R-CMD-check.yaml)
 
-<img src="inst/logo/ESM.png" align="right" height = 150/>
+<img src="inst/logo/ESM_icon_V2.png" align="right" height = 150/>
 <div align="center">
 <b>------------------------------------------------------------<br/>
 <b>ESM - Ensemble of Small Models<br/>
