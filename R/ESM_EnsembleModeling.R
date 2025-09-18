@@ -1,6 +1,6 @@
 #################################################################################################################################################
 #' @name ESM_Ensemble.Modeling
-#' @author Flavien Collart \email{flaviencollart@hotmail.com} 
+#' @author Flavien Collart \email{flaviencollart@@hotmail.com} 
 #' @title Ensemble of Small Models: Average Bivariate Models into an ESM
 #' @description This function averages simple bivariate models by weighted means to Ensemble Small Models.
 #' @param ESM.Mod The object returned by \code{ESM_Modeling}.

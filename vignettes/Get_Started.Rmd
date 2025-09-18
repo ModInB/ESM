@@ -2,7 +2,7 @@
 title: "Get Started with ESM Package"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Get_Started}
+  %\VignetteIndexEntry{Get Started with ESM Package}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -135,9 +135,9 @@ my.ESM_EF$evaluations
 
 The function *ESM_Response.Plot* allows you to visualize the response curves of the studied species to the different variables.
 
-```{r}
+```{r, fig.fullwidth=TRUE}
 ## 'par' Only needed to build the vignette
-par(mar=c(2, 4, 3, 1) + 0.1)  
+par(mar=c(2, 3, 3, 1) + 0.1)  
 ## get the response plots of ESMs
 my.ESM_responsePlot <- ESM_Response.Plot(my.ESM,my.ESM_EF, 
                                          fixed.var.metric = 'mean',
@@ -254,14 +254,14 @@ my.ESM$biva.calibration
 my.ESM$biva.evaluations
 ```
 
-```{r}
+```{r, fig.fullwidth=TRUE}
 my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM, 
                                    weighting.score=c("MaxTSS"), 
                                    threshold=0,
                                    save.obj = FALSE)
 ## Performances of the ensemble based on the pooling evaluation
 my.ESM_EF$evaluations
-## 'par' Only needed to build the vignette
+## 'par' Only needed to build the vignette 
 par(mar=c(2, 4, 3, 1) + 0.1)  
 Resp.Plot <- ESM_Response.Plot(my.ESM,my.ESM_EF)
 ## Pooling evaluation

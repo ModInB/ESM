@@ -1,6 +1,6 @@
 
 #' @name ESM_Projection
-#' @author Flavien Collart \email{flaviencollart@hotmail.com} 
+#' @author Flavien Collart \email{flaviencollart@@hotmail.com} 
 #' @title Ensemble of Small Models: Projections of Bivariate Models
 #' @description Project bivariate models 
 #' @param ESM.Mod The object returned by \code{\link{ESM_Modeling}}.
@@ -191,13 +191,13 @@ ESM_Projection <- function(ESM.Mod,
                             verbose){
   
   if(!is.data.frame(new.env) & verbose){
-    cat(paste("\n Projections of bivariate model:",x[1],x[2]))}
+    message(paste("\n Projections of bivariate model:",x[1],x[2]))}
   done <- c()
   for(j in 1:length(models)){
     ToSkip <- anyNA(biva.pred[[paste(x[1],x[2], sep=".")]][,paste0("Full.",models[j])])
     if(ToSkip){
       if(verbose){
-        cat(paste("\nThe Full model",x[1],x[2],models[j]),"failed and thus won't be projected")
+        message(paste("\nThe Full model",x[1],x[2],models[j]),"failed and thus won't be projected")
       }
       next
     }
@@ -242,7 +242,7 @@ ESM_Projection <- function(ESM.Mod,
         
       }else{
         if(verbose){
-          cat(paste0("\n\t",models[j]))
+          message(paste0("\n\t",models[j]))
         }
         
         

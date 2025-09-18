@@ -190,7 +190,7 @@ ESM_Models.Options <- function(ANN = NULL,
       if(!is.list(CTA$control) | length(CTA$control) != 9 ){
         stop("CTA$control should be a list with 9 elements. Please use the function rpart::rpart.control to generate this object")
       }
-      cat("\n CTA$control has been changed, Please note this parameter is not checked")
+      message("\n CTA$control has been changed, Please note this parameter is not checked")
       opt$CTA$control = CTA$control
     }
   }
@@ -238,7 +238,7 @@ ESM_Models.Options <- function(ANN = NULL,
       if(!is.list(GAM$control)){
         stop("GAM$control must be a list. Please use the function mgcv::gam.control to generate this object")
       }
-      cat("\n gam$control has been changed, Please note this parameter is not checked")
+      message("\n gam$control has been changed, Please note this parameter is not checked")
       opt$GAM$control = GAM$control
     }
     if(!is.null(GAM$scale)){

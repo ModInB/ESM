@@ -1,5 +1,5 @@
 #' @name ESM_Ensemble.Projection
-#' @author Flavien Collart \email{flaviencollart@hotmail.com} 
+#' @author Flavien Collart \email{flaviencollart@@hotmail.com} 
 #' @title Ensemble of Small Models: Projections of ESMs
 #' @description Generate the ESMs into a new space
 #' @param ESM.proj The object returned by \code{\link{ESM_Projection}}.

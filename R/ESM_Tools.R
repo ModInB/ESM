@@ -1,18 +1,16 @@
 #' @name Bp_Sampling
-#' @author Flavien Collart \email{flaviencollart@hotmail.com}
+#' @author Flavien Collart \email{flaviencollart@@hotmail.com}
 #' @title Ensemble of Small Models: Sampling background points using 4 different methods.
 #' @description This function generates background following the 4 different methods described by Steen et al (2024).
 #' Two are generated in the environmental space whereas the remaining is in the geographic space (see details).
 #' 
-#' @param env a \code{SpatRaster} of at least one layer. if \emph{method = "strat.geo"}, a minimum of 2 layers are needed.
-#' @param n.points \code{integer}. The number of background to be selected. \emph{Note that this number can change depending on the technique}
+#' @param env a \code{SpatRaster}. of at least one layer. if \emph{method ='rand.env'}, a minimum of 2 layers are needed.
+#' @param n.points \code{integer}. The number of background to be selected.
 #' @param method \code{character}. one of: "rand.geo", "strat.geo", "rand.env" or "strat.env". \emph{see Details}. \emph{Default: "rand.geo"}.
-#' @param digit.val.env \code{integer}. The number of digit to keep to remove too similar environmental values.
-#' Only needed when method = "rand.env". \emph{Default: 1}.
-#' @param res.grid.env \code{numeric}. Number of rows and columns to generate the grid (see Details). Only needed
-#' when method = "rand.env". \emph{see Details}. \emph{Default: 100}.
 #' @param aggr.fact.geo \code{integer}. The aggregating factor to generate the checkerboard. Only needed 
 #' when method = "strat.geo". \emph{see Details}. \emph{Default: 5}.
+#' @param digit.val.env \code{integer}. The number of digit to keep to remove too similar environmental values.
+#' Only needed when method = "rand.env". \emph{Default: 1}.
 #' @param n.strat.env \code{integer}. The number of classes to create for each environmental layer. Only needed
 #' when method = "strat.env". \emph{see Details}. \emph{Default: 3}.
 #' @param To.plot \code{logical}. Should the background point plotted on a map (in black).
@@ -20,24 +18,40 @@
 #' Optional and only used when To.plot = TRUE. Plot the occurrences on the map (in aquamarine). \emph{Default: NULL}.
 #' 
 #' @details
-#' The "rand.geo" method corresponds to a random selection of background points in the geographic space. 
-#' This is the most used techniques in SDM studies. This selection can also be stratified (method ="strat.geo"). To 
-#' realise this stratification, a checkerboard is created with a pixel of a certain resolution. The size of these
+#' This functions generate background using the 4 methods (available with the argument method) presented in Steen et al (2024), with some adaptations to 
+#' decrease computation time or improve the sampling strategies. Two techniques are in the geographical space and two
+#' in the environmental space:
+#' 
+#' \enumerate{
+#' \item 'rand.geo': Random background points selection in the geographic space. 
+#' This is the most used techniques in SDM studies. 
+#' 
+#' \item 'strat.geo': Stratified background points selection in the geographical space. To 
+#' realize this stratification, a checkerboard is created with a pixel of a certain resolution. The size of these
 #' pixels can be modified with the argument 'aggr.fact.geo'. For each pixel of the checkerboard the same number of 
-#' background points are randomly selected to reach the value of \emph{n.points}. Selecting background points can also 
-#' be performed in the environmental space (see Steen et al, 2024). The first method is the full random background
-#' point selection (method = "rand.env"). To do so, a PCA is first performed and the two fist axes are kept to 
-#' reflect the environmental space. Then, a grid of res.grid.env*res.grid.env (default 100\*100) pixel is created. Note that 
-#' increasing this value will strongly increase computation time. To reduce too similar points, 
-#' the PCA scores of each observation are rounded at a certain digit (argument digit.val.env) and only 
-#' one observation among the similar ones is kept. Several points are then randomly selected in each pixel of this grid.
-#' By doing this, the entire environmental is captured avoiding the over-abundance of some common environment. The
-#' second method is the stratified selection of background point in the environmental spaces (method = "strat.env").
-#' To perform this selection, each environmental layer is converted into classes of \emph{n.strat.env} (Default: 3)
+#' background points are randomly selected to reach the value of \emph{n.points}. 
+#' 
+#' \item  'rand.env': Random background point selection in the environmental space. 
+#' To do so, a PCA is first performed and the two fist axes are kept to 
+#' reflect the environmental space. To reduce too similar points, the PCA scores of each observation are rounded 
+#' at a certain digit (argument \emph{digit.val.env}) and only one observation among the similar ones is kept.
+#' Note that increasing the value of digit.val.env will strongly increase computation time.
+#' A convex hull is then generated to encompass all environmental points in the PCA. This polygon is split into 
+#' \emph{n} smaller polygons of roughly the same size (derived from the argument \emph{n.points})
+#' One observation is then capture in each of these small polygons. A second random selection is afterwards performed 
+#' in the small polygons that still have at least one observation to reach the requested number of background points. 
+#' By doing this, the entire environmental is captured avoiding the over-abundance of some common environment. 
+#' 
+#' \item 'strat.env': Stratified background points selection in the environmental space.
+#' To perform this selection, each environmental layer is converted into classes of \emph{n.strat.env}
 #' by dividing the range of the environmental predictor by \emph{n.strat.env} of the same size. For each pixel 
 #' constituting the grid, we then combined all the predictor together, creating a combination of classes. For each 
-#' of the different possible combination of classes available, the same number of background point is selected  to 
-#' reach the value of \emph{n.points}.
+#' of the different possible combination of classes available, the same number of background point is selected. if
+#' the needed number of background points is not available for a certain category, all the observations from this 
+#' category are taken and the remaining needed background points are collected in the other categories to reach 
+#' the value of \emph{n.points}.
+#' 
+#' }
 #'  
 #' @return a \code{matrix} containing the selected background points. The two first columns correspond to the coordinates.
 #' The other columns correspond to the environmental values of these points and the last column correspond to the geographic 
@@ -61,12 +75,11 @@
 #'                   To.plot = FALSE)
 #'                        
 #' # Selection full random in the environmental space                     
-#' Bp <- Bp_Sampling(env = env,
-#'                   n.points = 1000,
-#'                   method = "rand.env",
-#'                   digit.val.env = 2,
-#'                   res.grid.env = 100,
-#'                   To.plot = FALSE)       
+#'#  Bp <- Bp_Sampling(env = env,
+#'#                    n.points = 1000,
+#'#                    method = "rand.env",
+#'#                    digit.val.env = 2,
+#'#                    To.plot = FALSE)       
 #'                                         
 #' # Selection stratified in the environmental space                     
 #' Bp <- Bp_Sampling(env = env,
@@ -85,10 +98,10 @@
 Bp_Sampling <- function(env,
                         n.points = 10000,
                         method = "rand.geo",
-                        digit.val.env = 1,
-                        res.grid.env = 100,
                         aggr.fact.geo = 5,
+                        digit.val.env = 1,
                         n.strat.env = 3,
+                        force = FALSE,
                         To.plot = FALSE,
                         xy.pres = NULL){
   
@@ -108,7 +121,7 @@ Bp_Sampling <- function(env,
   if(method == "rand.geo"){
     coord.Env <- terra::crds(env)
     if(n.points > nrow(coord.Env)){
-      cat("\nn.points is greater than the number of pixels with values. All pixels are taken")
+      message("\nn.points is greater than the number of pixels with values. All pixels are taken")
       bp <- coord.Env
     }else{
       bp <- coord.Env[sample(1:nrow(coord.Env), size = n.points, replace = FALSE),]
@@ -127,65 +140,74 @@ Bp_Sampling <- function(env,
     
     env.dat <- terra::as.data.frame(env, xy = T)
     env.dat <- stats::na.omit(env.dat)
+    
+    ## Generate the environmental space
     env.pca <- ade4::dudi.pca(env.dat[,-c(1:2)], scale = TRUE, scannf = FALSE, nf = 2)
     Total.variance <- 100 * (cumsum(env.pca$eig/sum(env.pca$eig)))[2]
-    cat(paste("\nThe two first PCA axes explained", round(Total.variance,1),"% of the total variance"))
-    env.score.round <- round(env.pca$li,digit.val.env)
-    # density_2d <- ks::kde(env.score.round,compute.cont=TRUE)
-    # aa <- grDevices::contourLines(density_2d$eval.points[[1]], density_2d$eval.points[[2]], density_2d$estimate, level = 0.001)
-    # bb <- lapply(aa, function(x){do.call(cbind,x)[,c(2:3)]})
-    # cc <- terra::vect(bb,type = "polygons",crs="")
-    # cc<-terra::aggregate(cc)
-    grid.env <- terra::rast(terra::ext(apply(env.score.round,2, range)), ncols = res.grid.env, nrows = res.grid.env,crs="") #vals = 1:(100*100)
-    # ee <- terra::mask(vide,cc)
+    message(paste("\nThe two first PCA axes explained", round(Total.variance,1),"% of the total variance"))
     
+    ## Extract the coordinates of each observation from the environmental space and 
+    # round the values to remove very similar environmental values
+    env.score.round <- round(env.pca$li,digit.val.env)
     env.score.round.filt <- unique(env.score.round)
+    rm(env.score.round,env.pca)
     
     if(nrow(env.score.round.filt) <= n.points){
-      cat("Number of environmental values available is less than or equal to n.points. Please consider changing the values of 'digit.val.env' and/or 'res.grid.env'.")
+      message("Number of environmental values available is less than or equal to n.points. Please consider increasing the value of 'digit.val.env'")
       ToKeep <- c(1:nrow(env.score.round.filt))
       
     }else{
-      cell.pos <- terra::cellFromXY(grid.env, env.score.round.filt)
+      ## Create a convex hull taking all the observations inside and 
+      # Split this polygon into n polygons of roughly the same size
+      # Where n = the number of requested points
+      env.points <- terra::vect(as.matrix(env.score.round.filt))
+      env.shape <- terra::hull(env.points, type = "convex")
+      env.shape <- terra::buffer(env.shape,width=0.0001) # To avoid points outside the shape
+      env.small.shapes <- spsUtil::quiet(predicts::divider(env.shape, n.points))
+      
+      ## Check in which polygons each observation fall into
+      cell.pos <- terra::extract(env.shape,env.score.round.filt)[,2]
+      ## All the polygons having at least one observation
       cell.env <- unique(cell.pos)
       
-      # test <- as.factor(cell.pos)
-      # test <- split(x=1:length(test),f=test)
-      # 
-      
-      if(n.points<length(cell.env)){
-        cat("\nThere are more environmental classes than n.points. Thus,the number of background points will be equal to the number of classes")
-        n.ObsPerClass = 1
-      }else{
-        n.ObsPerClass <- floor(n.points/length(cell.env))
-      }
-      
-      #aa <- lapply(test, sample,size = 2)
-      
-      ToKeep <- c()
-      ToPrint <- TRUE
-      
-      ##Sampling
-      for(i in 1:length(cell.env)){
-        pointVal <- which(cell.pos == cell.env[i])
-        if(length(pointVal) < n.ObsPerClass){
-          if(ToPrint){
-            cat("\nSome Classes have less observation than the number of observation per class. Thus, all the observations for these classes will be sampled. 
-              Note that the number of background points sampled will be less than asked.")
-          }
-          ToPrint <- FALSE
-          ToKeep <- c(ToKeep,pointVal)
+      ## Sample 1 observation per small polygon
+      ToKeep <- sapply(cell.env, function(cell,pos,n.ObsPerClass) {
+        ind.val <- which(pos == cell)
+        if(length(ind.val)==1){
+          return(ind.val)
         }else{
-          if(length(pointVal)==1){
-            ToKeep <- c(ToKeep,pointVal)
-          }else{
-            ToKeep <- c(ToKeep,sample(pointVal,n.ObsPerClass, replace = FALSE))
-            
+          return(sample(ind.val, size = n.ObsPerClass))
+          
+        }
+      }, pos = cell.pos, n.ObsPerClass = 1 )
+      
+      while((length(ToKeep)<n.points) ){
+          cell.pos2 <- cell.pos[-ToKeep]
+          ID <- 1:length(cell.pos)
+          ID <- ID[-ToKeep]
+          cell.env <- unique(cell.pos2)
+          size <- n.points-length(ToKeep)
+          if(length(cell.env)<1){
+            break
           }
+          if(size<length(cell.env)){
+            # To sample again 1 value per remaining cell
+            cell.env <- sample(cell.env, size = size)
+          }
+          
+          ToKeep2 <- sapply(cell.env, function(cell,pos,n.ObsPerClass) {
+            ind.val <- which(pos == cell)
+            if(length(ind.val)==1){
+              return(ind.val)
+            }else{
+              return(sample(ind.val, size = n.ObsPerClass))
+              
+            }
+          }, pos = cell.pos2, n.ObsPerClass = 1 )
+            
+          ToKeep <- c(ToKeep, ID[ToKeep2])
         }
       }
-    }
-    
 
     bp <- env.dat[rownames(env.score.round.filt)[ToKeep],]
     
@@ -195,16 +217,20 @@ Bp_Sampling <- function(env,
       stop("aggr.fact.geo must be an integer greater than 1")
     }
     coord.Env <- terra::crds(env)
-    Checkboard <- terra::aggregate(terra::subset(env,1), fact = aggr.fact.geo, na.rm=T)
+    Checkboard <- terra::aggregate(terra::subset(env,1), fact = aggr.fact.geo)
+    val <- terra::extract(Checkboard,coord.Env)
+    coord.Env <- coord.Env[!is.na(val),]
     Checkboard.pos <- terra::cellFromXY(Checkboard, coord.Env)
     Checkboard.pos.class <- unique(Checkboard.pos)
     
     if(n.points<length(Checkboard.pos.class)){
-      cat("There are more geographic classes than n.points. Thus,the number of background points will be equal to the number of classes")
+      message("\nThere are more geographic classes than n.points. Thus,the number of background points will be equal to the number of classes. 
+          Consider increasing the value of aggr.fact.geo.")
       n.ObsPerClass = 1
     }else{
       n.ObsPerClass <- ceiling(n.points/length(Checkboard.pos.class))
     }
+    
     
     ToKeep <- c()
     ToPrint <- TRUE
@@ -213,18 +239,26 @@ Bp_Sampling <- function(env,
     for(i in 1:length(Checkboard.pos.class)){
       pointVal <- which(Checkboard.pos == Checkboard.pos.class[i])
       if(length(pointVal) < n.ObsPerClass){
-        if(ToPrint){
-          cat("Some Classes have less observation than the number of observation per class. Thus, all the observations for these classes will be  sampled. 
-              Note that the number of background points sampled will be less than  asked.")
+        if(ToPrint){ #should not arrive normally
+          message("Some Classes have less observation than the number of observation per class. Thus, all the observations for these classes will be  sampled. 
+              Note that the number of background points sampled could be less than asked.")
         }
         ToPrint <- FALSE
         ToKeep <- c(ToKeep,pointVal)
+
       }else{
         if(length(pointVal)==1){
           ToKeep <- c(ToKeep,pointVal)
         }
         ToKeep <- c(ToKeep,sample(pointVal,n.ObsPerClass, replace = FALSE))
       }
+      
+    }
+    
+    if(n.points < length(ToKeep)){
+      ToRemove <- length(ToKeep) -n.points
+      #remove some values, why trying to keep a uniform sampling
+      ToKeep <- ToKeep[-sample(seq(n.ObsPerClass,length(ToKeep),by= n.ObsPerClass),ToRemove,replace = FALSE)] 
     }
     
     bp <- terra::extract(env,coord.Env[ToKeep,])
@@ -252,37 +286,67 @@ Bp_Sampling <- function(env,
                        n.strat.env = n.strat.env)
     ## Generate the classes combining all the predictors
     Class.Tot <- as.factor(apply(env.class, 1, paste, collapse = "" ))
-    
     Cat.Class.Tot <- levels(Class.Tot)
     
     if(n.points<length(Cat.Class.Tot)){
-      cat("\nThere are more environmental classes than n.points. Thus,the number of background points will be equal to the number of classes")
+      message("\nThere are more environmental classes than n.points. Thus,the number of background points will be equal to the number of classes.")
       n.ObsPerClass = 1
     }else{
-      n.ObsPerClass <- ceiling(n.points/length(Cat.Class.Tot))
-    }
+      n.Obs <- sort(table(Class.Tot))
+      min.Obs <- min(n.Obs)
+      needed.n.obs <-  ceiling(n.points/length(Cat.Class.Tot))
+      n.ObsPerClass <- cbind.data.frame(Cat.Class = names(n.Obs), n.ObsPerClass = floor(n.points/length(Cat.Class.Tot))) 
+      ### Compute a variable number of observation per class to reach the number of observation
+      #   if a class has less obseravtions than needed, then all the observations of this class is
+      #   taken  and the remaining needed bp are distributed in the other classes 
+      if(needed.n.obs>min.Obs){
+        n.ObsPerClass$n.ObsPerClass[n.Obs<needed.n.obs] = n.Obs[n.Obs<needed.n.obs]
+        Remaining.class.n.Obs <- n.Obs[n.Obs>needed.n.obs]
+        ## Loop to check each time if the needed observations are available in the remaining category 
+        #  to reach the requested number of bp.
+        while(sum(n.ObsPerClass$n.ObsPerClass)<n.points){
+          Remaining.class.n.Obs <- Remaining.class.n.Obs - needed.n.obs
+          needed.n.obs <- ceiling((n.points-sum(n.ObsPerClass$n.ObsPerClass))/length(Remaining.class.n.Obs))
+          if(needed.n.obs>min(Remaining.class.n.Obs)){
+            ClassLess <- names(Remaining.class.n.Obs)[Remaining.class.n.Obs<=needed.n.obs]
+            ClassMore <- names(Remaining.class.n.Obs)[Remaining.class.n.Obs>needed.n.obs]
+            
+            n.ObsPerClass$n.ObsPerClass[n.ObsPerClass$Cat.Class %in% ClassLess] = n.ObsPerClass$n.ObsPerClass[n.ObsPerClass$Cat.Class %in% ClassLess] + Remaining.class.n.Obs[ClassLess]
+            n.ObsPerClass$n.ObsPerClass[n.ObsPerClass$Cat.Class %in% ClassMore] = n.ObsPerClass$n.ObsPerClass[n.ObsPerClass$Cat.Class %in% ClassMore]+ floor(ceiling((n.points-sum(n.ObsPerClass$n.ObsPerClass))/length(Remaining.class.n.Obs)))
+            
+            Remaining.class.n.Obs <- Remaining.class.n.Obs[Remaining.class.n.Obs>needed.n.obs]
+          }else{
+            n.ObsPerClass$n.ObsPerClass[n.ObsPerClass$Cat.Class %in% Remaining.class.n.Obs ] <- n.ObsPerClass$n.ObsPerClass[n.ObsPerClass$Cat.Class %in% Remaining.class.n.Obs ]+ floor((n.points-sum(n.ObsPerClass$n.ObsPerClass))/length(Remaining.class.n.Obs))
+            if(sum(n.ObsPerClass$n.ObsPerClass )<n.points){
+              ToAdd <- n.points- sum(n.ObsPerClass$n.ObsPerClass)
+              class.ToAdd <- sample(names(Remaining.class.n.Obs),ToAdd)
+              n.ObsPerClass$n.ObsPerClass[n.ObsPerClass$Cat.Class %in% class.ToAdd ] <- n.ObsPerClass$n.ObsPerClass[n.ObsPerClass$Cat.Class %in% class.ToAdd]+1
+            }
+            
+          }
+          
+        }
+      }else{
+        if(sum(n.ObsPerClass$n.ObsPerClass )<n.points){
+          ToAdd <- n.points- sum(n.ObsPerClass$n.ObsPerClass)
+          class.ToAdd <- sample(Cat.Class.Tot,ToAdd)
+          n.ObsPerClass$n.ObsPerClass[n.ObsPerClass$Cat.Class %in% class.ToAdd ] <- n.ObsPerClass$n.ObsPerClass[n.ObsPerClass$Cat.Class %in% class.ToAdd]+1
+        }
+      }
+        
+      }
+
+    
     
     ToKeep <- c()
-    ToPrint <- TRUE
     
     ##Sampling
     for(i in 1:length(Cat.Class.Tot)){
       pointVal <- which(Class.Tot == Cat.Class.Tot[i])
-      if(length(pointVal) < n.ObsPerClass){
-        if(ToPrint){
-          cat("\nSome Classes have less observation than the number of observation per class. Thus, all the observations for these classes will be  sampled. 
-              Note that the number of background points sampled will be less than you asked.")
-        }
-        ToPrint <- FALSE
-        ToKeep <- c(ToKeep,pointVal)
-      }else{
-        if(length(pointVal)==1){
-          ToKeep <- c(ToKeep,pointVal)
-        }
-        ToKeep <- c(ToKeep,sample(pointVal,n.ObsPerClass, replace = FALSE))
+      ToKeep <- c(ToKeep,sample(pointVal,n.ObsPerClass$n.ObsPerClass[n.ObsPerClass$Cat.Class==Cat.Class.Tot[i]], replace = FALSE))
+        
       }
-    }
-    
+
     bp <- cbind.data.frame(env.dat[ToKeep,],
                            BigClass = Class.Tot[ToKeep])
     
@@ -305,9 +369,9 @@ Bp_Sampling <- function(env,
 
 ####
 
-#' @name ESM_Range.Shift
-#' @author Flavien Collart \email{flaviencollart@hotmail.com}
-#' @title Ensemble of Small Models: Range Shift between projections
+#' @name ESM_Range.Shift.Binary
+#' @author Flavien Collart \email{flaviencollart@@hotmail.com}
+#' @title Ensemble of Small Models: Range Shift between binary projections
 #' @description This function compare ESM or SDM binary projections between two time periods by comparing the change 
 #' in suitable/Unsuitable pixels. It also returns percentage of loss and gained
 #' 
@@ -350,8 +414,8 @@ Bp_Sampling <- function(env,
 #' @seealso \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}, \code{\link{ESM_Threshold}}, \code{\link{ESM_Binarize}}
 #' @export
 
-ESM_Range.Shift <- function(proj.curr,
-                            proj.fut){
+ESM_Range.Shift.Binary <- function(proj.curr,
+                                   proj.fut){
   
   if(!(inherits(proj.curr,"SpatRaster") & inherits(proj.fut,"SpatRaster"))){
     stop("proj.curr and proj.fut must be SpatRaster a accepted")
@@ -390,9 +454,156 @@ ESM_Range.Shift <- function(proj.curr,
               RangeShift.table = results))
 }
 
+################
+#' @name ESM_Range.Shift.Continuous
+#' @author Flavien Collart \email{flaviencollart@@hotmail.com}
+#' @title Ensemble of Small Models: Range Shift between projections with continuous predictions
+#' @description This function compare ESM or SDM continuous projections between two time periods by XXXX
+#' 
+#' @param proj.curr \code{SpatRaster}. One ESM/SDM continuous projections at current time. 
+#' @param proj.fut \code{SpatRaster}. One or more ESM/SDM continuous projections at future time. 
+#' 
+#' @details
+#' Under Construction
+#' 
+#' 
+#' @seealso \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}
+#' @export
 
+ESM_Range.Shift.Continuous <- function(proj.curr,
+                                       proj.fut,
+                                       occ.pres = NULL,
+                                       test.significance = TRUE){
+  
+  
+  if(!(inherits(proj.curr,"SpatRaster") & inherits(proj.fut,"SpatRaster"))){
+    stop("proj.curr and proj.fut must be SpatRaster a accepted")
+  }
+  
+  if(terra::nlyr(proj.curr) > 1){
+    stop("proj.curr should only be composed of only one layer.")
+  }
+  if(!(is.null(occ.pres)) & ncol(occ.pres)!=2){
+    warning("occ.pres must be a two-columns matrix or dataframe. The computation of this part was thus discarded.")
+  }
+  
+  maps <- c(proj.curr,proj.fut) # To make sure they are the same
+  RangeChangeMap <- proj.fut - proj.curr
+  xy <- terra::as.data.frame(maps,xy=TRUE,na.rm=T)  
+  
+  ## Find center of projected suitabilities ####
+  .Compute.centroid <- function(suitability,xy){
+    if(sum(suitability)==0){
+      return(cbind(x=NA,y=NA))
+    }else{
+      return(cbind(x = sum(xy$x*suitability)/sum(suitability),y = sum(xy$y*suitability)/sum(suitability)) )
+    }
+    
+  }
+  
+  
+  centroids <- t(apply(xy[,-c(1:2)], 2,.Compute.centroid, xy = xy[,1:2]))
+  colnames(centroids) = c("x","y")
+  centroids <- as.data.frame(na.omit(centroids))
+  centroids.84 <- terra::project(as.matrix(centroids), from=terra::crs(maps), to="EPSG:4326") 
+  rownames(centroids.84) = rownames(centroids)
+  colnames(centroids.84) = c("x","y")
+  if(nrow(centroids.84)<2){
+    stop("Only one period have a centroid")
+  }else if(nrow(centroids.84)<terra::nlyr(maps)){
+    message("\nCentroids of some future were impossible to compute. Thus no results will produced for these periods.")
+  }
+  #longlag is TRUE to calculate the Great-circle distance with WGS84 coordinates
+  #results in km
+  shift_WGS84 <- sp::spDists(centroids.84, longlat=TRUE) #longlag is TRUE to calculate the Great-circle distance with WGS84 coordinates
+  colnames(shift_WGS84) = rownames(shift_WGS84) = rownames(centroids.84)
+
+  .Compute.bearing <- function(fut.pos,
+                              xy){
+   return(argosfilter::bearing(xy[1,2], xy[fut.pos,2],  xy[1,1], xy[fut.pos,1]))
+  }
+  dct_WGS84 <- sapply(2:nrow(centroids.84), .Compute.bearing, xy = centroids.84)
+  names(dct_WGS84) = paste0(rownames(centroids.84)[1],"-",rownames(centroids.84)[-1])
+  
+  # Essayer de reclassifier en Nord, Sud,...
+  
+  ## Compute the mean and median value of the global suitability
+  Mean.Suitability <- apply(xy[,rownames(centroids.84)], 2, mean)
+  SD.Suitability <- apply(xy[,rownames(centroids.84)], 2, stats::sd)
+  Quantile.Suitability <- apply(xy[,rownames(centroids.84)], 2, stats::quantile,probs=c(0,.5,1))
+  rownames(Quantile.Suitability) = c("min","median","max")
+  
+  summary.Suitability <- rbind(mean = Mean.Suitability,
+                               sd = SD.Suitability,
+                               Quantile.Suitability)
+
+  ## Test if different via a paired wilcox.test
+  if(test.significance){
+    suitability.toTest <- do.call(rbind.data.frame, 
+                                  lapply(rownames(centroids.84), function(var,
+                                                                          data){
+                                    df <- cbind.data.frame(scenario = var,
+                                                           suitability = data[,var],
+                                                           pixel = 1:nrow(data))
+                                    rownames(df) =NULL
+                                    return(df)
+                                  }, data = xy))
+    
+    test <- stats::friedman.test(y=suitability.toTest$suitability,
+                                 groups = suitability.toTest$scenario,
+                                 blocks = suitability.toTest$pixel)
+    if(test$p.value < 0.05){
+      signi <- stats::pairwise.wilcox.test(x = suitability.toTest$suitability,
+                                           g = suitability.toTest$scenario,
+                                           paired = TRUE,
+                                           p.adjust.method = "bonferroni")
+    }
+    
+  }
+  
+  if(!is.null(occ.pres) & ncol(occ.pres)==2){
+    
+    ## Compute the mean and median value of suitability where species is present
+    occ.suitabilities <- terra::extract(maps[[rownames(centroids.84)]],as.matrix(occ.pres))
+    occ.suitability.toTest <- do.call(rbind.data.frame, 
+                                  lapply(rownames(centroids.84), function(var,
+                                                                          data){
+                                    df <- cbind.data.frame(scenario = var,
+                                                           suitability = data[,var],
+                                                           pixel = 1:nrow(data))
+                                    rownames(df) =NULL
+                                    return(df)
+                                  }, data = suitabilities))
+    ## Compute the mean and median value of the global suitability
+    occ.Mean.Suitability <- apply(occ.suitabilities[,rownames(centroids.84)], 2, mean)
+    occ.SD.Suitability <- apply(occ.suitabilities[,rownames(centroids.84)], 2, stats::sd)
+    occ.Quantile.Suitability <- apply(occ.suitabilities[,rownames(centroids.84)], 2, stats::quantile,probs=c(0,.5,1))
+    rownames(occ.Quantile.Suitability) = c("min","median","max")
+    
+    occ.summary.Suitability <- rbind(mean = occ.Mean.Suitability,
+                                     sd = occ.SD.Suitability,
+                                     occ.Quantile.Suitability)
+    
+    ## Test if different via a wilcox.test
+    if(test.significance){
+      occ.test <- stats::friedman.test(y=occ.suitability.toTest$suitability,
+                                   groups = occ.suitability.toTest$scenario,
+                                   blocks = occ.suitability.toTest$pixel)
+      if(test$p.value < 0.05){
+        occ.signi <- stats::pairwise.wilcox.test(x = occ.suitability.toTest$suitability,
+                                             g = occ.suitability.toTest$scenario,
+                                             paired = TRUE,
+                                             p.adjust.method = "bonferroni")
+      }
+    }
+  }
+  
+}
+
+
+###########
 #' @name ESM_Binarize
-#' @author Flavien Collart \email{flaviencollart@hotmail.com}
+#' @author Flavien Collart \email{flaviencollart@@hotmail.com}
 #' @title Binarize probability values using a threshold
 #' @description This function binarizes probability values based on a specific threshold
 #' 
@@ -404,7 +615,7 @@ ESM_Range.Shift <- function(proj.curr,
 #' \describe{
 #' Probabilities strictly below the threshold will be assigned to 0 (
 #' environmentally unsuitable for the species) while probabilities greater or 
-#' equal to the threshold will be 1 (environementally suitable).
+#' equal to the threshold will be 1 (environmentally suitable).
 #' }
 #' 
 #' @return 
@@ -473,7 +684,7 @@ ESM_Binarize <- function(proj,
 
 #' @name ESM_Generate.ODMAP
 #' @title Generates and fills ODMAP table
-#' @author Flavien Collart \email{flaviencollart@hotmail.com}
+#' @author Flavien Collart \email{flaviencollart@@hotmail.com}
 #' @description
 #' The function generates an ODMAP table to report your Modelling procedure 
 #' using the outputs of \code{\link{ESM_Modeling}} and asks you some
@@ -687,7 +898,7 @@ ESM_Generate.ODMAP <- function(ESM.Mod = NULL,
   
   ## Ask information to fill the cells ####
   if(ask.to.fill){
-    cat("Starting the filing of ODMAP (~20 questions), please enter your answers without quote. You can simply let the value empty by pressing enter. If you want to stop the process but keep your data that you've already filled, write 'stop' (without the quote) during a question.")
+    message("Starting the filing of ODMAP (~20 questions), please enter your answers without quote. You can simply let the value empty by pressing enter. If you want to stop the process but keep your data that you've already filled, write 'stop' (without the quote) during a question.")
     ## Overview ----
     ### Study ----
     x <- readline(prompt = "Enter your study title:")
@@ -721,7 +932,7 @@ ESM_Generate.ODMAP <- function(ESM.Mod = NULL,
     x <- as.numeric(x)
     Objective <- x
     if(is.na(x) | x>3|x<=0){
-      cat("\n Not a correct answer. This question will be passed.")
+      message("\n Not a correct answer. This question will be passed.")
       Objective <- 1
     }else{
       ODMAP$Value[5] = c("Inference and explanation","Mapping and Interpolation","Forecast and Transfer")[x]
@@ -734,7 +945,7 @@ ESM_Generate.ODMAP <- function(ESM.Mod = NULL,
       }
       x <- as.numeric(x)
       if(is.na(x) | x>2|x<=0){
-        cat("\n Not a correct answer. This question will be passed.")
+        message("\n Not a correct answer. This question will be passed.")
       }else{
         ODMAP$Value[6] = c("suitable vs. unsuitable habitat","continuous habitat suitability index")[x]
       }
@@ -770,7 +981,7 @@ ESM_Generate.ODMAP <- function(ESM.Mod = NULL,
     }
     x <- as.numeric(x)
     if(is.na(x) | x>3|x<=0){
-      cat("\n Not a correct answer. This question will be passed.")
+      message("\n Not a correct answer. This question will be passed.")
     }else{
       ODMAP$Value[13] = c("Natural","Political","Rectangle")[x]
     }
@@ -781,12 +992,12 @@ ESM_Generate.ODMAP <- function(ESM.Mod = NULL,
       return(ODMAP)
     }
     if(is.na(x)){
-      cat("\n Not a correct answer. This question will be passed.")
+      message("\n Not a correct answer. This question will be passed.")
     }else{
       ToKeep <- sapply(as.character(1:5),grep, x= x)==1
       ToKeep <- !is.na(ToKeep)
       if(sum(ToKeep)==0){
-        cat("\n Not a correct answer. This question will be passed.")
+        message("\n Not a correct answer. This question will be passed.")
         
       }else{
         ODMAP$Value[14] = paste(c("citizen science", "field survey", "GPS tracking", "range map", "standardised monitoring data")[ToKeep],collapse = ", ")
@@ -801,7 +1012,7 @@ ESM_Generate.ODMAP <- function(ESM.Mod = NULL,
     }
     x <- as.numeric(x)
     if(is.na(x) | x>2 | x<0){
-      cat("\n Not a correct answer. This question will be passed.")
+      message("\n Not a correct answer. This question will be passed.")
     }else{
       ODMAP$Value[15]  = c("presence/absence","presence-only")[x]
     }
@@ -813,12 +1024,12 @@ ESM_Generate.ODMAP <- function(ESM.Mod = NULL,
       return(ODMAP)
     }
     if(is.na(x)){
-      cat("\n Not a correct answer. This question will be passed.")
+      message("\n Not a correct answer. This question will be passed.")
     }else{
       ToKeep <- sapply(as.character(1:4),grep, x = x)==1
       ToKeep <- !is.na(ToKeep)
       if(sum(ToKeep)==0){
-        cat("\n Not a correct answer. This question will be passed.")
+        message("\n Not a correct answer. This question will be passed.")
         
       }else{
         ODMAP$Value[16] = paste(c("climate", "edaphic", "habitat", "topographic")[ToKeep],collapse = ", ")
@@ -832,12 +1043,12 @@ ESM_Generate.ODMAP <- function(ESM.Mod = NULL,
       return(ODMAP)
     }
     if(is.na(x)){
-      cat("\n Not a correct answer. This question will be passed.")
+      message("\n Not a correct answer. This question will be passed.")
     }else{
       ToKeep <- sapply(as.character(1:5),grep, x = x)==1
       ToKeep <- !is.na(ToKeep)
       if(sum(ToKeep)==0){
-        cat("\n Not a correct answer. This question will be passed.")
+        message("\n Not a correct answer. This question will be passed.")
         
       }else{
         ODMAP$Value[28] = paste(c("Communties", "Individuals", "OTU", "Populations", "species")[ToKeep],collapse = ", ")
@@ -851,7 +1062,7 @@ ESM_Generate.ODMAP <- function(ESM.Mod = NULL,
     }
     x <- as.numeric(x)
     if(is.na(x) | x>2 | x<0){
-      cat("\n Not a correct answer. This question will be passed.")
+      message("\n Not a correct answer. This question will be passed.")
     }else{
       ODMAP$Value[32]  = c("The observation data were clipped","No clipping was made")[x]
     }
@@ -877,7 +1088,7 @@ ESM_Generate.ODMAP <- function(ESM.Mod = NULL,
     }
     
   }
-  cat("\n\n Your ODMAP have been generated with your information. Please try to fill the other cells. We added help to fill the different sections that could not be filled.")
+  message("\n\n Your ODMAP have been generated with your information. Please try to fill the other cells. We added help to fill the different sections that could not be filled.")
   return(ODMAP)
 }
 

@@ -2,7 +2,7 @@
 # Load ESM objects
 
 #' @name Load_ESM
-#' @author Flavien Collart \email{flaviencollart@hotmail.com} 
+#' @author Flavien Collart \email{flaviencollart@@hotmail.com} 
 #' @title Functions to load the ESM objects
 #' @description These functions allow the user to easily load their ESM objects
 #' @param sp.name \code{character}. The species name given in sp.name argument from ESM_Modelling()

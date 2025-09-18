@@ -1,6 +1,6 @@
 Package: ESM
-Version: 0.7.2
-Date: 2025-07-16
+Version: 0.8
+Date: 2025-09-16
 Title: Ensemble of Small Models
 Authors@R: c(
 	person("Flavien", "Collart", role = c("cre","aut","ctb"), email = "flaviencollart@hotmail.com"),
@@ -18,23 +18,24 @@ Encoding: UTF-8
 Depends: R (>= 4.0.0)
 Imports: 
 	ade4 (>= 1.7-22), 
+	argosfilter (>= 0.70), 
+	ecospat (>= 4.0.0),
 	gbm (>= 2.1.1), 
-	terra (>= 1.2-5),
-	mgcv (>= 1.9-1),
-	PresenceAbsence (>= 1.1.9), 
-	parallel, 
-	maxnet (>= 0.1.4), 
-	ecospat (>= 4.0.0), 
+	maxnet (>= 0.1.4),
+	mgcv (>= 1.9-1), 
 	nnet (>= 7.3-19), 
+	parallel,
+	predicts (>= 0.1-19),
+	PresenceAbsence (>= 1.1.9), 
 	rpart(>= 4.1.23), 
-	spsUtil (>= 0.2.2)
+	spsUtil (>= 0.2.2), 
+	terra (>= 1.8-60)
 Description: Tools to generate and evaluate ensemble of small models.
 License: GPL
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Suggests: 
     knitr,
     rmarkdown
 VignetteBuilder: knitr
 LazyData: true
 LazyDataCompression: xz
-

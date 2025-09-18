@@ -22,7 +22,7 @@ This function binarizes probability values based on a specific threshold
 \describe{
 Probabilities strictly below the threshold will be assigned to 0 (
 environmentally unsuitable for the species) while probabilities greater or 
-equal to the threshold will be 1 (environementally suitable).
+equal to the threshold will be 1 (environmentally suitable).
 }
 }
 \examples{
