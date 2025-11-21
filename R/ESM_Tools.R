@@ -428,15 +428,24 @@ ESM_Range.Shift.Binary <- function(proj.curr,
   if(length(names(proj.fut)) == length(unique(names(proj.fut)))){
     names(shift) = names(proj.fut)
     }
-  results <- terra::freq(shift, wide=T)
-  n.column <- ncol(results)
-  while(ncol(results) < 5){
-    
-    results <- cbind(results,0)
-    colnames(results)[ncol(results)] = setdiff(c("layer",0:3), colnames(results))[1]
-  } 
+  # results <- terra::freq(shift, wide = TRUE) # not working with the new version of terra
+  # 
+  # n.column <- ncol(results)
+  # while(ncol(results) < 5){
+  #   
+  #   results <- cbind(results,0)
+  #   colnames(results)[ncol(results)] = setdiff(c("layer",0:3), colnames(results))[1]
+  # } 
+  # 
+  # results <- results[,c(1,order(colnames(results)[2:5])+1)]
+
+  frequencies <- terra::freq(shift, wide =  FALSE)
+  results <- as.data.frame(matrix(0,nc = 5, nr = terra::nlyr(proj.fut)))
+  colnames(results) = c("layer",0:3)
+  for(i in 1: terra::nlyr(proj.fut)){
+    results[i,as.character(frequencies$value[frequencies$layer==i])] = frequencies$count[frequencies$layer==i]
+  }
   
-  results <- results[,c(1,order(colnames(results)[2:5])+1)]
   colnames(results) <-c("layer","Pixel.Absence.Stable","Pixel.Presence.Current.only",
                         "Pixel.Presence.Future.Only","Pixel.Presence.Stable")
   results$layer <- names(proj.fut)
@@ -458,16 +467,62 @@ ESM_Range.Shift.Binary <- function(proj.curr,
 #' @name ESM_Range.Shift.Continuous
 #' @author Flavien Collart \email{flaviencollart@@hotmail.com}
 #' @title Ensemble of Small Models: Range Shift between projections with continuous predictions
-#' @description This function compare ESM or SDM continuous projections between two time periods by XXXX
+#' @description 
+#' This function compare ESM or SDM continuous projections between two time periods by using 
+#' model projections on the whole study area and model predictions on observation data. 
 #' 
 #' @param proj.curr \code{SpatRaster}. One ESM/SDM continuous projections at current time. 
-#' @param proj.fut \code{SpatRaster}. One or more ESM/SDM continuous projections at future time. 
+#' \emph{Note that if the number of layer is greater than one for proj.curr, the number of layer 
+#' in proj.fut must be the same as comparisons will be between between map i of proj.curr and map i of proj.fut.}
+#' @param proj.fut \code{SpatRaster}. One or more ESM/SDM continuous projections at future time. \emph{Note that
+#' the map names should be different than in proj.curr}.
+#' @param occ.pres \code{matrix} or \code{data.frame} containing the X and Y coordinate 
+#' of the species occurrences.\emph{Default: NULL}.
+#' @param test.significance \code{logical}. Should the change in suitability between 
+#' present and future should be tested? \emph{Default: TRUE}.
+#' 
 #' 
 #' @details
-#' Under Construction
+#' This functions compute different metric to infer range change using continuous data:
+#' \enumerate{
+#' \item A Difference in habitat suitability between present and future using all pixels from the study area or using only 
+#' occurrences. If test.significance = TRUE, a friedman test followed by a post-hoc paired wilcox test is performed to 
+#' test if there is a significant difference in suitability between the time periods.
+#' \item A distance and a direction between the centroids defined at present and future time. To do so,
+#' each centroid is computed based on a weighted mean across all pixel centroids of the studied area, 
+#' weighting their x or y values with their respective suitability value following Maclean & Early (2023).
+#' The distance is computed by first projecting centroid coordinates in ESPG:4326 and then computed with 
+#' sp::spDists. The direction is computed using argosfilter::bearing
+#' }
 #' 
-#' 
+#' @return \code{list} containing:
+#' \itemize{
+#' \item{suitability.Change.Map}. \code{SpatRaster}. The difference between present and future time in suitability.
+#' \item{results.All.pixels}. A \code{list} containing:
+#' \itemize{
+#' \item{summary.Suitability}. \code{matrix}. The summary in suitability values of the different maps.
+#' \item{centroids}. \code{matrix}. Centroid coordinates. See details for more information
+#' \item{centroid.shift}. a squared \code{matrix} with the distance in meter between each centroid.
+#' \item{centroid.direction}. \code{matrix}. The direction in degree between the centroid at present time
+#' to the centroid in the future.
+#' \item{significance.SuitabilityDiff}. \code{list}. The result of the different statistical tests comparing 
+#' the suitability values between the two time periods. Only available when test.significance = TRUE.
+#' }
+#' \item{results.on.occurrences}. A \code{list}, only present when occ.pres is not NULL, containing:
+#' \itemize{
+#' \item{summary.Suitability}. \code{matrix}. The summary in suitability values predicted on current 
+#' species occurrences at different time periods.
+#' \item{significance.SuitabilityDiff}. \code{list}. The result of the different statistical tests comparing 
+#' the suitability values extracted on occurrences between the two time periods. Only available when 
+#' test.significance = TRUE.
+#' }
+#' }
 #' @seealso \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}
+#' @references 
+#' Maclean, I.M.D., Early, R. 2023. Macroclimate data overestimate range shifts of plants 
+#' in response to climate change. \emph{Nat. Clim. Chang}. \bold{13}, 484–490. 
+#' \doi{10.1038/s41558-023-01650-3}.
+#' 
 #' @export
 
 ESM_Range.Shift.Continuous <- function(proj.curr,
@@ -536,6 +591,12 @@ ESM_Range.Shift.Continuous <- function(proj.curr,
   summary.Suitability <- rbind(mean = Mean.Suitability,
                                sd = SD.Suitability,
                                Quantile.Suitability)
+  out <- list(suitability.Change.Map = RangeChangeMap,
+              results.All.pixels = list(summary.Suitability = summary.Suitability,
+                                        centroids = centroids,
+                                        centroid.shift = shift_WGS84,
+                                        centroid.direction = dct_WGS84)
+              )
 
   ## Test if different via a paired wilcox.test
   if(test.significance){
@@ -552,12 +613,16 @@ ESM_Range.Shift.Continuous <- function(proj.curr,
     test <- stats::friedman.test(y=suitability.toTest$suitability,
                                  groups = suitability.toTest$scenario,
                                  blocks = suitability.toTest$pixel)
-    if(test$p.value < 0.05){
+    
+    test <- list(FriedmanTest = test)
+    if(test$FriedmanTest$p.value < 0.05){
       signi <- stats::pairwise.wilcox.test(x = suitability.toTest$suitability,
                                            g = suitability.toTest$scenario,
                                            paired = TRUE,
                                            p.adjust.method = "bonferroni")
+      test$pairwise.paired.wilcox <- signi
     }
+    out$results.All.pixels$significance.SuitabilityDiff <- test
     
   }
   
@@ -573,7 +638,7 @@ ESM_Range.Shift.Continuous <- function(proj.curr,
                                                            pixel = 1:nrow(data))
                                     rownames(df) =NULL
                                     return(df)
-                                  }, data = suitabilities))
+                                  }, data = occ.suitabilities))
     ## Compute the mean and median value of the global suitability
     occ.Mean.Suitability <- apply(occ.suitabilities[,rownames(centroids.84)], 2, mean)
     occ.SD.Suitability <- apply(occ.suitabilities[,rownames(centroids.84)], 2, stats::sd)
@@ -583,21 +648,28 @@ ESM_Range.Shift.Continuous <- function(proj.curr,
     occ.summary.Suitability <- rbind(mean = occ.Mean.Suitability,
                                      sd = occ.SD.Suitability,
                                      occ.Quantile.Suitability)
+    out$results.on.occurrences$summary.Suitability  = occ.summary.Suitability
     
     ## Test if different via a wilcox.test
     if(test.significance){
       occ.test <- stats::friedman.test(y=occ.suitability.toTest$suitability,
                                    groups = occ.suitability.toTest$scenario,
                                    blocks = occ.suitability.toTest$pixel)
-      if(test$p.value < 0.05){
+      test <- list(FriedmanTest = occ.test)
+      
+      if(test$FriedmanTest$p.value< 0.05){
         occ.signi <- stats::pairwise.wilcox.test(x = occ.suitability.toTest$suitability,
                                              g = occ.suitability.toTest$scenario,
                                              paired = TRUE,
                                              p.adjust.method = "bonferroni")
+        test$pairwise.paired.wilcox <- occ.signi
+        
       }
+      out$results.on.occurrences$significance.SuitabilityDiff <- test
+      
     }
   }
-  
+  return(out)
 }
 
 

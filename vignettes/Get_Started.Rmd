@@ -238,10 +238,10 @@ my.ESM <- ESM_Modeling(resp = resp,
                        xy = xy,
                        env = env.pres,
                        sp.name = sp.name,
-                       models = c("GLM","ANN"),
+                       models = "ANN",
                        cv.rep = 3,
                        pooling = FALSE,
-                       SBI = FALSE,
+                       SBI = FALSE, 
                        verbose = FALSE) 
 ```
 
@@ -268,7 +268,7 @@ Resp.Plot <- ESM_Response.Plot(my.ESM,my.ESM_EF)
 myEval <- ESM_Pooling.Evaluation(ESM.Mod = my.ESM,
                                  ESM.ensembleMod = my.ESM_EF,
                                  EachSmallModels = FALSE)
-
+myEval$ESM.evaluations
 ```
 
 ```{r, echo = FALSE}
@@ -289,11 +289,11 @@ proj.curr <- ESM_Projection(ESM.Mod = my.ESM,
 Ens.proj.curr <- ESM_Ensemble.Projection(ESM.proj = proj.curr,
                                     ESM.ensembleMod = my.ESM_EF,
                                     save.obj = FALSE)
-
+names(Ens.proj.curr) = "current"
 plot(Ens.proj.curr)
 ```
 
-Projecting in 2071-2100 according to the scenario UKESM ssp 5-8.5
+Projecting in 2041-2070 according to the scenario UKESM ssp 3-7.0
 
 ```{r}
 proj.fut <- ESM_Projection(ESM.Mod = my.ESM, 
@@ -306,6 +306,7 @@ proj.fut <- ESM_Projection(ESM.Mod = my.ESM,
 Ens.proj.fut <- ESM_Ensemble.Projection(ESM.proj = proj.fut,
                                     ESM.ensembleMod = my.ESM_EF,
                                     save.obj = FALSE)
+names(Ens.proj.fut) = "UKESM_370"
 
 plot(Ens.proj.fut)
 ```
@@ -317,12 +318,37 @@ You can determine a threshold that will set the limit between your presences and
 my.ESM_thresholds <- ESM_Threshold(my.ESM_EF)
 
 my.ESM_EFproj_current_binary <- ESM_Binarize(Ens.proj.curr, 
-                                             1000*my.ESM_thresholds$TSS.th)
+                                      1000*my.ESM_thresholds$TSS.th)
+
 plot(my.ESM_EFproj_current_binary)
+```
+```{r}
+my.ESM_EFproj_fut_binary <- ESM_Binarize(Ens.proj.fut, 
+                                      1000*my.ESM_thresholds$TSS.th)
+plot(my.ESM_EFproj_fut_binary)
 ```
 
 
 ### Output Analyses
+
+Comparison of habitat suitability change
+```{r, warning=FALSE}
+RangeShift_c <- ESM_Range.Shift.Continuous(proj.curr = Ens.proj.curr,
+                                           proj.fut = Ens.proj.fut,
+                                           occ.pres = xy[resp==1,],
+                                           test.significance = TRUE)
+#Plot showing the difference in suitabilities between future and present
+# and the change in centroid
+terra::plot(RangeShift_c$suitability.Change.Map, 
+            col = terrain.colors(100)[100:1])
+#circle = present centroid, square = future
+terra::points(RangeShift_c$results.All.pixels$centroids,
+              pch = c(19,15)) 
+
+#Significant changes in suitability values
+RangeShift_c$results.All.pixels$significance.SuitabilityDiff
+```
+
 
 ```{r, echo = FALSE}
 ## remove folder

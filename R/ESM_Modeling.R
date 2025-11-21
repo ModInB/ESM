@@ -522,7 +522,7 @@ ESM_Modeling <- function(resp,
                           verbose = TRUE){
   
   if(verbose){
-    message(c("\n\nCombinations", as.character(x)))
+    message(c("\n\nCombinations ", paste(as.character(x),collapse = " ")))
   }
     
   envi <- env.var[,as.character(x)]
@@ -534,6 +534,7 @@ ESM_Modeling <- function(resp,
              prevalence = prevalence, 
              save.obj = save.obj, 
              verbose =verbose)
+  if(length(models))
   return(do.call(cbind,d))
 }
 
@@ -592,7 +593,7 @@ ESM_Modeling <- function(resp,
           pred <- as.data.frame(rep(NA,nrow(env.var)))
           colnames(pred) = "ANN" 
         }else{
-          pred <- predict(mod,newdata = env.var,type="raw")
+          pred <- as.data.frame(predict(mod,newdata = env.var,type="raw"))
           colnames(pred) = "ANN" 
           
         }
