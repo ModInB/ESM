@@ -30,7 +30,7 @@ Functions to perform and evaluate Ensemble of small models. These functions are 
 
 To cite this package, please use the following reference:
 
-<code> <i> Collart, F., Hotermans, A., Theunissen, K., Broennimann, O., Guisan, A. 2024. ESM: Ensemble of Small Models_. R package version 0.8.</code> </i>
+<code> <i> Collart, F., Hotermans, A., Theunissen, K., Broennimann, O., Guisan, A. 2025. ESM: Ensemble of Small Models_. R package version 0.8.</code> </i>
 
 ### List of the functions in the package
 
