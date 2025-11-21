@@ -4,8 +4,8 @@ Date: 2025-11-25
 Title: Ensemble of Small Models
 Authors@R: c(
 	person("Flavien", "Collart", role = c("cre","aut","ctb"), email = "flaviencollart@hotmail.com"),
-	person("Adele", "Hotermans", role = c("aut","ctb"), email = "ahotermans@student.uliege.be"),
-	person("Kelly", "Theunissen", role = c("aut"), email = "ahotermans@student.uliege.be"),
+	person("Adele", "Hotermans", role = c("aut","ctb"), email = "ahotermans@doct.uliege.be"),
+	person("Kelly", "Theunissen", role = c("aut"), email = "ahotermans@doct.uliege.be"),
 	person("Olivier", "Broennimann", role = c("aut","ctb"), email = "olivier.broennimann@unil.ch"),
 	person("Antoine", "Guisan", role = "aut", email = "antoine.guisan@unil.ch"))
 Author: Flavien Collart [cre, aut, ctb],
