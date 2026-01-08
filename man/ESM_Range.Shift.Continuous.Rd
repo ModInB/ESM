@@ -34,7 +34,9 @@ present and future should be tested? \emph{Default: TRUE}.}
 \item{summary.Suitability}. \code{matrix}. The summary in suitability values of the different maps.
 \item{centroids}. \code{matrix}. Centroid coordinates. See details for more information
 \item{centroid.shift}. a squared \code{matrix} with the distance in meter between each centroid.
-\item{centroid.direction}. \code{matrix}. The direction in degree between the centroid at present time
+\item{centroid.direction.angle}. \code{numeric}. The direction in degree between the centroid at present time
+to the centroid in the future.
+\item{centroid.direction}. \code{character}. The classified direction between the centroid at present time
 to the centroid in the future.
 \item{significance.SuitabilityDiff}. \code{list}. The result of the different statistical tests comparing 
 the suitability values between the two time periods. Only available when test.significance = TRUE.

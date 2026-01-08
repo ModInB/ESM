@@ -101,7 +101,6 @@ Bp_Sampling <- function(env,
                         aggr.fact.geo = 5,
                         digit.val.env = 1,
                         n.strat.env = 3,
-                        force = FALSE,
                         To.plot = FALSE,
                         xy.pres = NULL){
   
@@ -378,7 +377,8 @@ Bp_Sampling <- function(env,
 #' @param proj.curr \code{SpatRaster}. One or more ESM/SDM binary projections at current time. 
 #' \emph{Note that if the number of layer is greater than one for proj.curr, the number of layer 
 #' in proj.fut must be the same as comparisons will be between between map i of proj.curr and map i of proj.fut.}
-#' @param proj.fut \code{SpatRaster}. One or more ESM/SDM binary projections at future time.
+#' @param proj.fut \code{SpatRaster}. One or more ESM/SDM binary projections at future time.\emph{Note that
+#' the map names should be different than in proj.curr}.
 #' 
 #' @details
 #' The comparisons between SDM/ESM binary predictions are made following this formula: 
@@ -388,13 +388,16 @@ Bp_Sampling <- function(env,
 #' When it is 1, pixels considered as "presence" in proj.curr  but not in proj.fut \bold{(pixel lost)}.
 #' When it is 2, pixels considered as "presence" in proj.fut  but not in proj.curr \bold{(pixel gained)}.
 #' When it is 3, pixels are considered as "present" in both time periods \bold{(pixel Stable)}.
-#'   
-#' 
+#' In addition of the Range shift in terms of percentage of gain/loss, this function compute the change in the centroid position
+#' of the range at the two time period. To do, so an average of the x and y pixel coordinates where species is considered
+#' as present is computed. Then, the distance between the centroid position at curerent and future time is computed by first 
+#' projecting centroid coordinates in ESPG:4326 and then computed with sp::spDists. The direction is computed 
+#' using argosfilter::bearing
 #' 
 #' @return \code{list} containing:
 #' \itemize{
-#' \item{RangeShift}: \code{SpatRaster}. The range comparisons between current and future (\emph{see Details for the values}).
-#' \item{RangeShift.table}: \code{data.frame}. Summary of the comparisons between maps. containing 9 columns:
+#' \item{RangeShift}. \code{SpatRaster}. The range comparisons between current and future (\emph{see Details for the values}).
+#' \item{RangeShift.table}. \code{data.frame}. Summary of the comparisons between maps. containing 9 columns:
 #' \itemize{
 #' \item{layer}. The layer names of proj.fut used to make the comparisons.
 #' \item{Pixel.Absence.Stable}. The number of pixels that are considered as absent for both time period.
@@ -409,6 +412,16 @@ Bp_Sampling <- function(env,
 #' \item{Perc.Gain}. The percentage of pixel considered as "absent" in proj.curr and becoming 
 #' "present" in proj.fut compared to the current range size. 
 #' }
+#' \item{centroid.Analysis}. a \code{list} containing:
+#' \itemize{
+#' \item{centroids}. \code{matrix}. Centroid coordinates. See details for more information
+#' \item{centroid.shift}. a squared \code{matrix} with the distance in meter between each centroid.
+#' \item{centroid.direction.angle}. \code{numeric}. The direction in degree between the centroid at present time
+#' to the centroid in the future.
+#' \item{centroid.direction}. \code{character}. The classified direction between the centroid at present time
+#' to the centroid in the future.
+#' }
+#' 
 #' }
 #' 
 #' @seealso \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}, \code{\link{ESM_Threshold}}, \code{\link{ESM_Binarize}}
@@ -440,7 +453,7 @@ ESM_Range.Shift.Binary <- function(proj.curr,
   # results <- results[,c(1,order(colnames(results)[2:5])+1)]
 
   frequencies <- terra::freq(shift, wide =  FALSE)
-  results <- as.data.frame(matrix(0,nc = 5, nr = terra::nlyr(proj.fut)))
+  results <- as.data.frame(matrix(0,ncol = 5, nrow = terra::nlyr(proj.fut)))
   colnames(results) = c("layer",0:3)
   for(i in 1: terra::nlyr(proj.fut)){
     results[i,as.character(frequencies$value[frequencies$layer==i])] = frequencies$count[frequencies$layer==i]
@@ -459,8 +472,60 @@ ESM_Range.Shift.Binary <- function(proj.curr,
                                (results$Pixel.Presence.Current.only+results$Pixel.Presence.Stable),
                              2)  
   
+  ## Compute Centroids
+  maps <- c(proj.curr,proj.fut) # To make sure they are the same
+  xy <- terra::as.data.frame(maps,xy=TRUE,na.rm=T)  
+  
+  ## Find center of projected suitabilities ####
+  .Compute.centroid <- function(suitability,xy){
+    if(sum(suitability)==0){
+      return(cbind(x=NA,y=NA))
+    }else{
+      return(cbind(x = sum(xy$x*suitability)/sum(suitability),y = sum(xy$y*suitability)/sum(suitability)) )
+    }
+    
+  }
+  
+  centroids <- t(apply(xy[,-c(1:2)], 2,.Compute.centroid, xy = xy[,1:2]))
+  colnames(centroids) = c("x","y")
+  centroids <- as.data.frame(na.omit(centroids))
+  centroids.84 <- terra::project(as.matrix(centroids), from=terra::crs(maps), to="EPSG:4326") 
+  rownames(centroids.84) = rownames(centroids)
+  colnames(centroids.84) = c("x","y")
+  if(nrow(centroids.84)<2){
+    stop("Only one period have a centroid")
+  }else if(nrow(centroids.84)<terra::nlyr(maps)){
+    message("\nCentroids of some future were impossible to compute. Thus no results will produced for these periods.")
+  }
+  #longlag is TRUE to calculate the Great-circle distance with WGS84 coordinates
+  #results in km
+  shift_WGS84 <- sp::spDists(centroids.84, longlat=TRUE) #longlag is TRUE to calculate the Great-circle distance with WGS84 coordinates
+  colnames(shift_WGS84) = rownames(shift_WGS84) = rownames(centroids.84)
+  
+  .Compute.bearing <- function(fut.pos,
+                               xy){
+    return(argosfilter::bearing(xy[1,2], xy[fut.pos,2],  xy[1,1], xy[fut.pos,1]))
+  }
+  dct_WGS84 <- sapply(2:nrow(centroids.84), .Compute.bearing, xy = centroids.84)
+  names(dct_WGS84) = paste0(rownames(centroids.84)[1],"-",rownames(centroids.84)[-1])
+  dct_WGS84.Classified = as.character(cut(dct_WGS84, c(-181,-157.5,-112.5,-67.5,-22.5,22.5,67.5,112.5,157.5,181),
+                                          labels = c("South",
+                                        "South West",
+                                        "West",
+                                        "North West",
+                                        "North",
+                                        "North East",
+                                        "East",
+                                        "South East",
+                                        "South")))
+  
   return(list(RangeShift = shift,
-              RangeShift.table = results))
+              RangeShift.table = results,
+              centroid.analysis = list(centroids = centroids,
+                                       centroid.shift = shift_WGS84,
+                                       centroid.direction.angle = dct_WGS84,
+                                       centroid.direction = dct_WGS84.Classified)
+              ))
 }
 
 ################
@@ -503,7 +568,9 @@ ESM_Range.Shift.Binary <- function(proj.curr,
 #' \item{summary.Suitability}. \code{matrix}. The summary in suitability values of the different maps.
 #' \item{centroids}. \code{matrix}. Centroid coordinates. See details for more information
 #' \item{centroid.shift}. a squared \code{matrix} with the distance in meter between each centroid.
-#' \item{centroid.direction}. \code{matrix}. The direction in degree between the centroid at present time
+#' \item{centroid.direction.angle}. \code{numeric}. The direction in degree between the centroid at present time
+#' to the centroid in the future.
+#' \item{centroid.direction}. \code{character}. The classified direction between the centroid at present time
 #' to the centroid in the future.
 #' \item{significance.SuitabilityDiff}. \code{list}. The result of the different statistical tests comparing 
 #' the suitability values between the two time periods. Only available when test.significance = TRUE.
@@ -579,7 +646,16 @@ ESM_Range.Shift.Continuous <- function(proj.curr,
   }
   dct_WGS84 <- sapply(2:nrow(centroids.84), .Compute.bearing, xy = centroids.84)
   names(dct_WGS84) = paste0(rownames(centroids.84)[1],"-",rownames(centroids.84)[-1])
-  
+  dct_WGS84.Classified = as.character(cut(dct_WGS84, c(-181,-157.5,-112.5,-67.5,-22.5,22.5,67.5,112.5,157.5,181),
+                                          labels = c("South",
+                                                     "South West",
+                                                     "West",
+                                                     "North West",
+                                                     "North",
+                                                     "North East",
+                                                     "East",
+                                                     "South East",
+                                                     "South")))
   # Essayer de reclassifier en Nord, Sud,...
   
   ## Compute the mean and median value of the global suitability
@@ -595,7 +671,8 @@ ESM_Range.Shift.Continuous <- function(proj.curr,
               results.All.pixels = list(summary.Suitability = summary.Suitability,
                                         centroids = centroids,
                                         centroid.shift = shift_WGS84,
-                                        centroid.direction = dct_WGS84)
+                                        centroid.direction.angle = dct_WGS84,
+                                        centroid.direction = dct_WGS84.Classified)
               )
 
   ## Test if different via a paired wilcox.test
@@ -693,7 +770,7 @@ ESM_Range.Shift.Continuous <- function(proj.curr,
 #' @return 
 #' An object of the same class as proj: \code{SpatRaster}, \code{data.frame}, \code{matrix}, or \code{numeric}.
 #' 
-#' @seealso \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}, \code{\link{ESM_Threshold}} ,\code{\link{ESM_Range.Shift}}
+#' @seealso \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}, \code{\link{ESM_Threshold}} ,\code{\link{ESM_Range.Shift.Binary}}
 #' 
 #' @examples 
 #' ## Generate a vector to binarize

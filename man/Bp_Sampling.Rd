@@ -11,7 +11,6 @@ Bp_Sampling(
   aggr.fact.geo = 5,
   digit.val.env = 1,
   n.strat.env = 3,
-  force = FALSE,
   To.plot = FALSE,
   xy.pres = NULL
 )

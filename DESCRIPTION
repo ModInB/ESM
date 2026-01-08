@@ -1,5 +1,5 @@
 Package: ESM
-Version: 0.8
+Version: 0.8.1
 Date: 2025-11-25
 Title: Ensemble of Small Models
 Authors@R: c(
@@ -28,7 +28,8 @@ Imports:
 	predicts (>= 0.1-19),
 	PresenceAbsence (>= 1.1.9), 
 	rpart(>= 4.1.23), 
-	spsUtil (>= 0.2.2), 
+	sp (>= 2.1-4),
+	spsUtil (>= 0.2.2),
 	terra (>= 1.8-60)
 Description: Tools to generate and evaluate ensemble of small models.
 License: GPL

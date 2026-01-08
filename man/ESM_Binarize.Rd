@@ -34,7 +34,7 @@ ESM_Binarize(proj = proj, thr = 400)
 
 }
 \seealso{
-\code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}, \code{\link{ESM_Threshold}} ,\code{\link{ESM_Range.Shift}}
+\code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}, \code{\link{ESM_Threshold}} ,\code{\link{ESM_Range.Shift.Binary}}
 }
 \author{
 Flavien Collart \email{flaviencollart@hotmail.com}

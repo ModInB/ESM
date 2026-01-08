@@ -188,7 +188,7 @@ unlink("ESM.output_Solenostoma_gracillimum",recursive = TRUE)
 
 ## Case 2: Modeling with presence-only data
 
-Modelling species distribution based on presence-only is often challenging. For this example, we chose *Splachnum melanocaulon*, an endangered bryophyte species mainly living in Scandinavia. The aim of this study case is to assess the impact of climate change on this endangered species in Scandinavia.
+Modelling species distribution based on presence-only is often challenging but made simplier with the ESM package. For this example, we chose *Splachnum melanocaulon*, an endangered bryophyte species mainly living in Scandinavia. The aim of this study case is to assess the impact of climate change on this endangered species in Scandinavia.
 
 This part of the vignette is not finished yet.
 
@@ -231,51 +231,65 @@ resp <- rep(c(1,0),times = c(nrow(ESM_Splachnum.Data),nrow(BP)))
 ```
 
 ### Modeling Core
-
+For this example, we will using two modelling algorithms that have different complexity levels: GLM and ANN For this example, we will use the default model parameters, evaluate each bivariate models with 3 cross-validation (70% for calibration and 30% for validation). As the sample size is very limited, we will compute a smooth continuous boyce index instead of the regular one (see ?Smooth_CBI; Liu et al 2024).
 ```{r}
 
 my.ESM <- ESM_Modeling(resp = resp,
                        xy = xy,
                        env = env.pres,
                        sp.name = sp.name,
-                       models = "ANN",
-                       cv.rep = 3,
+                       models = c("GLM","ANN"),
+                       cv.rep = 3, # Usually >= 10
+                       cv.ratio = 0.7,
                        pooling = FALSE,
-                       SBI = FALSE, 
+                       SBI = TRUE, 
                        verbose = FALSE) 
 ```
 
+Checking model performances for each bivariate model. Here, as an example, we only showed the first bivariate model
+
 ```{r}
-# Is the model able to correctly predict the probability of occurrence inside 
-# the environment in which it was calibrated 
-my.ESM$biva.calibration 
-
 # Is the model able to correctly predict the probability of occurrence of new points 
-my.ESM$biva.evaluations
+my.ESM$biva.evaluations$bio1.bio3
 ```
-
+After generating and evaluating each bivariate models, the second step is to combined all of them into an ensemble, using a weighting mean, wheighting each bivariate model with their SBI values. 
 ```{r, fig.fullwidth=TRUE}
 my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM, 
-                                   weighting.score=c("MaxTSS"), 
+                                   weighting.score=c("SBI"), 
                                    threshold=0,
                                    save.obj = FALSE)
 ## Performances of the ensemble based on the pooling evaluation
 my.ESM_EF$evaluations
-## 'par' Only needed to build the vignette 
-par(mar=c(2, 4, 3, 1) + 0.1)  
-Resp.Plot <- ESM_Response.Plot(my.ESM,my.ESM_EF)
+```
+ESM can also be evaluated afterwards using the pooling evaluation presented in Collart & Guisan (2023).
+```{r}
 ## Pooling evaluation
 myEval <- ESM_Pooling.Evaluation(ESM.Mod = my.ESM,
                                  ESM.ensembleMod = my.ESM_EF,
                                  EachSmallModels = FALSE)
 myEval$ESM.evaluations
 ```
+A crucial step in modelling is to check afterwards response curves to pinpoint potential overfitting issues or check ecological meaning (?). This can be done using the function *ESM_Response.Plot"
+
+```{r}
+## 'par' Only needed to build the vignette 
+par(mar=c(2, 4, 3, 1) + 0.1)  
+Resp.Plot <- ESM_Response.Plot(my.ESM,
+                               my.ESM_EF)
+
+```
+
 
 ```{r, echo = FALSE}
 par(mar=c(5, 4, 4, 2) + 0.1)
 ```
 
+### Model Projection
+To project the ESM models into a spatio-temporal region, you'll need to use two functions: *ESM_Projection*, to project each bivariate model and *ESM_Ensemble.Projection*, to combine all of these projections into an ensemble. 
+To work, *ESM_Projection* need at least the two first argument aka the output of the *ESM_Modelling* functions and a SpatRaster containing the predictors used during the modelling at the needed time and geographical region that you want to project your models. Note that the names of the predictors should be exactly the same as those used during the modelling procedure. 
+
 ```{r}
+# Here projection at present time
 proj.curr <- ESM_Projection(ESM.Mod = my.ESM, 
                        new.env = env.pres,
                        name.env = "current", 
@@ -284,18 +298,18 @@ proj.curr <- ESM_Projection(ESM.Mod = my.ESM,
                        verbose = FALSE)
 
 ```
-
+Once each bivariate model are projected, you can realise an ensemble via the function *ESM_Ensemble.Projection* which will need at least two objects: the objects resulting from the *ESM_Projection* and *ESM_Ensemble.Modeling*.
 ```{r}
 Ens.proj.curr <- ESM_Ensemble.Projection(ESM.proj = proj.curr,
                                     ESM.ensembleMod = my.ESM_EF,
                                     save.obj = FALSE)
-names(Ens.proj.curr) = "current"
+names(Ens.proj.curr) = paste("current",names(Ens.proj.curr) )
 plot(Ens.proj.curr)
 ```
 
-Projecting in 2041-2070 according to the scenario UKESM ssp 3-7.0
-
 ```{r}
+# Projecting in 2041-2070 according to the scenario UKESM ssp 3-7.0
+
 proj.fut <- ESM_Projection(ESM.Mod = my.ESM, 
                        new.env = env.fut,
                        name.env = "future", 
@@ -306,35 +320,23 @@ proj.fut <- ESM_Projection(ESM.Mod = my.ESM,
 Ens.proj.fut <- ESM_Ensemble.Projection(ESM.proj = proj.fut,
                                     ESM.ensembleMod = my.ESM_EF,
                                     save.obj = FALSE)
-names(Ens.proj.fut) = "UKESM_370"
+names(Ens.proj.fut) = paste("UKESM_370",names(Ens.proj.fut) )
 
 plot(Ens.proj.fut)
-```
-
-You can determine a threshold that will set the limit between your presences and absences among the probabilities of occurrence using the function *ESM_thresholds*. Once the different possible thresholds are determine, you can project a binary map based on one of these using *ESM_Binarize*. In this case, the one based on the max TSS of calibrated ESMs into a new space was used.
-
-```{r}
-
-my.ESM_thresholds <- ESM_Threshold(my.ESM_EF)
-
-my.ESM_EFproj_current_binary <- ESM_Binarize(Ens.proj.curr, 
-                                      1000*my.ESM_thresholds$TSS.th)
-
-plot(my.ESM_EFproj_current_binary)
-```
-```{r}
-my.ESM_EFproj_fut_binary <- ESM_Binarize(Ens.proj.fut, 
-                                      1000*my.ESM_thresholds$TSS.th)
-plot(my.ESM_EFproj_fut_binary)
 ```
 
 
 ### Output Analyses
 
-Comparison of habitat suitability change
+Once all the models are projected, you can then compare the difference in distributions. In the *ESM* package, two functions were developed to compare two time periods using the continuous data but also binary data. 
+
+#### Comparison of habitat suitability change
+
+*ESM_Range.Shift.Continuous* compares continuous species distribution model projections between a present and a future period to assess how habitat suitability and species range may change over time. It quantifies changes in suitability across the whole landscape and, optionally, at observed occurrence points, and can test whether these changes are statistically significant. The function also calculates the distance and direction of shifts in suitability-weighted range centroids between time periods, providing an intuitive picture of potential range movements under future conditions.
+
 ```{r, warning=FALSE}
-RangeShift_c <- ESM_Range.Shift.Continuous(proj.curr = Ens.proj.curr,
-                                           proj.fut = Ens.proj.fut,
+RangeShift_c <- ESM_Range.Shift.Continuous(proj.curr = Ens.proj.curr$`current EF`,
+                                           proj.fut = Ens.proj.fut$`UKESM_370 EF`,
                                            occ.pres = xy[resp==1,],
                                            test.significance = TRUE)
 #Plot showing the difference in suitabilities between future and present
@@ -347,6 +349,42 @@ terra::points(RangeShift_c$results.All.pixels$centroids,
 
 #Significant changes in suitability values
 RangeShift_c$results.All.pixels$significance.SuitabilityDiff
+```
+#### Comparison of range shift using binary data
+
+For this part, you will need to convert the continuous habitat suitability values into a binary.To do so, you can determine a threshold that will set the limit between your presences and absences among the probabilities of occurrence using the function *ESM_thresholds*. Once the different possible thresholds are determine, you can project a binary map based on one of these using *ESM_Binarize*. In this case, the one based on the max TSS of calibrated ESMs into a new space is used.
+
+```{r}
+
+my.ESM_thresholds <- ESM_Threshold(my.ESM_EF)
+
+my.ESM_EFproj_current_binary <- ESM_Binarize(Ens.proj.curr, 
+                                      1000*my.ESM_thresholds$TSS.th)
+
+plot(my.ESM_EFproj_current_binary)
+```
+
+The same thresholds are then used for the future projections
+```{r}
+my.ESM_EFproj_fut_binary <- ESM_Binarize(Ens.proj.fut, 
+                                      1000*my.ESM_thresholds$TSS.th)
+plot(my.ESM_EFproj_fut_binary)
+```
+
+
+*ESM_Range.Shift.Binary* compares binary species distribution model projections between a present and a future period to show where habitat remains suitable, is lost, or is newly gained. It classifies each pixel as consistently unsuitable, lost, gained, or stable suitable habitat, and summarizes these categories along with the percentages of range loss and gain relative to the current distribution. The function also tracks how the range centroid shifts between time periods by computing its movement distance and direction, helping to visualize the main trajectory of species range change over time.
+
+```{r}
+RangeShift_b <- ESM_Range.Shift.Binary(proj.curr = my.ESM_EFproj_current_binary,
+                               proj.fut = my.ESM_EFproj_fut_binary)
+#changed in pixels (gain, loss, stable)
+plot(RangeShift_b$RangeShift)
+
+# The values resulting from the above maps
+RangeShift_b$RangeShift.table
+
+#The change in centroid position
+RangeShift_b$centroid
 ```
 
 

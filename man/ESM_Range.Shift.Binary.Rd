@@ -11,13 +11,14 @@ ESM_Range.Shift.Binary(proj.curr, proj.fut)
 \emph{Note that if the number of layer is greater than one for proj.curr, the number of layer 
 in proj.fut must be the same as comparisons will be between between map i of proj.curr and map i of proj.fut.}}
 
-\item{proj.fut}{\code{SpatRaster}. One or more ESM/SDM binary projections at future time.}
+\item{proj.fut}{\code{SpatRaster}. One or more ESM/SDM binary projections at future time.\emph{Note that
+the map names should be different than in proj.curr}.}
 }
 \value{
 \code{list} containing:
 \itemize{
-\item{RangeShift}: \code{SpatRaster}. The range comparisons between current and future (\emph{see Details for the values}).
-\item{RangeShift.table}: \code{data.frame}. Summary of the comparisons between maps. containing 9 columns:
+\item{RangeShift}. \code{SpatRaster}. The range comparisons between current and future (\emph{see Details for the values}).
+\item{RangeShift.table}. \code{data.frame}. Summary of the comparisons between maps. containing 9 columns:
 \itemize{
 \item{layer}. The layer names of proj.fut used to make the comparisons.
 \item{Pixel.Absence.Stable}. The number of pixels that are considered as absent for both time period.
@@ -32,6 +33,16 @@ in proj.fut compared to the current range size.
 \item{Perc.Gain}. The percentage of pixel considered as "absent" in proj.curr and becoming 
 "present" in proj.fut compared to the current range size. 
 }
+\item{centroid.Analysis}. a \code{list} containing:
+\itemize{
+\item{centroids}. \code{matrix}. Centroid coordinates. See details for more information
+\item{centroid.shift}. a squared \code{matrix} with the distance in meter between each centroid.
+\item{centroid.direction.angle}. \code{numeric}. The direction in degree between the centroid at present time
+to the centroid in the future.
+\item{centroid.direction}. \code{character}. The classified direction between the centroid at present time
+to the centroid in the future.
+}
+
 }
 }
 \description{
@@ -46,6 +57,11 @@ time period.
 When it is 1, pixels considered as "presence" in proj.curr  but not in proj.fut \bold{(pixel lost)}.
 When it is 2, pixels considered as "presence" in proj.fut  but not in proj.curr \bold{(pixel gained)}.
 When it is 3, pixels are considered as "present" in both time periods \bold{(pixel Stable)}.
+In addition of the Range shift in terms of percentage of gain/loss, this function compute the change in the centroid position
+of the range at the two time period. To do, so an average of the x and y pixel coordinates where species is considered
+as present is computed. Then, the distance between the centroid position at curerent and future time is computed by first 
+projecting centroid coordinates in ESPG:4326 and then computed with sp::spDists. The direction is computed 
+using argosfilter::bearing
 }
 \seealso{
 \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}, \code{\link{ESM_Threshold}}, \code{\link{ESM_Binarize}}
