@@ -1,6 +1,6 @@
 
 #' @name ESM_Modeling
-#' @author Flavien Collart \email{flaviencollart@hotmail.com}
+#' @author Flavien Collart \email{flaviencollart@@hotmail.com}
 #' @title Ensemble of Small Models: Calibration of Bivariate Models
 #' @description Model and evaluate species distribution based on the method Ensemble of Small Models (ESM).
 #' 
@@ -194,7 +194,7 @@ ESM_Modeling <- function(resp,
     resp[is.na(resp)] = 0
     
     if(is.null(prevalence)){
-      cat("\nAs NAs were present in resp, we assume that you use pseudo-absences and we thus set prevalence to 0.5")
+      message("\nAs NAs were present in resp, we assume that you use pseudo-absences and we thus set prevalence to 0.5")
       prevalence = 0.5
     }
   }
@@ -341,7 +341,7 @@ ESM_Modeling <- function(resp,
   
  
   if(verbose){
-    cat("\n################### Start Modeling ###################")
+    message("\n################### Start Modeling ###################")
   }
   
   if(parallel){
@@ -377,7 +377,7 @@ ESM_Modeling <- function(resp,
   names(biva.mods) = paste0(combinations[1,],".",combinations[2,])
   
   if(verbose){
-    cat("\n##################### Done #####################")
+    message("\n##################### Done #####################")
   }
   
 
@@ -390,7 +390,7 @@ ESM_Modeling <- function(resp,
   if(verbose){  
     lapply(1:length(biva.mods), .PrintFailedMods,
            biva.mods,failed.mods)
-      cat("\n############### Start evaluations ###############")
+      message("\n############### Start evaluations ###############")
 
   }
 
@@ -448,7 +448,7 @@ ESM_Modeling <- function(resp,
     save(obj,file=paste0("../ESM.Modeling.",modeling.id,".out"))
   }
   if(verbose){
-    cat("\n##################### Done #####################")
+    message("\n##################### Done #####################")
   }
   
   return(obj)
@@ -522,7 +522,7 @@ ESM_Modeling <- function(resp,
                           verbose = TRUE){
   
   if(verbose){
-    cat(c("\n\nCombinations", as.character(x)))
+    message(c("\n\nCombinations ", paste(as.character(x),collapse = " ")))
   }
     
   envi <- env.var[,as.character(x)]
@@ -534,6 +534,7 @@ ESM_Modeling <- function(resp,
              prevalence = prevalence, 
              save.obj = save.obj, 
              verbose =verbose)
+  if(length(models))
   return(do.call(cbind,d))
 }
 
@@ -571,7 +572,7 @@ ESM_Modeling <- function(resp,
       err <- FALSE
       if(models[j] == "ANN"){
         if(verbose){
-          cat(paste("\nANN", nameRun,"\n"))
+          message(paste("\nANN", nameRun,"\n"))
         }
         formula <- .makeGLMFormula(env.var,
                                    model.option=list(type="linear"))
@@ -584,7 +585,7 @@ ESM_Modeling <- function(resp,
                                          maxit = models.options$ANN$maxit, 
                                          trace= FALSE)}, 
                  error=function(e){
-                   cat(paste("\n model",models[j],nameRun,"failed"))
+                   message(paste("\n model",models[j],nameRun,"failed"))
                    err <<-TRUE
                  })
         
@@ -592,7 +593,7 @@ ESM_Modeling <- function(resp,
           pred <- as.data.frame(rep(NA,nrow(env.var)))
           colnames(pred) = "ANN" 
         }else{
-          pred <- predict(mod,newdata = env.var,type="raw")
+          pred <- as.data.frame(predict(mod,newdata = env.var,type="raw"))
           colnames(pred) = "ANN" 
           
         }
@@ -615,7 +616,7 @@ ESM_Modeling <- function(resp,
       if(models[j] == "CTA"){
         
         if(verbose){
-          cat(paste("\nCTA", nameRun,"\n"))
+          message(paste("\nCTA", nameRun,"\n"))
         }
         formula <- .makeGLMFormula(env.var,
                                    model.option=list(type="linear"))
@@ -631,7 +632,7 @@ ESM_Modeling <- function(resp,
                                            control = models.options$CTA$control
                                            )}, 
                  error=function(e){
-                   cat(paste("\n model",models[j],nameRun,"failed"))
+                   message(paste("\n model",models[j],nameRun,"failed"))
                    err <<-TRUE
                  })
         
@@ -661,7 +662,7 @@ ESM_Modeling <- function(resp,
       }
       if(models[j] == "GLM"){
         if(verbose){
-          cat(paste("\nGLM", nameRun))
+          message(paste("\nGLM", nameRun))
         }
         if(models.options$GLM$test == "none"){
           
@@ -671,7 +672,7 @@ ESM_Modeling <- function(resp,
                                                             family = models.options$GLM$family,
                                                             weights = w,
                                                             data = data))}, error=function(e){
-                                                              cat(paste("\n model",models[j],nameRun,"failed"))
+                                                              message(paste("\n model",models[j],nameRun,"failed"))
                                                               err <<-TRUE
                                                             })
           if(err){
@@ -708,9 +709,9 @@ ESM_Modeling <- function(resp,
                                                 scope = "resp~1",
                                                 direction = "both",
                                                 trace=F))
-            if(verbose){cat(paste0("\n\tBest Formula:",deparse(mod$formula)))}
+            if(verbose){message(paste0("\n\tBest Formula:",deparse(mod$formula)))}
           }, error=function(e){
-            cat(paste("\n model",models[j],nameRun,"failed"))
+            message(paste("\n model",models[j],nameRun,"failed"))
             err <<-TRUE
           })
           
@@ -739,7 +740,7 @@ ESM_Modeling <- function(resp,
       }
       if(models[j]=="GBM"){
         if(verbose){
-          cat(paste("\nGBM", nameRun,"\n"))
+          message(paste("\nGBM", nameRun,"\n"))
         }
         formula <- .makeGLMFormula(env.var,
                                    model.option=list(type="linear"))
@@ -757,7 +758,7 @@ ESM_Modeling <- function(resp,
                         keep.data = TRUE,
                         verbose = models.options$GBM$verbose,
                         n.cores = models.options$GBM$n.cores)}, error=function(e){
-                          cat(paste("\n model",models[j],nameRun,"failed"))
+                          message(paste("\n model",models[j],nameRun,"failed"))
                           err <<-TRUE
                         })
         if(err){
@@ -783,9 +784,9 @@ ESM_Modeling <- function(resp,
         }
       }
       if(models[j] == "MAXNET"){
-        if(verbose){cat(paste("\nMAXNET", nameRun,"\n"))}
+        if(verbose){message(paste("\nMAXNET", nameRun,"\n"))}
         tryCatch(expr={mod <- maxnet::maxnet(p = data.maxnet$resp,data = data.maxnet[,-1])}, error=function(e){
-          cat(paste("\n model",models[j],nameRun,"failed"))
+          message(paste("\n model",models[j],nameRun,"failed"))
           err <<-TRUE
         })
         
@@ -814,7 +815,7 @@ ESM_Modeling <- function(resp,
       
       if(models[j] == "GAM"){
         if(verbose){
-          cat(paste("\nGAM", nameRun,"\n"))
+          message(paste("\nGAM", nameRun,"\n"))
         }
         formula <- stats::as.formula(paste0("resp ~ ",paste0("s(",
                                                              colnames(env.var),
@@ -836,7 +837,7 @@ ESM_Modeling <- function(resp,
                                         knots = models.options$GAM$knots,
                                         H = models.options$GAM$H))}, 
                  error=function(e){
-                   cat(paste("\n model",models[j],nameRun,"failed"))
+                   message(paste("\n model",models[j],nameRun,"failed"))
                    err <<-TRUE
                  })
         
@@ -930,7 +931,7 @@ ESM_Modeling <- function(resp,
 .PrintFailedMods <- function(biva,biva.mods,failed.mods){
   
   if(sum(failed.mods[[biva]])>0){
-    cat(paste("\nFailed Models for combination",names(biva.mods)[biva],":",colnames(biva.mods[[biva]])[failed.mods[[biva]]] ))
+    message(paste("\nFailed Models for combination",names(biva.mods)[biva],":",colnames(biva.mods[[biva]])[failed.mods[[biva]]] ))
   }
   
 }

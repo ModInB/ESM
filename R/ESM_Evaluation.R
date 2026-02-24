@@ -7,7 +7,7 @@
 ## Perform the pooling evaluation
 #' @name ESM_Pooling.Evaluation
 #' @title Ensemble of Small Models: Evaluation via the Pooling procedure
-#' @author Flavien Collart \email{flaviencollart@hotmail.com}
+#' @author Flavien Collart \email{flaviencollart@@hotmail.com}
 #' @description 
 #' This function evaluates the Ensemble of Small Models by pooling the different runs of the cross validation as in Collart et al (2021) 
 #' and recommended for rare species by Collart & Guisan (2023).
@@ -191,7 +191,7 @@ ESM_Pooling.Evaluation <- function (ESM.Mod,
 
 
 #' @name ESM_Null.Models
-#' @author Flavien Collart \email{flaviencollart@hotmail.com}
+#' @author Flavien Collart \email{flaviencollart@@hotmail.com}
 #' @title Ensemble of Small Models: Evaluation using Null Models
 #' @description Performed null models to test the significance of the ESM evaluation as recommended in Collart & Guisan (2023). 
 #' 
@@ -403,7 +403,7 @@ ESM_Null.Models <- function(ESM.Mod,
 
 #' @name ESM_Threshold
 #' @title Thresholds for Ensemble of Small Models
-#' @author Flavien Collart \email{flaviencollart@hotmail.com} based on the scripts of Frank Breiner.
+#' @author Flavien Collart \email{flaviencollart@@hotmail.com} based on the scripts of Frank Breiner.
 #' @description 
 #' This function evaluates the full model which is used for projections and provides thresholds to produce binary maps.
 #' @param ESM.ensembleMod The object returned by \code{\link{ESM_Ensemble.Modeling}}.
@@ -491,8 +491,8 @@ ESM_Threshold <- function (ESM.ensembleMod){
 
 #' @name ESM_Variable.Contributions
 #' @title Variable contribution in ESMs
-#' @author Olivier Broennimann \email{Olivier.Broennimann@unil.ch} with contributions of Heidi Mod and Daniel Scherrer 
-#' for the ecospat package and adapted for this package by Flavien Collart \email{flaviencollart@hotmail.com}
+#' @author Olivier Broennimann \email{Olivier.Broennimann@@unil.ch} with contributions of Heidi Mod and Daniel Scherrer 
+#' for the ecospat package and adapted for this package by Flavien Collart \email{flaviencollart@@hotmail.com}
 #' @description 
 #' This function evaluates the full model which is used for projections and provides thresholds to produce binary maps.
 #' 
@@ -549,7 +549,7 @@ ESM_Variable.Contributions <- function (ESM.Mod,
 
 #' @name ESM_Response.Plot
 #' @title Produce response plots for ESMs
-#' @author Flavien Collart \email{flaviencollart@hotmail.com} from the code of Frank Breiner.
+#' @author Flavien Collart \email{flaviencollart@@hotmail.com} from the code of Frank Breiner.
 #' @description 
 #' This function creates response plots (evaluation strips) for Ensembles of Small Models (ESMs).
 #' 
@@ -571,7 +571,8 @@ ESM_Variable.Contributions <- function (ESM.Mod,
 #' @references 
 #' Elith, J., Ferrier, S., Huettmann, FALSE. & Leathwick, J. R. 2005 The evaluation strip: A new and robust method for plotting predicted 
 #' responses from species distribution models. Ecological Modelling 186, 280-289.
-#' 
+#' @importFrom  graphics "par"
+#' @importFrom stats na.omit
 #' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}
 #' @export
 
@@ -660,7 +661,7 @@ ESM_Response.Plot <- function (ESM.Mod,
 
 #' @name Smooth_CBI
 #' @title Compute the Smooth continuous Boyce Index (SBI) of Liu et al (2024)
-#' @author Flavien Collart \email{flaviencollart@hotmail.com} from the code available in Liu et al (2024).
+#' @author Flavien Collart \email{flaviencollart@@hotmail.com} from the code available in Liu et al (2024).
 #' @description 
 #' This function computes the Smooth continuous Boyce Index of Liu et al (2024) using 5 smoothing techniques and make an ensemble.
 #' 
@@ -816,7 +817,7 @@ Smooth_CBI <- function(pres,
 
 #' @name Max_MCC
 #' @title Compute the maximum value of Matthew’s Correlation Coefficient
-#' @author Flavien Collart \email{flaviencollart@hotmail.com}.
+#' @author Flavien Collart \email{flaviencollart@@hotmail.com}.
 #' @description 
 #' This function computes the Smooth continuous Boyce Index of Liu et al (2024) using 5 smoothing techniques and make an ensemble.
 #' 
@@ -1066,7 +1067,7 @@ Max_MCC <- function(Pred, Sp.occ) # Pred: vector of predicted probabilities Sp.o
                            pooling,
                            pathToSaveObject,
                            save.obj){
-  cat(paste("\nProcessing Null Model:", x))
+  message(paste("\nProcessing Null Model:", x))
   # Modeling Info
   models <- ESM.Mod$model.info$models
   models.options <- ESM.Mod$model.info$models.options

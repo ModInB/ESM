@@ -1,5 +1,5 @@
 #' @name get_Chelsa.Clim
-#' @author Flavien Collart \email{flaviencollart@hotmail.com} with contributions of Adèle Hotermans
+#' @author Flavien Collart \email{flaviencollart@@hotmail.com} with contributions of Adèle Hotermans
 #' @title Download CHELSA data
 #' @description
 #' Download and crop climatic variables at different time periods from CHELSA v.2.1.
@@ -281,7 +281,7 @@ get_Chelsa.Clim <- function(var.names,
 }
 
 #' @name get_Topography
-#' @author Flavien Collart \email{flaviencollart@hotmail.com} with contributions of Adèle Hotermans
+#' @author Flavien Collart \email{flaviencollart@@hotmail.com} with contributions of Adèle Hotermans
 #' @title Download topographic data
 #' @description
 #' Download and crop topographic variables from Amatulli et al (2018) using GMTED elevation data.

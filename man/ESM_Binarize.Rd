@@ -22,7 +22,7 @@ This function binarizes probability values based on a specific threshold
 \describe{
 Probabilities strictly below the threshold will be assigned to 0 (
 environmentally unsuitable for the species) while probabilities greater or 
-equal to the threshold will be 1 (environementally suitable).
+equal to the threshold will be 1 (environmentally suitable).
 }
 }
 \examples{
@@ -34,7 +34,7 @@ ESM_Binarize(proj = proj, thr = 400)
 
 }
 \seealso{
-\code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}, \code{\link{ESM_Threshold}} ,\code{\link{ESM_Range.Shift}}
+\code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}, \code{\link{ESM_Threshold}} ,\code{\link{ESM_Range.Shift.Binary}}
 }
 \author{
 Flavien Collart \email{flaviencollart@hotmail.com}
