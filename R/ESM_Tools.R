@@ -60,7 +60,7 @@
 #' @examples 
 #' \donttest{
 #' library(terra)
-#' env <- terra::unwrap(ESM_Env)
+#' env <- terra::subset(terra::unwrap(ESM_Splachnum.Env),1:4)
 #' # Selection full random in the geographic space
 #' Bp <- Bp_Sampling(env = env,
 #'                   n.points = 1000,

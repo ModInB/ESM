@@ -84,14 +84,12 @@
 #' \code{\link{ESM_Pooling.Evaluation}}
 #' 
 #' @examples \donttest{
-#' library(terra)
 #' #Loading test data
 #' data(ESM_Species.Env)
-#' data(ESM_Env)
 #' #species occurrences
 #' xy <- ESM_Species.Env[,1:2]
 #' resp <- ESM_Species.Env[,3] #Campylophyllum halleri 
-#' env <- terra::unwrap(ESM_Env)
+#' env  <- ESM_Species.Env[,6:9]
 #' ### Calibration of simple bivariate models
 #' my.ESM <- ESM_Modeling(resp = resp,
 #'                        env=env,

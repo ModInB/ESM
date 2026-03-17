@@ -27,7 +27,7 @@ library(terra)
 
 Here we first need to load our data. To realize an ESM, we first gather some information: the coordinates of the observations (called xy); a response vector (resp) attributing 1 if the species was present or 0 if absent; the name of the species (sp.name) and; environmental predictors (env), which can be a SpatRaster from terra package or a data.frame.
 
-Let's focus here to model the distribution of *Solenostoma gracillimum*, which were only found 14 times out of 413 plots, in the Western Swiss Alps. Here, we will use 4 predictors Ecological indicator values reflecting Soil pH (ch_edaphic_eivdescombes_pixel_r); Annual solar radiation (sradY); Isothermalithy (bio3_tiso_8110_LV95); and Precipitation Seasonality (bio15_ps_8110_LV95). Species data are from Collart et al (2024. *STOTEN*). Environmental variables were gathered from different sources listed in Collart et al (2024).
+Let's focus here to model the distribution of *Solenostoma gracillimum*, which were only found 14 times out of 413 plots, in the Western Swiss Alps. Here, we will use 4 predictors Ecological indicator values reflecting Soil pH (ch_edaphic_eivdescombes_pixel_r); Annual solar radiation (sradY); Isothermalithy (bio3_tiso_8110_LV95); and Precipitation Seasonality (bio15_ps_8110_LV95). Species and environmental data are from Collart et al (2024. *STOTEN*). 
 
 We first need to download and prepare our data :
 
@@ -36,26 +36,15 @@ set.seed(123)
 ## Species information with environmental values
 data("ESM_Species.Env") 
 
-## SpatRaster with 5 environmental predictors
-data("ESM_Env")
-
 
 sp.name <- "Solenostoma_gracillimum" 
 xy <- ESM_Species.Env[,1:2] # coordinates
 resp <- ESM_Species.Env[,sp.name] # Presence/Absence
 
-env  <- terra::unwrap(ESM_Env) 
+env  <- ESM_Species.Env[,6:9]
 
 ```
 
-Let's take a look at our data while plotting the observations across the study area
-
-```{r echo=TRUE, warning=FALSE}
-terra::plot(terra::subset(env, 1), col = "grey85", 
-            legend = FALSE, box = FALSE, axes = FALSE)
-terra::points(xy[resp ==0,], pch = 13, col = "firebrick")
-terra::points(xy[resp ==1,], pch = 16, col = "black")
-```
 
 ### Modeling Core
 
@@ -104,20 +93,22 @@ my.ESM$biva.calibration
 my.ESM$biva.evaluations
 ```
 
-Finally, you can use the function *ESM_Projection* to predict new probability of occurrence of *Solenostoma gracillimum* in a completely new environment (the totality of our map). The function will produce raster maps (.tif) that will be stored in a new folder of your computer.
+Finally, you can use the function *ESM_Projection* to predict new probability of occurrence of *Solenostoma gracillimum* through space and time. The function will produce dataframe (.txt) or raster maps (.tif) that will be stored in a new folder of your computer.
 
 ```{r}
 proj <- ESM_Projection(ESM.Mod = my.ESM, 
                        new.env = env,
-                       name.env = "current", 
+                       name.env = "current",
+                       rounded = FALSE,
+                       pred.multiplier = 1, 
                        parallel = FALSE,
                        save.obj = FALSE,
                        verbose = FALSE)
-#load all the maps from the new folder
-Proj_TS <- rast(list.files("ESM.output_Solenostoma_gracillimum/current/", 
-                           full.names=T)) 
+#load all the datasets from the new folder
+Proj_TS <- sapply(list.files("ESM.output_Solenostoma_gracillimum/current/", 
+                           full.names=T),read.table) 
 
-plot(Proj_TS[[1]]) #plot the fmap base on the first bivariate model
+Proj_TS[[1]]
 ```
 
 Now, in practice, you will not use these bivariate models to make predictions. The objective of the ESMs is to generate bivariate models to overcome the overfitting problem related to the low number of occurrences and then combine them. To do so, you will have to use the function *ESM_Ensemble.Modeling* that will generates an ensemble model combining all the bivariate ones based on their respective performances.
@@ -160,19 +151,9 @@ Ens.proj <- ESM_Ensemble.Projection(ESM.proj = proj,
                                     ESM.ensembleMod = my.ESM_EF,
                                     save.obj = FALSE)
 
-plot(Ens.proj)
+Ens.proj
 ```
 
-Secondly, you can determine a threshold that will set the limit between your presences and absences among the probabilities of occurrence using the function *ESM_thresholds*. Once the different possible thresholds are determine, you can project a binary map based on one of these using *ESM_Binarize*. In this case, the one based on the max MCC of calibrated ESMs into a new space was used.
-
-```{r}
-
-my.ESM_thresholds <- ESM_Threshold(my.ESM_EF)
-
-my.ESM_EFproj_current_binary <- ESM_Binarize(Ens.proj, 
-                                             1000*my.ESM_thresholds$MCC.th)
-plot(my.ESM_EFproj_current_binary)
-```
 
 Finally, you can analyse the proportional contribution of the variable in the final ensemble model by using the *ESM_Variable.Contributions* function. As value of higher than 1 indicates that the focal variable has a higher contribution than average.
 
@@ -246,13 +227,7 @@ my.ESM <- ESM_Modeling(resp = resp,
                        verbose = FALSE) 
 ```
 
-Checking model performances for each bivariate model. Here, as an example, we only showed the first bivariate model
-
-```{r}
-# Is the model able to correctly predict the probability of occurrence of new points 
-my.ESM$biva.evaluations$bio1.bio3
-```
-After generating and evaluating each bivariate models, the second step is to combined all of them into an ensemble, using a weighting mean, wheighting each bivariate model with their SBI values. 
+After generating and evaluating each bivariate models, the second step is to combined all of them into an ensemble, using a weighting mean, weighting each bivariate model with their SBI values. 
 ```{r, fig.fullwidth=TRUE}
 my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM, 
                                    weighting.score=c("SBI"), 
@@ -261,6 +236,7 @@ my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
 ## Performances of the ensemble based on the pooling evaluation
 my.ESM_EF$evaluations
 ```
+
 ESM can also be evaluated afterwards using the pooling evaluation presented in Collart & Guisan (2023).
 ```{r}
 ## Pooling evaluation
@@ -269,8 +245,8 @@ myEval <- ESM_Pooling.Evaluation(ESM.Mod = my.ESM,
                                  EachSmallModels = FALSE)
 myEval$ESM.evaluations
 ```
-A crucial step in modelling is to check afterwards response curves to pinpoint potential overfitting issues or check ecological meaning (?). This can be done using the function *ESM_Response.Plot"
 
+A crucial step in modelling is to check afterwards response curves to pinpoint potential overfitting issues or check ecological meaning (?). This can be done using the function *ESM_Response.Plot"
 ```{r}
 ## 'par' Only needed to build the vignette 
 par(mar=c(2, 4, 3, 1) + 0.1)  
@@ -298,8 +274,10 @@ proj.curr <- ESM_Projection(ESM.Mod = my.ESM,
                        verbose = FALSE)
 
 ```
+
 Once each bivariate model are projected, you can realise an ensemble via the function *ESM_Ensemble.Projection* which will need at least two objects: the objects resulting from the *ESM_Projection* and *ESM_Ensemble.Modeling*.
 ```{r}
+# Projecting at the reference period (1981-2010)
 Ens.proj.curr <- ESM_Ensemble.Projection(ESM.proj = proj.curr,
                                     ESM.ensembleMod = my.ESM_EF,
                                     save.obj = FALSE)
@@ -350,6 +328,7 @@ terra::points(RangeShift_c$results.All.pixels$centroids,
 #Significant changes in suitability values
 RangeShift_c$results.All.pixels$significance.SuitabilityDiff
 ```
+
 #### Comparison of range shift using binary data
 
 For this part, you will need to convert the continuous habitat suitability values into a binary.To do so, you can determine a threshold that will set the limit between your presences and absences among the probabilities of occurrence using the function *ESM_thresholds*. Once the different possible thresholds are determine, you can project a binary map based on one of these using *ESM_Binarize*. In this case, the one based on the max TSS of calibrated ESMs into a new space is used.

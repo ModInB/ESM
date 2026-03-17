@@ -28,6 +28,40 @@ This is an adaptation of the Evaluation Strip method proposed by Elith et al.(20
 can be provided and won't be checked by this function.
 For the use of this function, please refer to the manual of ESM_Modeling.
 }
+\examples{
+ \donttest{
+# #Loading test data
+# data(ESM_Species.Env)
+# #species occurrences
+# xy <- ESM_Species.Env[,1:2]
+# resp <- ESM_Species.Env[,3] 
+# env <- ESM_Species.Env[,6:9]
+# ### Calibration of simple bivariate models
+# my.ESM <- ESM_Modeling(resp = resp,
+#                        xy = xy,
+#                        env = env,
+#                        sp.name = "test",
+#                        models = c("GLM"),
+#                        models.options = NULL,
+#                        prevalence = 0.5,
+#                        cv.method = "split-sampling",
+#                        cv.rep = 2,
+#                        cv.ratio = 0.7,
+#                        pooling = FALSE,
+#                        SBI = FALSE,
+#                        parallel = FALSE,
+#                        save.models = FALSE,
+#                        save.obj = FALSE,
+#                        verbose = FALSE)
+#                        
+# ### Ensemble models using a weighted mean based on maxTSS
+# my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
+#                                    weighting.score=c("MaxTSS"),
+#                                    threshold=0,
+#                                    save.obj = FALSE)
+# ESM_Response.Plot(my.ESM, my.ESM_EF)
+}
+}
 \references{
 Elith, J., Ferrier, S., Huettmann, FALSE. & Leathwick, J. R. 2005 The evaluation strip: A new and robust method for plotting predicted 
 responses from species distribution models. Ecological Modelling 186, 280-289.

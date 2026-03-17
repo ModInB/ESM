@@ -34,7 +34,7 @@ Contains sampling of 3 bryophytes in 413 plots in the Western Swiss Alps with
 environmental values from Collart et al (2024)
 }
 \examples{
-data(ESM_species.env)
+data(ESM_Species.Env)
 }
 \references{
 Collart, F., Kiebacher, T., Quetsch, M., Broennimann, O., Guisan, A. & Vanderpoorten, A. 2024. To what extent can we predict 

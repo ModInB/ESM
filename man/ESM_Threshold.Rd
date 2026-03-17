@@ -23,6 +23,42 @@ presences are predicted positive), Boyce.th.min (the lowest suitability value wh
 suitability value where the predicted/expected ratio is =1). 
 For the use of this function, please refer to the manual of ESM_Modeling.
 }
+\examples{
+ \donttest{
+# #Loading test data
+# data(ESM_Species.Env)
+# #species occurrences
+# xy <- ESM_Species.Env[,1:2]
+# resp <- ESM_Species.Env[,3] 
+# env <- ESM_Species.Env[,6:9]
+# ### Calibration of simple bivariate models
+# my.ESM <- ESM_Modeling(resp = resp,
+#                        xy = xy,
+#                        env = env,
+#                        sp.name = "test",
+#                        models = c("GLM"),
+#                        models.options = NULL,
+#                        prevalence = 0.5,
+#                        cv.method = "split-sampling",
+#                        cv.rep = 2,
+#                        cv.ratio = 0.7,
+#                        pooling = FALSE,
+#                        SBI = FALSE,
+#                        parallel = FALSE,
+#                        save.models = FALSE,
+#                        save.obj = FALSE,
+#                        verbose = FALSE)
+#                        
+# ### Ensemble models using a weighted mean based on maxTSS
+# my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
+#                                    weighting.score=c("MaxTSS"),
+#                                    threshold=0,
+#                                    save.obj = FALSE)
+# ESM_Threshold(my.ESM_EF)
+}
+
+
+}
 \references{
 Hirzel, Alexandre H., et al. Evaluating the ability of habitat suitability models to predict species presences. 
 \emph{Ecological modelling}, \bold{199.2} (2006): 142-152.

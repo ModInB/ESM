@@ -38,11 +38,11 @@
 #' }
 #' @examples \donttest{
 #' # #Loading test data
-#' # data(ESM_Species.env)
+#' # data(ESM_Species.Env)
 #' # #species occurrences
-#' # xy <- ESM_Species.env[,1:2]
-#' # resp <- ESM_Species.env[,3] 
-#' # env <- ESM_Species.env[,6:9]
+#' # xy <- ESM_Species.Env[,1:2]
+#' # resp <- ESM_Species.Env[,3] 
+#' # env <- ESM_Species.Env[,6:9]
 #' # ### Calibration of simple bivariate models
 #' # my.ESM <- ESM_Modeling(resp = resp,
 #' #                        xy = xy,
@@ -224,11 +224,11 @@ ESM_Pooling.Evaluation <- function (ESM.Mod,
 #' }
 #' @examples \donttest{
 #' # #Loading test data
-#' # data(ESM_Species.env)
+#' # data(ESM_Species.Env)
 #' # #species occurrences
-#' # xy <- ESM_Species.env[,1:2]
-#' # resp <- ESM_Species.env[,3] 
-#' # env <- ESM_Species.env[,6:9]
+#' # xy <- ESM_Species.Env[,1:2]
+#' # resp <- ESM_Species.Env[,3] 
+#' # env <- ESM_Species.Env[,6:9]
 #' # ### Calibration of simple bivariate models
 #' # my.ESM <- ESM_Modeling(resp = resp,
 #' #                        xy = xy,
@@ -430,11 +430,45 @@ ESM_Null.Models <- function(ESM.Mod,
 #' Hellegers, M., van Hinsberg, A., Lenoir, J., Dengler, J., Huijbregts, M.A.J. and Schipper, A.M. (2025), Multiple Threshold-Selection Methods 
 #' Are Needed to Binarise Species Distribution Model Predictions. \emph{Divers Distrib}, 31: e70019. \doi{10.1111/ddi.70019}.
 #' 
+#' @examples  \donttest{
+#' # #Loading test data
+#' # data(ESM_Species.Env)
+#' # #species occurrences
+#' # xy <- ESM_Species.Env[,1:2]
+#' # resp <- ESM_Species.Env[,3] 
+#' # env <- ESM_Species.Env[,6:9]
+#' # ### Calibration of simple bivariate models
+#' # my.ESM <- ESM_Modeling(resp = resp,
+#' #                        xy = xy,
+#' #                        env = env,
+#' #                        sp.name = "test",
+#' #                        models = c("GLM"),
+#' #                        models.options = NULL,
+#' #                        prevalence = 0.5,
+#' #                        cv.method = "split-sampling",
+#' #                        cv.rep = 2,
+#' #                        cv.ratio = 0.7,
+#' #                        pooling = FALSE,
+#' #                        SBI = FALSE,
+#' #                        parallel = FALSE,
+#' #                        save.models = FALSE,
+#' #                        save.obj = FALSE,
+#' #                        verbose = FALSE)
+#' #                        
+#' # ### Ensemble models using a weighted mean based on maxTSS
+#' # my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
+#' #                                    weighting.score=c("MaxTSS"),
+#' #                                    threshold=0,
+#' #                                    save.obj = FALSE)
+#' # ESM_Threshold(my.ESM_EF)
+#' }
+#' 
+#' 
 #' @seealso \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}
 #' @export
 
 
-ESM_Threshold <- function (ESM.ensembleMod){
+ESM_Threshold <- function(ESM.ensembleMod){
   
   models = ESM.ensembleMod$model.info$models 
   resp <-  ESM.ensembleMod$data$resp
@@ -513,6 +547,40 @@ ESM_Threshold <- function (ESM.ensembleMod){
 #' 
 #' @return 
 #' a \code{dataframe} with contribution values (i.e. proportional contribution) for each variable and model
+#' 
+#' @examples  \donttest{
+#' # #Loading test data
+#' # data(ESM_Species.Env)
+#' # #species occurrences
+#' # xy <- ESM_Species.Env[,1:2]
+#' # resp <- ESM_Species.Env[,3] 
+#' # env <- ESM_Species.Env[,6:9]
+#' # ### Calibration of simple bivariate models
+#' # my.ESM <- ESM_Modeling(resp = resp,
+#' #                        xy = xy,
+#' #                        env = env,
+#' #                        sp.name = "test",
+#' #                        models = c("GLM"),
+#' #                        models.options = NULL,
+#' #                        prevalence = 0.5,
+#' #                        cv.method = "split-sampling",
+#' #                        cv.rep = 2,
+#' #                        cv.ratio = 0.7,
+#' #                        pooling = FALSE,
+#' #                        SBI = FALSE,
+#' #                        parallel = FALSE,
+#' #                        save.models = FALSE,
+#' #                        save.obj = FALSE,
+#' #                        verbose = FALSE)
+#' #                        
+#' # ### Ensemble models using a weighted mean based on maxTSS
+#' # my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
+#' #                                    weighting.score=c("MaxTSS"),
+#' #                                    threshold=0,
+#' #                                    save.obj = FALSE)
+#' # ESM_Variable.Contributions(my.ESM, my.ESM_EF)
+#' }
+#' 
 #' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Projection}}, \code{\link{ESM_Ensemble.Projection}}
 #' @export
 
@@ -573,6 +641,39 @@ ESM_Variable.Contributions <- function (ESM.Mod,
 #' responses from species distribution models. Ecological Modelling 186, 280-289.
 #' @importFrom  graphics "par"
 #' @importFrom stats na.omit
+#' 
+#' @examples  \donttest{
+#' # #Loading test data
+#' # data(ESM_Species.Env)
+#' # #species occurrences
+#' # xy <- ESM_Species.Env[,1:2]
+#' # resp <- ESM_Species.Env[,3] 
+#' # env <- ESM_Species.Env[,6:9]
+#' # ### Calibration of simple bivariate models
+#' # my.ESM <- ESM_Modeling(resp = resp,
+#' #                        xy = xy,
+#' #                        env = env,
+#' #                        sp.name = "test",
+#' #                        models = c("GLM"),
+#' #                        models.options = NULL,
+#' #                        prevalence = 0.5,
+#' #                        cv.method = "split-sampling",
+#' #                        cv.rep = 2,
+#' #                        cv.ratio = 0.7,
+#' #                        pooling = FALSE,
+#' #                        SBI = FALSE,
+#' #                        parallel = FALSE,
+#' #                        save.models = FALSE,
+#' #                        save.obj = FALSE,
+#' #                        verbose = FALSE)
+#' #                        
+#' # ### Ensemble models using a weighted mean based on maxTSS
+#' # my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
+#' #                                    weighting.score=c("MaxTSS"),
+#' #                                    threshold=0,
+#' #                                    save.obj = FALSE)
+#' # ESM_Response.Plot(my.ESM, my.ESM_EF)
+#' }
 #' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}
 #' @export
 

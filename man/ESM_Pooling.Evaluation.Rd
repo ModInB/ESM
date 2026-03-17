@@ -42,11 +42,11 @@ For the use of this function, please refer to the manual of ESM_Modeling.
 \examples{
 \donttest{
 # #Loading test data
-# data(ESM_Species.env)
+# data(ESM_Species.Env)
 # #species occurrences
-# xy <- ESM_Species.env[,1:2]
-# resp <- ESM_Species.env[,3] 
-# env <- ESM_Species.env[,6:9]
+# xy <- ESM_Species.Env[,1:2]
+# resp <- ESM_Species.Env[,3] 
+# env <- ESM_Species.Env[,6:9]
 # ### Calibration of simple bivariate models
 # my.ESM <- ESM_Modeling(resp = resp,
 #                        xy = xy,
