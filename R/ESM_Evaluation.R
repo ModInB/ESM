@@ -487,18 +487,18 @@ ESM_Threshold <- function(ESM.ensembleMod){
   EVAL <- NULL
   for (i in 1:ncol(Full.models)) {
 
-    TSS <- ecospat::ecospat.max.tss(Pred = Full.models[, i],Sp.occ = resp)
+    TSS <- .maxtss.ecospat(Pred = Full.models[, i],Sp.occ = resp)
     TSS.th <- TSS$max.threshold
     
-    MPA1.0 <- ecospat::ecospat.mpa(Full.models[resp==1, i], perc = 1)
-    MPA0.95 <- ecospat::ecospat.mpa(Full.models[resp==1, i], perc = 0.95)
-    MPA0.90 <- ecospat::ecospat.mpa(Full.models[resp==1, i], perc = 0.90)
+    MPA1.0 <- .mpa.ecospat(Full.models[resp==1, i], perc = 1)
+    MPA0.95 <- .mpa.ecospat(Full.models[resp==1, i], perc = 0.95)
+    MPA0.90 <- .mpa.ecospat(Full.models[resp==1, i], perc = 0.90)
     
     MCC.th <- Max_MCC(Pred = Full.models[, i],
                       Sp.occ = resp)$max.threshold
     
-    boyce <- ecospat::ecospat.boyce(fit = Full.models[, i],
-                           obs = Full.models[resp==1, i], PEplot = FALSE)
+    boyce <- .boyce.ecospat(fit = Full.models[, i],
+                           obs = Full.models[resp==1, i])
     pos.F <- which(boyce$F.ratio > 1)
     neg.F <- which(boyce$F.ratio <= 1)
     if (max(neg.F) < min(pos.F)) {
@@ -996,14 +996,14 @@ Max_MCC <- function(Pred, Sp.occ) # Pred: vector of predicted probabilities Sp.o
                                    st.dev = FALSE,which.model = 1, 
                                    na.rm = TRUE)
   
-  tss.test <- ecospat::ecospat.max.tss(Pred = Pred, Sp.occ = resp)[[2]]
+  tss.test <- .maxtss.ecospat(Pred = Pred, Sp.occ = resp)[[2]]
   
   if(SBI){
     SBI.test <- spsUtil::quiet(Smooth_CBI(pres = pred.esmPres, 
                                           abs = pred.esmAbs)$SBI[,"SBI.m"])
   }else{
-    SBI.test <- ecospat::ecospat.boyce(c(pred.esmPres, pred.esmAbs), 
-                                         pred.esmPres, PEplot = F)$cor
+    SBI.test <- .boyce.ecospat(c(pred.esmPres, pred.esmAbs), 
+                                         pred.esmPres)$cor
   }
   output <- cbind(AUC = auc.test, 
                   SomersD = (2 * auc.test - 
@@ -1244,4 +1244,89 @@ Max_MCC <- function(Pred, Sp.occ) # Pred: vector of predicted probabilities Sp.o
   }
 }
 
+## Ecospat functions (V4.1.2) to avoid a lot of dependencies 
+# but please use the function in the ecospat package
+#' @importFrom stats quantile
+.maxtss.ecospat <- function(Pred, Sp.occ){
+  FUN <- function(thresh) {
+    xtab <- table(Pred >= thresh, Sp.occ)
+    if (nrow(xtab) != 2) {
+      return(0)
+    }
+    else {
+      a <- xtab[4]
+      b <- xtab[2]
+      c <- xtab[3]
+      d <- xtab[1]
+      se <- a/(a + c)
+      sp <- d/(b + d)
+      return(se + sp - 1)
+    }
+  }
+  threshold <- (1:100)/100
+  tss <- sapply(threshold, FUN)
+  table <- data.frame(cbind(threshold, tss))
+  max.TSS <- max(table$tss, na.rm = TRUE)
+  max.threshold <- table$threshold[which.max(table$tss)][1]
+  return(list(table = table, max.TSS = max.TSS, max.threshold = max.threshold))
+}
 
+.mpa.ecospat <- function(Pred, Sp.occ.xy = NULL, perc = 0.9){
+  perc <- 1 - perc
+  if (!is.null(Sp.occ.xy)) {
+    Pred <- terra::extract(Pred, as.data.frame(Sp.occ.xy), 
+                           ID = FALSE)
+  }
+  round(quantile(Pred, probs = perc, na.rm = TRUE), 3)
+}
+
+.boyce.ecospat <- function(fit, obs, nclass = 0, window.w = "default", res = 100, 
+                           rm.duplicate = TRUE, method = "spearman"){
+  boycei <- function(interval, obs, fit) {
+    pi <- sum(as.numeric(obs >= interval[1] & obs <= interval[2]))/length(obs)
+    ei <- sum(as.numeric(fit >= interval[1] & fit <= interval[2]))/length(fit)
+    return(round(pi/ei, 10))
+  }
+  mini <- min(fit, obs)
+  maxi <- max(fit, obs)
+  if(length(nclass) == 1) {
+    if(nclass == 0) {
+      if (window.w == "default") {
+        window.w <- (max(fit) - min(fit))/10
+      }
+      vec.mov <- seq(from = mini, to = maxi - window.w, 
+                     by = (maxi - mini - window.w)/res)
+      vec.mov[res + 1] <- vec.mov[res + 1] + 1
+      interval <- cbind(vec.mov, vec.mov + window.w)
+    }
+    else {
+      vec.mov <- seq(from = mini, to = maxi, by = (maxi - 
+                                                     mini)/nclass)
+      interval <- cbind(vec.mov, c(vec.mov[-1], maxi))
+    }
+  }
+  else {
+    vec.mov <- c(mini, sort(nclass[!nclass > maxi | nclass < 
+                                     mini]))
+    interval <- cbind(vec.mov, c(vec.mov[-1], maxi))
+  }
+  f <- apply(interval, 1, boycei, obs, fit)
+  to.keep <- which(f != "NaN")
+  f <- f[to.keep]
+  if (length(f) < 2) {
+    b <- NA
+  }
+  else {
+    r <- 1:length(f)
+    if (rm.duplicate == TRUE) {
+      r <- c(1:length(f))[f != c(f[-1], TRUE)]
+    }
+    b <- cor(f[r], vec.mov[to.keep][r], method = method)
+  }
+  HS <- apply(interval, 1, sum)/2
+  if (length(nclass) == 1 & nclass == 0) {
+    HS[length(HS)] <- HS[length(HS)] - 1
+  }
+  HS <- HS[to.keep]
+  return(list(F.ratio = f, cor = round(b, 3), HS = HS))
+}

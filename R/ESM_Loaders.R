@@ -10,7 +10,7 @@
 #' @details
 #' The function allow to load the most recent ESM object. Note that the ESM folder 
 #' should be in your working directory
-#' @export
+NULL  
 
 #' @rdname Load_ESM
 #' @export

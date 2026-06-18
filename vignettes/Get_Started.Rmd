@@ -27,7 +27,7 @@ library(terra)
 
 Here we first need to load our data. To realize an ESM, we first gather some information: the coordinates of the observations (called xy); a response vector (resp) attributing 1 if the species was present or 0 if absent; the name of the species (sp.name) and; environmental predictors (env), which can be a SpatRaster from terra package or a data.frame.
 
-Let's focus here to model the distribution of *Solenostoma gracillimum*, which were only found 14 times out of 413 plots, in the Western Swiss Alps. Here, we will use 4 predictors Ecological indicator values reflecting Soil pH (ch_edaphic_eivdescombes_pixel_r); Annual solar radiation (sradY); Isothermalithy (bio3_tiso_8110_LV95); and Precipitation Seasonality (bio15_ps_8110_LV95). Species and environmental data are from Collart et al (2024. *STOTEN*). 
+Let's focus here to model the distribution of *Solenostoma gracillimum*, which were only found 14 times out of 413 plots, in the Western Swiss Alps. Here, we will use 4 predictors Ecological indicator values reflecting Soil pH (ch_edaphic_eivdescombes_pixel_r); Annual solar radiation (sradY); Isothermalithy (bio3_tiso_8110_LV95); and Precipitation Seasonality (bio15_ps_8110_LV95). Species and environmental data are from Collart et al (2024. *STOTEN*).
 
 We first need to download and prepare our data :
 
@@ -44,7 +44,6 @@ resp <- ESM_Species.Env[,sp.name] # Presence/Absence
 env  <- ESM_Species.Env[,6:9]
 
 ```
-
 
 ### Modeling Core
 
@@ -82,7 +81,7 @@ Once the models are generated, *ESM_Modeling* also calculates the predictions an
 
 ```{r}
 # Prediction for one bivariate model
-head(my.ESM$biva.predictions$bio15_ps_8110_LV95.sradY)
+head(my.ESM$biva.predictions[[1]])
 
 # Is the model able to correctly predict the probability of occurrence inside 
 # the environment in which it was calibrated (70% of our data if ratio = 0.7).
@@ -104,11 +103,12 @@ proj <- ESM_Projection(ESM.Mod = my.ESM,
                        parallel = FALSE,
                        save.obj = FALSE,
                        verbose = FALSE)
-#load all the datasets from the new folder
+# Load all the datasets from the new folder
 Proj_TS <- sapply(list.files("ESM.output_Solenostoma_gracillimum/current/", 
                            full.names=T),read.table) 
 
-Proj_TS[[1]]
+# Taking the 10 first values
+Proj_TS[[1]][1:10]
 ```
 
 Now, in practice, you will not use these bivariate models to make predictions. The objective of the ESMs is to generate bivariate models to overcome the overfitting problem related to the low number of occurrences and then combine them. To do so, you will have to use the function *ESM_Ensemble.Modeling* that will generates an ensemble model combining all the bivariate ones based on their respective performances.
@@ -139,7 +139,6 @@ my.ESM_responsePlot <- ESM_Response.Plot(my.ESM,my.ESM_EF,
 
 ```
 
-
 ```{r, echo = FALSE}
 par(mar=c(5, 4, 4, 2) + 0.1)
 ```
@@ -150,10 +149,7 @@ Then, as above, the function *ESM_Ensemble.Projection* will allow you to predict
 Ens.proj <- ESM_Ensemble.Projection(ESM.proj = proj,
                                     ESM.ensembleMod = my.ESM_EF,
                                     save.obj = FALSE)
-
-Ens.proj
 ```
-
 
 Finally, you can analyse the proportional contribution of the variable in the final ensemble model by using the *ESM_Variable.Contributions* function. As value of higher than 1 indicates that the focal variable has a higher contribution than average.
 
@@ -212,7 +208,9 @@ resp <- rep(c(1,0),times = c(nrow(ESM_Splachnum.Data),nrow(BP)))
 ```
 
 ### Modeling Core
+
 For this example, we will using two modelling algorithms that have different complexity levels: GLM and ANN For this example, we will use the default model parameters, evaluate each bivariate models with 3 cross-validation (70% for calibration and 30% for validation). As the sample size is very limited, we will compute a smooth continuous boyce index instead of the regular one (see ?Smooth_CBI; Liu et al 2024).
+
 ```{r}
 
 my.ESM <- ESM_Modeling(resp = resp,
@@ -227,7 +225,8 @@ my.ESM <- ESM_Modeling(resp = resp,
                        verbose = FALSE) 
 ```
 
-After generating and evaluating each bivariate models, the second step is to combined all of them into an ensemble, using a weighting mean, weighting each bivariate model with their SBI values. 
+After generating and evaluating each bivariate models, the second step is to combined all of them into an ensemble, using a weighting mean, weighting each bivariate model with their SBI values.
+
 ```{r, fig.fullwidth=TRUE}
 my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM, 
                                    weighting.score=c("SBI"), 
@@ -238,6 +237,7 @@ my.ESM_EF$evaluations
 ```
 
 ESM can also be evaluated afterwards using the pooling evaluation presented in Collart & Guisan (2023).
+
 ```{r}
 ## Pooling evaluation
 myEval <- ESM_Pooling.Evaluation(ESM.Mod = my.ESM,
@@ -246,7 +246,8 @@ myEval <- ESM_Pooling.Evaluation(ESM.Mod = my.ESM,
 myEval$ESM.evaluations
 ```
 
-A crucial step in modelling is to check afterwards response curves to pinpoint potential overfitting issues or check ecological meaning (?). This can be done using the function *ESM_Response.Plot"
+A crucial step in modelling is to check afterwards response curves to pinpoint potential overfitting issues or check ecological meaning (?). This can be done using the function \*ESM_Response.Plot"
+
 ```{r}
 ## 'par' Only needed to build the vignette 
 par(mar=c(2, 4, 3, 1) + 0.1)  
@@ -255,14 +256,13 @@ Resp.Plot <- ESM_Response.Plot(my.ESM,
 
 ```
 
-
 ```{r, echo = FALSE}
 par(mar=c(5, 4, 4, 2) + 0.1)
 ```
 
 ### Model Projection
-To project the ESM models into a spatio-temporal region, you'll need to use two functions: *ESM_Projection*, to project each bivariate model and *ESM_Ensemble.Projection*, to combine all of these projections into an ensemble. 
-To work, *ESM_Projection* need at least the two first argument aka the output of the *ESM_Modelling* functions and a SpatRaster containing the predictors used during the modelling at the needed time and geographical region that you want to project your models. Note that the names of the predictors should be exactly the same as those used during the modelling procedure. 
+
+To project the ESM models into a spatio-temporal region, you'll need to use two functions: *ESM_Projection*, to project each bivariate model and *ESM_Ensemble.Projection*, to combine all of these projections into an ensemble. To work, *ESM_Projection* need at least the two first argument aka the output of the *ESM_Modelling* functions and a SpatRaster containing the predictors used during the modelling at the needed time and geographical region that you want to project your models. Note that the names of the predictors should be exactly the same as those used during the modelling procedure.
 
 ```{r}
 # Here projection at present time
@@ -276,6 +276,7 @@ proj.curr <- ESM_Projection(ESM.Mod = my.ESM,
 ```
 
 Once each bivariate model are projected, you can realise an ensemble via the function *ESM_Ensemble.Projection* which will need at least two objects: the objects resulting from the *ESM_Projection* and *ESM_Ensemble.Modeling*.
+
 ```{r}
 # Projecting at the reference period (1981-2010)
 Ens.proj.curr <- ESM_Ensemble.Projection(ESM.proj = proj.curr,
@@ -303,10 +304,9 @@ names(Ens.proj.fut) = paste("UKESM_370",names(Ens.proj.fut) )
 plot(Ens.proj.fut)
 ```
 
-
 ### Output Analyses
 
-Once all the models are projected, you can then compare the difference in distributions. In the *ESM* package, two functions were developed to compare two time periods using the continuous data but also binary data. 
+Once all the models are projected, you can then compare the difference in distributions. In the *ESM* package, two functions were developed to compare two time periods using the continuous data but also binary data.
 
 #### Comparison of habitat suitability change
 
@@ -344,12 +344,12 @@ plot(my.ESM_EFproj_current_binary)
 ```
 
 The same thresholds are then used for the future projections
+
 ```{r}
 my.ESM_EFproj_fut_binary <- ESM_Binarize(Ens.proj.fut, 
                                       1000*my.ESM_thresholds$TSS.th)
 plot(my.ESM_EFproj_fut_binary)
 ```
-
 
 *ESM_Range.Shift.Binary* compares binary species distribution model projections between a present and a future period to show where habitat remains suitable, is lost, or is newly gained. It classifies each pixel as consistently unsuitable, lost, gained, or stable suitable habitat, and summarizes these categories along with the percentages of range loss and gain relative to the current distribution. The function also tracks how the range centroid shifts between time periods by computing its movement distance and direction, helping to visualize the main trajectory of species range change over time.
 
@@ -365,7 +365,6 @@ RangeShift_b$RangeShift.table
 #The change in centroid position
 RangeShift_b$centroid
 ```
-
 
 ```{r, echo = FALSE}
 ## remove folder
