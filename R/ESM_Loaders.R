@@ -43,7 +43,7 @@ Load_ESM_Ensemble.Modelling <- function(sp.name){
     stop("The ESM folder does not exist:", folder)
   }
   list.out.files <- list.files(path = folder,
-                               pattern = "ESM.EsnsembleModeling",
+                               pattern = "ESM.EnsembleModeling",
                                full.names = TRUE)
   
   if(length(list.out.files)==0){
