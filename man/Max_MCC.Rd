@@ -20,7 +20,8 @@ a \code{list} containing:
 }
 }
 \description{
-This function computes the Smooth continuous Boyce Index of Liu et al (2024) using 5 smoothing techniques and make an ensemble.
+This function computes the Matthew’s Correlation Coefficient among 100 different thresholds
+and takes the maximal value
 }
 \details{
 This function calculates the Matthews Correlation Coefficient (MCC) along different thresholds, between 0.01 and 1 with a 0.01 increment, and return the maximum values.

@@ -920,7 +920,8 @@ Smooth_CBI <- function(pres,
 #' @title Compute the maximum value of Matthew’s Correlation Coefficient
 #' @author Flavien Collart \email{flaviencollart@@hotmail.com}.
 #' @description 
-#' This function computes the Smooth continuous Boyce Index of Liu et al (2024) using 5 smoothing techniques and make an ensemble.
+#' This function computes the Matthew’s Correlation Coefficient among 100 different thresholds
+#' and takes the maximal value
 #' 
 #' @param Pred \code{numeric}. A vector of predicted probabilities.
 #' @param Sp.occ \code{numeric}. A vector of speceis observations (1 = presence, 0 = absence)
