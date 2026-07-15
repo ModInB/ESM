@@ -143,6 +143,9 @@
 #'
 #' ### get the variable contributions of ESMs
 #' ESM_Variable.Contributions(my.ESM,my.ESM_EF) 
+#' 
+#' ### Get the variable importance with permutations
+
 #'
 #' ### get the response plots of ESMs
 #' my.ESM_responsePlot<- ESM_Response.Plot(my.ESM,

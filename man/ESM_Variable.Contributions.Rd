@@ -28,7 +28,8 @@ indicates that the focal variable has a higher contribution than average.
 In the case of multiple methods (e.g., GLM,...), the contributions are counted per method. For ensemble model, the contributions 
 are then weighted means (based on the weighting score as chosen in \code{\link{ESM_Ensemble.Modeling}} of single methods.
 
-For the use of this function, please refer to the manual of ESM_Modeling.
+This computation is similar to ecospat package whereas ESM_Variable.Importance
+is similar to the biomod2 package.
 }
 \examples{
  \donttest{

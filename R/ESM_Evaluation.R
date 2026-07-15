@@ -543,7 +543,8 @@ ESM_Threshold <- function(ESM.ensembleMod){
 #' In the case of multiple methods (e.g., GLM,...), the contributions are counted per method. For ensemble model, the contributions 
 #' are then weighted means (based on the weighting score as chosen in \code{\link{ESM_Ensemble.Modeling}} of single methods.
 #' 
-#' For the use of this function, please refer to the manual of ESM_Modeling.
+#' This computation is similar to ecospat package whereas ESM_Variable.Importance
+#' is similar to the biomod2 package. 
 #' 
 #' @return 
 #' a \code{dataframe} with contribution values (i.e. proportional contribution) for each variable and model
@@ -758,6 +759,147 @@ ESM_Response.Plot <- function (ESM.Mod,
   unlink(paste0("ESM.output_", ESM.Mod$data$sp.name,"/data.fixed",1:ncol(data)), recursive = TRUE)
   
   return(proj.fixed.list = proj.fixed.list)
+}
+
+
+#' @name ESM_Variable.Importance
+#' @title Variable importance in ESMs
+#' @author Flavien Collat \email{flaviencollart@@hotmail.com} 
+#'  
+#' @description 
+#' This function evaluates the full model which is used for projections and provides thresholds to produce binary maps.
+#' 
+#' @param ESM.Mod The object returned by \code{\link{ESM_Modeling}}.
+#' @param ESM.ensembleMod The object returned by \code{\link{ESM_Ensemble.Modeling}}.
+#' @param n.rep \code{numeric}. The number of shuffling to compute the importance. \emph{Default: 100L}
+#' @param parallel \code{logical}. Allows or not parallel job using the functions makeCluster.
+#' @param n.cores \code{integer}. Number of CPU cores used to make the models.
+#' @param verbose \code{logical}. Allows or not message.
+#' 
+#' @details 
+#' 
+#' Variable importance is evaluated using a permutation approach similar to the 
+#' importance computed for random forest models For each predictor, 
+#' values are randomly shuffled and the assembled ESM predictions are recalculated 
+#' (pred shuffle) and compared to the observed predictions (pred obs). 
+#' Importance is then defined as the mean value of 1-cor(pred obs, pred shuffle). 
+#' 
+#' Values close to 0 indicate that the variable has little influence on the 
+#' ensemble prediction, whereas larger values indicate a stronger contribution, 
+#' as permuting the variable causes greater changes in model predictions.
+#' 
+#' This computation is similar to biomod2 package whereas ESM_Variable.Contributions 
+#' is similar to the ecospat package. 
+#' 
+#' @return 
+#' a \code{matrix} with importance values for each variable and model
+#' 
+#' @examples \donttest{
+#' 
+#' # data(ESM_Species.Env)
+#' #species occurrences
+#' # xy <- ESM_Species.Env[,1:2]
+#' # resp <- ESM_Species.Env[,3] #Campylophyllum halleri 
+#' # env  <- ESM_Species.Env[,6:9]
+#' # ### Calibration of simple bivariate models
+#' # my.ESM <- ESM_Modeling(resp = resp,
+#' #                        env=env,
+#' #                        xy=xy,
+#' #                        sp.name = "test",
+#' #                        models = c("GLM"),
+#' #                        models.options = NULL,
+#' #                        prevalence = 0.5,
+#' #                        cv.method = "split-sampling",
+#' #                        cv.rep = 2,
+#' #                        cv.ratio = 0.7,
+#' #                        pooling = TRUE,
+#' #                        SBI = FALSE,
+#' #                        parallel = FALSE,
+#' #                        save.models = FALSE,
+#' #                        save.obj = FALSE,
+#' #                        verbose = FALSE)
+#' # 
+#' # ### Ensemble models using a weighted mean based on maxTSS
+#' # my.ESM_EF <- ESM_Ensemble.Modeling(my.ESM,
+#' #                                    weighting.score=c("MaxTSS"),
+#' #                                    threshold=0,
+#' #                                    save.obj = FALSE)
+#' # # Note that n.rep should be greater than 10 (usually 100)
+#' # ESM_Variable.Importance(my.ESM,my.ESM_EF,n.rep = 1) 
+#' 
+#' }
+#' 
+#' @seealso \code{\link{ESM_Modeling}}, \code{\link{ESM_Ensemble.Modeling}}, \code{\link{ESM_Variable.Contributions}}
+#' @export
+
+
+ESM_Variable.Importance <- function (ESM.Mod,
+                                     ESM.ensembleMod,
+                                     n.rep = 100,
+                                     parallel = FALSE,
+                                     n.cores = 1,
+                                     verbose = TRUE){
+  
+  var <- colnames(ESM.Mod$data$env.var)
+  models <- ESM.Mod$model.info$models
+  env <- ESM.Mod$data$env.var
+  
+  pred.obs <- ESM_Projection(ESM.Mod,
+                         new.env = env,
+                         name.env = paste0(ESM.Mod$model.info$modeling.id,"/","Importance"),
+                         save.obj = FALSE,
+                         verbose = FALSE)
+  pred.obs.ens <- ESM_Ensemble.Projection(pred.obs,ESM.ensembleMod,save.obj = F)
+  unlink(paste0(ESM.Mod$model.info$biva.path,"/","Importance"),recursive = T)
+  
+  importance <- NULL
+  
+  for(i in 1:length(var)){
+    if(verbose){print(var[i])}
+    
+    if(parallel){
+      cl <- parallel::makeCluster(n.cores)
+      corr.tot <- parallel::parSapply(cl = cl,
+                                      1:n.rep,
+                                      FUN = .importanceParallel,
+                                      env = env,
+                                      var = var[i],
+                                      ESM.Mod = ESM.Mod,
+                                      ESM.ensembleMod = ESM.ensembleMod,
+                                      pred.obs.ens = pred.obs.ens)
+      parallel::stopCluster(cl)
+      if(length(models)==1){
+        corr.tot <- matrix(corr.tot,ncol=1)
+        rownames(corr.tot) = NULL
+        colnames(corr.tot) = models
+      }else{
+        corr.tot <- t(corr.tot)
+      }
+      
+    }else{
+      corr.tot <- NULL
+      for(j in 1:n.rep){
+        new.env <- env
+        new.env[,var[i]] = sample(new.env[,var[i]])
+        pred.null <- ESM_Projection(ESM.Mod,
+                                    new.env = new.env,
+                                    name.env = paste0(ESM.Mod$model.info$modeling.id,"/","Importance"),
+                                    save.obj = FALSE,
+                                    verbose = FALSE)
+        pred.null.ens <- ESM_Ensemble.Projection(pred.null,ESM.ensembleMod,save.obj = F)
+        corr.tot <- rbind(corr.tot,diag(cor(pred.null.ens,pred.obs.ens)))
+        unlink(paste0(ESM.Mod$model.info$biva.path,"/","Importance"),recursive = T)
+      }
+      
+    }
+    importance.var <- 1-apply(corr.tot,2,mean)
+    importance <- rbind(importance,importance.var)
+
+  }
+  
+  rownames(importance) = var
+  
+  return(importance)
 }
 
 #' @name Smooth_CBI
@@ -1243,6 +1385,24 @@ Max_MCC <- function(Pred, Sp.occ) # Pred: vector of predicted probabilities Sp.o
       return(ESM.ensembleMod.Null$evaluations["Full.EF",])
     }
   }
+}
+
+.importanceParallel <- function(x,
+                                env,
+                                var,
+                                ESM.Mod,
+                                ESM.ensembleMod,
+                                pred.obs.ens){
+  new.env <- env
+  new.env[,var] = sample(new.env[,var])
+  pred.null <- ESM_Projection(ESM.Mod,
+                              new.env = new.env,
+                              name.env = paste0(ESM.Mod$model.info$modeling.id,"/","Importance",x),
+                              save.obj = FALSE,
+                              verbose = FALSE)
+  pred.null.ens <- ESM_Ensemble.Projection(pred.null,ESM.ensembleMod,save.obj = F)
+  unlink(paste0(ESM.Mod$model.info$biva.path,"/","Importance",x),recursive = T)
+  return(diag(cor(pred.null.ens,pred.obs.ens)))
 }
 
 ## Ecospat functions (V4.1.2) to avoid a lot of dependencies 
