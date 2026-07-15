@@ -605,8 +605,11 @@ ESM_Range.Shift.Continuous <- function(proj.curr,
   if(terra::nlyr(proj.curr) > 1){
     stop("proj.curr should only be composed of only one layer.")
   }
-  if(!(is.null(occ.pres)) & ncol(occ.pres)!=2){
-    warning("occ.pres must be a two-columns matrix or dataframe. The computation of this part was thus discarded.")
+  if(!(is.null(occ.pres))){
+    if(ncol(occ.pres)!=2){
+      occ.pres = NULL
+      warning("occ.pres must be a two-columns matrix or dataframe. The computation of this part was thus discarded.")
+    }
   }
   
   maps <- c(proj.curr,proj.fut) # To make sure they are the same
@@ -703,7 +706,7 @@ ESM_Range.Shift.Continuous <- function(proj.curr,
     
   }
   
-  if(!is.null(occ.pres) & ncol(occ.pres)==2){
+  if(!is.null(occ.pres)){
     
     ## Compute the mean and median value of suitability where species is present
     occ.suitabilities <- terra::extract(maps[[rownames(centroids.84)]],as.matrix(occ.pres))
